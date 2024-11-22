@@ -1,3 +1,3 @@
 comfyui-easynodes
-ltx-video@git+https://github.com/Lightricks/LTX-Video.git@b36e47c
+ltx-video@git+https://github.com/Lightricks/LTX-Video.git@ac53aa5
 huggingface_hub==0.25.2
