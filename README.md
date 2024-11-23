@@ -12,7 +12,8 @@ cd custom_nodes/ComfyUI-LTXVideo && pip install -r requirements.txt
 4. Download [ltx-video-2b-v0.9.safetensors](https://huggingface.co/Lightricks/LTX-Video/blob/main/ltx-video-2b-v0.9.safetensors) from Hugging Face and place it under `models/checkpoints`.
 5. Clone the text encoder model to `models/text_encoders`:
 ```bash
-cd models/text_encoders && git clone https://huggingface.co/PixArt-alpha/PixArt-XL-2-1024-MS
+sudo apt install git-lfs
+cd models/text_encoders && git clone https://huggingface.co/PixArt-alpha/PixArt-XL-2-1024-MS && cd PixArt-XL-2-1024-MS && git lfs pull
 ```
 
 ## Example workflows
