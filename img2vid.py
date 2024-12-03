@@ -1,14 +1,11 @@
+import comfy.latent_formats
 import comfy.model_base
 import comfy.model_management
-import comfy.supported_models_base
-import comfy.utils
 import comfy.model_patcher
 import comfy.sd
-import comfy.latent_formats
-import nodes
+import comfy.supported_models_base
+import comfy.utils
 import torch
-from .nodes_registry import comfy_node
-
 from ltx_video.models.autoencoders.vae_encode import get_vae_size_scale_factor
 
 

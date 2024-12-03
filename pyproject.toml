@@ -1,0 +1,21 @@
+[project]
+name = "comfyui-ltxvideo"
+version = "0.1.0"
+description = "Custom nodes for LTX-Video support in ComfyUI"
+authors = [
+    { name = "Andrew Kvochko", email = "akvochko@lightricks.com" }
+]
+requires-python = ">=3.10"
+readme = "README.md"
+license = { file = "LICENSE" }
+dependencies = [
+    "ltx-video@git+https://github.com/Lightricks/LTX-Video@ltx-video-0.9",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pre-commit>=4.0.1",
+    "pytest>=8.0.0",
+    "websocket-client==1.6.1",
+    "scikit-image==0.24.0"
+]

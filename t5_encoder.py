@@ -1,18 +1,19 @@
-import torch
+from pathlib import Path
+
 import comfy.clip_model
+import comfy.latent_formats
 import comfy.model_base
 import comfy.model_management
+import comfy.model_patcher
+import comfy.sd
 import comfy.sd1_clip
 import comfy.supported_models_base
 import comfy.utils
-import comfy.model_patcher
-import comfy.sd
-import comfy.latent_formats
 import folder_paths
-from pathlib import Path
-from .nodes_registry import comfy_node
-
+import torch
 from transformers import T5EncoderModel, T5Tokenizer
+
+from .nodes_registry import comfy_node
 
 
 class LTXVTokenizer(comfy.sd1_clip.SDTokenizer):
@@ -84,7 +85,7 @@ class LTXVTextEncoderModel(torch.nn.Module):
             [[w[1] for w in token_weight_pairs_t5]],
             device=self.t5xxl.device,
         )
-        self.to(self.t5xxl.device) # comfyui skips loading some weights to gpu
+        self.to(self.t5xxl.device)  # comfyui skips loading some weights to gpu
         out = self.t5xxl(text_input_ids, attention_mask=prompt_attention_mask)[0]
         out = out * prompt_attention_mask.unsqueeze(2)
         return out, None, {"attention_mask": prompt_attention_mask}
@@ -119,10 +120,14 @@ def ltxv_tokenizer(tokenizer_path):
 class LTXVCLIPModelLoader:
     @classmethod
     def INPUT_TYPES(s):
-        return {"required": {"clip_path": (
-            folder_paths.get_filename_list("text_encoders"),
-            {"tooltip": "The name of the text encoder model to load."},
-        )}}
+        return {
+            "required": {
+                "clip_path": (
+                    folder_paths.get_filename_list("text_encoders"),
+                    {"tooltip": "The name of the text encoder model to load."},
+                )
+            }
+        }
 
     RETURN_TYPES = ("CLIP",)
     RETURN_NAMES = ("clip",)

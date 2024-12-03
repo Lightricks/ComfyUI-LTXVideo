@@ -1,29 +1,21 @@
-import torch
+import io
+import math
+
+import comfy.latent_formats
 import comfy.model_base
 import comfy.model_management
-import comfy.supported_models_base
-import comfy.utils
 import comfy.model_patcher
 import comfy.sd
-import comfy.latent_formats
-from comfy.ldm.modules.diffusionmodules.util import make_beta_schedule
-import folder_paths
-import math
-from pathlib import Path
-from .nodes_registry import comfy_node
-
-from ltx_video.models.transformers.transformer3d import Transformer3DModel
-from ltx_video.models.transformers.symmetric_patchifier import SymmetricPatchifier
+import comfy.supported_models_base
+import comfy.utils
+import PIL
+import torch
 from ltx_video.models.autoencoders.vae_encode import get_vae_size_scale_factor
+from ltx_video.models.transformers.symmetric_patchifier import SymmetricPatchifier
 
-from .model import (
-    LTXVTransformer3DWrapper,
-    LTXVTransformer3D,
-    LTXVModel,
-    LTXVModelConfig,
-    LTXVSampling,
-)
 from .img2vid import encode_media_conditioning
+from .model import LTXVModel, LTXVModelConfig, LTXVSampling, LTXVTransformer3DWrapper
+from .nodes_registry import comfy_node
 
 
 def get_normal_shift(
@@ -85,12 +77,35 @@ class LTXVModelConfigurator:
                 ),
                 "width": ("INT", {"default": 768, "min": 1, "max": 10000}),
                 "height": ("INT", {"default": 512, "min": 1, "max": 10000}),
-                "frames_number": ("INT", {"default": 65, "min": 9, "max": 257, "step": 8, "tooltip": "Must be equal to N * 8 + 1"}),
+                "frames_number": (
+                    "INT",
+                    {
+                        "default": 65,
+                        "min": 9,
+                        "max": 257,
+                        "step": 8,
+                        "tooltip": "Must be equal to N * 8 + 1",
+                    },
+                ),
                 "frame_rate": ("INT", {"default": 25, "min": 1, "max": 60}),
                 "batch": ("INT", {"default": 1, "min": 1, "max": 60}),
                 "mixed_precision": ("BOOLEAN", {"default": True}),
+                "cond_compression": (
+                    "INT",
+                    {
+                        "default": 60,
+                        "min": 0,
+                        "max": 100,
+                        "tooltip": "Quality of the conditioning compression to use.",
+                    },
+                ),
             },
-            "optional": {"conditioning": ("IMAGE",{"tooltip": "Optional conditioning image or video."})},
+            "optional": {
+                "conditioning": (
+                    "IMAGE",
+                    {"tooltip": "Optional conditioning image or video."},
+                )
+            },
         }
 
     RETURN_TYPES = ("MODEL", "LATENT", "FLOAT")
@@ -149,6 +164,26 @@ class LTXVModelConfigurator:
 
         return indices_grid
 
+    def compress(self, images: torch.Tensor, quality=60):
+        result = torch.zeros_like(images)
+        for i, image in enumerate(images):
+            tensor = (image * 255).byte().cpu().numpy()
+            image = PIL.Image.fromarray(tensor)
+
+            buffer = io.BytesIO()
+            image.save(buffer, format="JPEG", quality=quality)
+            buffer.seek(0)
+
+            decompressed_image = PIL.Image.open(buffer)
+            decompressed_tensor = torch.tensor(
+                list(decompressed_image.getdata()), dtype=torch.uint8
+            ).view(*decompressed_image.size[::-1], -1)
+
+            decompressed_tensor = decompressed_tensor.unsqueeze(0).float() / 255
+            result[i] = decompressed_tensor
+
+        return result
+
     def configure_sizes(
         self,
         model,
@@ -160,6 +195,7 @@ class LTXVModelConfigurator:
         frame_rate,
         batch,
         mixed_precision,
+        cond_compression,
         conditioning=None,
     ):
         load_device = comfy.model_management.get_torch_device()
@@ -180,6 +216,8 @@ class LTXVModelConfigurator:
         ]
         conditioning_mask = torch.zeros(mask_shape, device=load_device)
         if conditioning is not None:
+            if cond_compression > 0 and cond_compression < 100:
+                conditioning = self.compress(conditioning, cond_compression)
             latent = encode_media_conditioning(
                 conditioning, vae, width, height, frames_number
             )
@@ -206,7 +244,10 @@ class LTXVModelConfigurator:
         )
         model.model.diffusion_model.to(load_device)
         new_model = LTXVModel(
-            LTXVModelConfig(vae.first_stage_model.config.latent_channels, model.model.model_config.manual_cast_dtype),
+            LTXVModelConfig(
+                vae.first_stage_model.config.latent_channels,
+                model.model.model_config.manual_cast_dtype,
+            ),
             model_type=comfy.model_base.ModelType.FLOW,
             device=comfy.model_management.get_torch_device(),
         )
@@ -232,15 +273,21 @@ class LTXVShiftSigmas:
             "required": {
                 "sigmas": ("SIGMAS",),
                 "sigma_shift": ("FLOAT", {"default": 1.820833333}),
-                "stretch": ("BOOLEAN", {
-                    "default": True,
-                    "tooltip": "Stretch the sigmas to be in the range [terminal, 1]."
-                }),
+                "stretch": (
+                    "BOOLEAN",
+                    {
+                        "default": True,
+                        "tooltip": "Stretch the sigmas to be in the range [terminal, 1].",
+                    },
+                ),
                 "terminal": (
                     "FLOAT",
                     {
-                        "default": 0.1, "min": 0.0, "max": 0.99, "step": 0.01,
-                        "tooltip": "The terminal value of the sigmas after stretching."
+                        "default": 0.1,
+                        "min": 0.0,
+                        "max": 0.99,
+                        "step": 0.01,
+                        "tooltip": "The terminal value of the sigmas after stretching.",
                     },
                 ),
             }
@@ -250,7 +297,9 @@ class LTXVShiftSigmas:
     CATEGORY = "lightricks/LTXV"
 
     FUNCTION = "shift_sigmas"
-    DESCRIPTION = "Transforms sigmas to values where the model can focus on denoising high noise."
+    DESCRIPTION = (
+        "Transforms sigmas to values where the model can focus on denoising high noise."
+    )
 
     def shift_sigmas(self, sigmas, sigma_shift, stretch, terminal):
         power = 1

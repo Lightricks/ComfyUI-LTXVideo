@@ -1,24 +1,17 @@
-import torch
+import comfy.latent_formats
 import comfy.model_base
 import comfy.model_management
-import comfy.supported_models_base
-import comfy.utils
 import comfy.model_patcher
 import comfy.sd
-import comfy.latent_formats
-import folder_paths
-from pathlib import Path
-from .nodes_registry import comfy_node
-
-from ltx_video.models.autoencoders.video_autoencoder import VideoAutoencoder
-from ltx_video.models.autoencoders.causal_video_autoencoder import CausalVideoAutoencoder
+import comfy.supported_models_base
+import comfy.utils
+import torch
+from diffusers.image_processor import VaeImageProcessor
 from ltx_video.models.autoencoders.vae_encode import (
     get_vae_size_scale_factor,
     vae_decode,
     vae_encode,
 )
-from ltx_video.models.transformers.symmetric_patchifier import SymmetricPatchifier
-from diffusers.image_processor import VaeImageProcessor
 
 
 class LTXVVAE(comfy.sd.VAE):

@@ -1,22 +1,20 @@
 from pathlib import Path
-import safetensors.torch
-import torch
 
 import comfy
 import comfy.model_management
 import comfy.model_patcher
 import folder_paths
-
-
-from ltx_video.models.transformers.transformer3d import Transformer3DModel
-from ltx_video.models.autoencoders.causal_video_autoencoder import CausalVideoAutoencoder
-from ltx_video.models.autoencoders.vae_encode import get_vae_size_scale_factor
+import safetensors.torch
+import torch
+from ltx_video.models.autoencoders.causal_video_autoencoder import (
+    CausalVideoAutoencoder,
+)
 from ltx_video.models.transformers.symmetric_patchifier import SymmetricPatchifier
+from ltx_video.models.transformers.transformer3d import Transformer3DModel
 
-from .model import LTXVTransformer3D, LTXVModel, LTXVModelConfig
-from .vae import LTXVVAE
-
+from .model import LTXVModel, LTXVModelConfig, LTXVTransformer3D
 from .nodes_registry import comfy_node
+from .vae import LTXVVAE
 
 
 @comfy_node(name="LTXVLoader")
@@ -53,7 +51,11 @@ class LTXVLoader:
         num_latent_channels = vae.first_stage_model.config.latent_channels
 
         model = self._load_unet(
-            load_device, offload_device, weights, num_latent_channels, dtype=dtype_map[dtype]
+            load_device,
+            offload_device,
+            weights,
+            num_latent_channels,
+            dtype=dtype_map[dtype],
         )
         return (model, vae)
 
@@ -94,7 +96,9 @@ class LTXVLoader:
         )
         return vae
 
-    def _load_unet(self, load_device, offload_device, weights, num_latent_channels, dtype):
+    def _load_unet(
+        self, load_device, offload_device, weights, num_latent_channels, dtype
+    ):
         config = {
             "_class_name": "Transformer3DModel",
             "_diffusers_version": "0.25.1",

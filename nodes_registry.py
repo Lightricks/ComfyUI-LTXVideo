@@ -1,8 +1,6 @@
 import re
 from typing import Callable, Optional, Type
 
-from easy_nodes import initialize_easy_nodes
-
 NODE_CLASS_MAPPINGS = {}
 NODE_DISPLAY_NAME_MAPPINGS = {}
 
@@ -10,8 +8,6 @@ NODES_DISPLAY_NAME_PREFIX = "🅛🅣🅧"
 EXPERIMENTAL_DISPLAY_NAME_PREFIX = "(Experimental 🧪)"
 DEPRECATED_DISPLAY_NAME_PREFIX = "(Deprecated 🚫)"
 DEFAULT_CATEGORY_NAME = "Lightricks"
-
-initialize_easy_nodes(default_category=DEFAULT_CATEGORY_NAME, auto_register=True)
 
 
 def register_node(node_class: Type, name: str, description: str) -> None:

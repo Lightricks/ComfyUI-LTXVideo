@@ -1,20 +1,18 @@
+import math
 from contextlib import nullcontext
-import torch
-import torch.nn as nn
+
+import comfy.latent_formats
 import comfy.model_base
 import comfy.model_management
+import comfy.model_patcher
+import comfy.model_sampling
+import comfy.sd
 import comfy.supported_models_base
 import comfy.utils
-import comfy.model_patcher
-import comfy.sd
-import comfy.latent_formats
-import comfy.model_sampling
-from comfy.ldm.modules.diffusionmodules.util import make_beta_schedule
-import math
-
-from ltx_video.models.transformers.transformer3d import Transformer3DModel
+import torch
+import torch.nn as nn
 from ltx_video.models.transformers.symmetric_patchifier import SymmetricPatchifier
-from ltx_video.models.autoencoders.vae_encode import get_vae_size_scale_factor
+from ltx_video.models.transformers.transformer3d import Transformer3DModel
 
 
 class LTXVModelConfig:
@@ -109,14 +107,15 @@ class LTXVTransformer3D(nn.Module):
         latent_patchified = self.patchifier.patchify(latent)
         context_mask = (context != 0).any(dim=2).to(self.transformer.dtype)
 
-        l = latent_patchified
         if mixed_precision:
             context_manager = torch.autocast("cuda", dtype=torch.bfloat16)
         else:
             context_manager = nullcontext()
         with context_manager:
             noise_pred = self.transformer(
-                l.to(self.transformer.dtype).to(self.transformer.device),
+                latent_patchified.to(self.transformer.dtype).to(
+                    self.transformer.device
+                ),
                 indices_grid.to(self.transformer.device),
                 encoder_hidden_states=context.to(self.transformer.device),
                 encoder_attention_mask=context_mask.to(self.transformer.device).to(
