@@ -1,20 +1,578 @@
 {
-  "last_node_id": 106,
-  "last_link_id": 266,
+  "last_node_id": 186,
+  "last_link_id": 402,
   "nodes": [
+    {
+      "id": 112,
+      "type": "String Replace (mtb)",
+      "pos": [
+        -152.169921875,
+        574.6173706054688
+      ],
+      "size": [
+        210,
+        82
+      ],
+      "flags": {},
+      "order": 13,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "string",
+          "type": "STRING",
+          "link": 402,
+          "widget": {
+            "name": "string"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "STRING",
+          "type": "STRING",
+          "links": [
+            276
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "String Replace (mtb)"
+      },
+      "widgets_values": [
+        "",
+        "image",
+        "video"
+      ]
+    },
+    {
+      "id": 117,
+      "type": "String Replace (mtb)",
+      "pos": [
+        -152.169921875,
+        701.39794921875
+      ],
+      "size": [
+        210,
+        82
+      ],
+      "flags": {},
+      "order": 15,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "string",
+          "type": "STRING",
+          "link": 276,
+          "widget": {
+            "name": "string"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "STRING",
+          "type": "STRING",
+          "links": [
+            272
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "String Replace (mtb)"
+      },
+      "widgets_values": [
+        "",
+        "photo",
+        "video"
+      ]
+    },
+    {
+      "id": 113,
+      "type": "String Replace (mtb)",
+      "pos": [
+        -152.169921875,
+        836.8164672851562
+      ],
+      "size": [
+        210,
+        82
+      ],
+      "flags": {},
+      "order": 17,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "string",
+          "type": "STRING",
+          "link": 272,
+          "widget": {
+            "name": "string"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "STRING",
+          "type": "STRING",
+          "links": [
+            273
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "String Replace (mtb)"
+      },
+      "widgets_values": [
+        "",
+        "painting",
+        "video"
+      ]
+    },
+    {
+      "id": 81,
+      "type": "BasicScheduler",
+      "pos": [
+        840,
+        210
+      ],
+      "size": [
+        315,
+        106
+      ],
+      "flags": {},
+      "order": 16,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 261
+        }
+      ],
+      "outputs": [
+        {
+          "name": "SIGMAS",
+          "type": "SIGMAS",
+          "links": [
+            262
+          ],
+          "slot_index": 0,
+          "shape": 3
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "BasicScheduler"
+      },
+      "widgets_values": [
+        "normal",
+        25,
+        1
+      ]
+    },
+    {
+      "id": 104,
+      "type": "LTXVShiftSigmas",
+      "pos": [
+        1290,
+        450
+      ],
+      "size": [
+        315,
+        106
+      ],
+      "flags": {},
+      "order": 18,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "sigmas",
+          "type": "SIGMAS",
+          "link": 262
+        },
+        {
+          "name": "sigma_shift",
+          "type": "FLOAT",
+          "link": 259,
+          "widget": {
+            "name": "sigma_shift"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "SIGMAS",
+          "type": "SIGMAS",
+          "links": [
+            380
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LTXVShiftSigmas"
+      },
+      "widgets_values": [
+        1.820833333,
+        true,
+        0.1
+      ]
+    },
+    {
+      "id": 87,
+      "type": "CLIPTextEncode",
+      "pos": [
+        530,
+        290
+      ],
+      "size": [
+        210,
+        54
+      ],
+      "flags": {},
+      "order": 21,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 353
+        },
+        {
+          "name": "text",
+          "type": "STRING",
+          "link": 362,
+          "widget": {
+            "name": "text"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            300
+          ],
+          "slot_index": 0,
+          "shape": 3
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CLIPTextEncode"
+      },
+      "widgets_values": [
+        "a man is riding a motorcycle on a paved road, the motorcycle is a dark red with a sleek, modern design, and it has a large, round headlight in the center of the video, the man has short, wavy brown hair and a light complexion, he is wearing a black leather jacket, black leather gloves, and blue jeans, with black leather boots, his expression is one of mild surprise or curiosity, with a slight smirk on his face, in the background, there is a gas station with a red awning and a sign reading oil and diner, the gas station is set against a lush green field with tall, leafy trees, the road is paved with a yellow line on the right side, indicating a rural setting, the overall mood of the videograph is slightly out of focus, emphasizing the man's rugged appearance, The scene appears to be from a fantasy movie."
+      ]
+    },
+    {
+      "id": 128,
+      "type": "LTXVApplySTG",
+      "pos": [
+        530,
+        556.3655395507812
+      ],
+      "size": [
+        215.36399841308594,
+        82
+      ],
+      "flags": {},
+      "order": 11,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 296
+        }
+      ],
+      "outputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "links": [
+            303
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LTXVApplySTG"
+      },
+      "widgets_values": [
+        "attention",
+        "14"
+      ]
+    },
+    {
+      "id": 171,
+      "type": "Note",
+      "pos": [
+        530,
+        688.9594116210938
+      ],
+      "size": [
+        210,
+        72.68328857421875
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "Adding more layers will tend to reduce the amount of motion. Start experimenting with layers: 11, 14, and 19"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 36,
+      "type": "SamplerCustomAdvanced",
+      "pos": [
+        1720,
+        210
+      ],
+      "size": [
+        355.20001220703125,
+        106
+      ],
+      "flags": {},
+      "order": 23,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "noise",
+          "type": "NOISE",
+          "link": 72
+        },
+        {
+          "name": "guider",
+          "type": "GUIDER",
+          "link": 302,
+          "slot_index": 1
+        },
+        {
+          "name": "sampler",
+          "type": "SAMPLER",
+          "link": 70
+        },
+        {
+          "name": "sigmas",
+          "type": "SIGMAS",
+          "link": 380
+        },
+        {
+          "name": "latent_image",
+          "type": "LATENT",
+          "link": 258
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "LATENT",
+          "links": [],
+          "slot_index": 0,
+          "shape": 3
+        },
+        {
+          "name": "denoised_output",
+          "type": "LATENT",
+          "links": [
+            383
+          ],
+          "slot_index": 1,
+          "shape": 3
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "SamplerCustomAdvanced"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 130,
+      "type": "STGGuider",
+      "pos": [
+        1290,
+        610
+      ],
+      "size": [
+        310.2327575683594,
+        146
+      ],
+      "flags": {},
+      "order": 22,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 299
+        },
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "link": 300
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "link": 301
+        }
+      ],
+      "outputs": [
+        {
+          "name": "GUIDER",
+          "type": "GUIDER",
+          "links": [
+            302
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "STGGuider"
+      },
+      "widgets_values": [
+        3,
+        1,
+        0.75
+      ]
+    },
+    {
+      "id": 170,
+      "type": "Note",
+      "pos": [
+        1290,
+        800
+      ],
+      "size": [
+        309.2375793457031,
+        80.02484130859375
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "Setting CFG to 1.0 will reduce running time by skipping unconditioned generation. It may also increase the amount of motion and make the scene more erratic."
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 173,
+      "type": "Note",
+      "pos": [
+        840,
+        710.3784790039062
+      ],
+      "size": [
+        343.3447570800781,
+        137.82643127441406
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "Look at preset field for reasonable range of width x height x frames_numbers parameters.\n\nIncreasing FPS will reduce the overall amount of motion.\n\nImg_compression will add noise to the original image in order to match the training data distribution more closely. Increase it if you are getting little motion in the resulting video."
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 174,
+      "type": "Note",
+      "pos": [
+        84.26954650878906,
+        1121.198486328125
+      ],
+      "size": [
+        313.4017028808594,
+        110.61173248291016
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "Suggested suffixes:\n\nThe scene is captured in real-life footage.\nThe scene appears to be from a movie or TV show.\nThe scene is computer-generated imagery."
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 115,
+      "type": "StringFunction|pysssss",
+      "pos": [
+        83.40266418457031,
+        575.637451171875
+      ],
+      "size": [
+        319.0057373046875,
+        495.6424255371094
+      ],
+      "flags": {},
+      "order": 20,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "text_a",
+          "type": "STRING",
+          "link": 400,
+          "widget": {
+            "name": "text_a"
+          },
+          "shape": 7
+        }
+      ],
+      "outputs": [
+        {
+          "name": "STRING",
+          "type": "STRING",
+          "links": [
+            362
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "StringFunction|pysssss"
+      },
+      "widgets_values": [
+        "append",
+        "no",
+        "",
+        "",
+        "The scene is captured in real-life footage.",
+        "a man riding a red motorcycle, the motorcycle has a front grille with a small emblem, in front of him is an open road with blurred grassy field and some distant trees, sunlight is filtering through the trees creating patches of light on the ground, there are several cars parked along both sides of the road, one car is closer to the camera while the other is farther away, the road is bordered by lush green hills, the sky above is clear and blue, the scene captures a moment of racing or racing, overall video taken during daytime, vibrant colors.The scene is captured in real-life footage."
+      ]
+    },
     {
       "id": 14,
       "type": "KSamplerSelect",
       "pos": [
-        397,
-        -104
+        1290,
+        340
       ],
       "size": [
         315,
         58
       ],
       "flags": {},
-      "order": 0,
+      "order": 4,
       "mode": 0,
       "inputs": [],
       "outputs": [
@@ -32,127 +590,43 @@
         "Node name for S&R": "KSamplerSelect"
       },
       "widgets_values": [
-        "euler"
-      ]
-    },
-    {
-      "id": 42,
-      "type": "CFGGuider",
-      "pos": [
-        397,
-        153
-      ],
-      "size": [
-        315,
-        98
-      ],
-      "flags": {},
-      "order": 7,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "model",
-          "type": "MODEL",
-          "link": 264
-        },
-        {
-          "name": "positive",
-          "type": "CONDITIONING",
-          "link": 215
-        },
-        {
-          "name": "negative",
-          "type": "CONDITIONING",
-          "link": 214
-        }
-      ],
-      "outputs": [
-        {
-          "name": "GUIDER",
-          "type": "GUIDER",
-          "links": [
-            87
-          ],
-          "slot_index": 0,
-          "shape": 3
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "CFGGuider"
-      },
-      "widgets_values": [
-        4
-      ]
-    },
-    {
-      "id": 81,
-      "type": "BasicScheduler",
-      "pos": [
-        45,
-        -227
-      ],
-      "size": [
-        315,
-        106
-      ],
-      "flags": {},
-      "order": 8,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "model",
-          "type": "MODEL",
-          "link": 265
-        }
-      ],
-      "outputs": [
-        {
-          "name": "SIGMAS",
-          "type": "SIGMAS",
-          "links": [
-            257
-          ],
-          "slot_index": 0,
-          "shape": 3
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "BasicScheduler"
-      },
-      "widgets_values": [
-        "normal",
-        20,
-        1
+        "euler_ancestral"
       ]
     },
     {
       "id": 103,
       "type": "LTXVModelConfigurator",
       "pos": [
-        -392,
-        -230
+        840,
+        380
       ],
       "size": [
-        378,
-        242
+        347.4894104003906,
+        286
       ],
       "flags": {},
-      "order": 6,
+      "order": 14,
       "mode": 0,
       "inputs": [
         {
           "name": "model",
           "type": "MODEL",
-          "link": 253
+          "link": 303
         },
         {
           "name": "vae",
           "type": "VAE",
-          "link": 254
+          "link": 255
         },
         {
           "name": "conditioning",
           "type": "IMAGE",
+          "link": null,
+          "shape": 7
+        },
+        {
+          "name": "initial_latent",
+          "type": "LATENT",
           "link": null,
           "shape": 7
         }
@@ -162,8 +636,8 @@
           "name": "model",
           "type": "MODEL",
           "links": [
-            264,
-            265
+            261,
+            299
           ],
           "slot_index": 0
         },
@@ -171,7 +645,7 @@
           "name": "latent",
           "type": "LATENT",
           "links": [
-            255
+            258
           ],
           "slot_index": 1
         },
@@ -179,9 +653,15 @@
           "name": "sigma_shift",
           "type": "FLOAT",
           "links": [
-            258
+            259
           ],
           "slot_index": 2
+        },
+        {
+          "name": "image_prompt",
+          "type": "STRING",
+          "links": [],
+          "slot_index": 3
         }
       ],
       "properties": {
@@ -191,183 +671,98 @@
         "Custom",
         768,
         512,
-        65,
+        105,
         25,
         1,
-        true
+        true,
+        29
       ]
     },
     {
-      "id": 104,
-      "type": "LTXVShiftSigmas",
+      "id": 169,
+      "type": "Note",
       "pos": [
-        397,
-        -260
+        840,
+        99.53419494628906
       ],
       "size": [
-        315,
-        106
+        312.3548278808594,
+        58
       ],
       "flags": {},
-      "order": 9,
+      "order": 5,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "Alternative scheduler is linear-quadratic; in this case, do not use LTXV Shift Sigmas node"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 114,
+      "type": "String Replace (mtb)",
+      "pos": [
+        -152.169921875,
+        988.8927001953125
+      ],
+      "size": [
+        210,
+        82
+      ],
+      "flags": {},
+      "order": 19,
       "mode": 0,
       "inputs": [
         {
-          "name": "sigmas",
-          "type": "SIGMAS",
-          "link": 257
-        },
-        {
-          "name": "sigma_shift",
-          "type": "FLOAT",
-          "link": 258,
+          "name": "string",
+          "type": "STRING",
+          "link": 273,
           "widget": {
-            "name": "sigma_shift"
+            "name": "string"
           }
         }
       ],
       "outputs": [
         {
-          "name": "SIGMAS",
-          "type": "SIGMAS",
+          "name": "STRING",
+          "type": "STRING",
           "links": [
-            259
+            400
           ],
           "slot_index": 0
         }
       ],
       "properties": {
-        "Node name for S&R": "LTXVShiftSigmas"
+        "Node name for S&R": "String Replace (mtb)"
       },
       "widgets_values": [
-        1.820833333,
-        true,
-        0.1
-      ]
-    },
-    {
-      "id": 36,
-      "type": "SamplerCustomAdvanced",
-      "pos": [
-        777,
-        -54
-      ],
-      "size": [
-        355.20001220703125,
-        106
-      ],
-      "flags": {},
-      "order": 10,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "noise",
-          "type": "NOISE",
-          "link": 72
-        },
-        {
-          "name": "guider",
-          "type": "GUIDER",
-          "link": 87,
-          "slot_index": 1
-        },
-        {
-          "name": "sampler",
-          "type": "SAMPLER",
-          "link": 70
-        },
-        {
-          "name": "sigmas",
-          "type": "SIGMAS",
-          "link": 259
-        },
-        {
-          "name": "latent_image",
-          "type": "LATENT",
-          "link": 255
-        }
-      ],
-      "outputs": [
-        {
-          "name": "output",
-          "type": "LATENT",
-          "links": [
-            78
-          ],
-          "slot_index": 0,
-          "shape": 3
-        },
-        {
-          "name": "denoised_output",
-          "type": "LATENT",
-          "links": [],
-          "slot_index": 1,
-          "shape": 3
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "SamplerCustomAdvanced"
-      },
-      "widgets_values": []
-    },
-    {
-      "id": 87,
-      "type": "CLIPTextEncode",
-      "pos": [
-        -392,
-        64
-      ],
-      "size": [
-        378.8294372558594,
-        191.98770141601562
-      ],
-      "flags": {},
-      "order": 4,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "clip",
-          "type": "CLIP",
-          "link": 262
-        }
-      ],
-      "outputs": [
-        {
-          "name": "CONDITIONING",
-          "type": "CONDITIONING",
-          "links": [
-            215
-          ],
-          "slot_index": 0,
-          "shape": 3
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "CLIPTextEncode"
-      },
-      "widgets_values": [
-        "A group of colorful hot air balloons take off at dawn in Cappadocia, Turkey.\nDozens of balloons in various bright colors and patterns slowly rise into the pink and orange sky. Below them, the unique landscape of Cappadocia unfolds, with its distinctive \"fairy chimneys\" - tall, cone-shaped rock formations scattered across the valley. The rising sun casts long shadows across the terrain, highlighting the otherworldly topography."
+        "",
+        "illustration",
+        "video"
       ]
     },
     {
       "id": 88,
       "type": "CLIPTextEncode",
       "pos": [
-        -392,
-        315
+        530,
+        400
       ],
       "size": [
-        377.8036804199219,
-        195.38250732421875
+        216.46029663085938,
+        90.9249496459961
       ],
       "flags": {},
-      "order": 5,
+      "order": 12,
       "mode": 0,
       "inputs": [
         {
           "name": "clip",
           "type": "CLIP",
-          "link": 263
+          "link": 354
         }
       ],
       "outputs": [
@@ -375,7 +770,7 @@
           "name": "CONDITIONING",
           "type": "CONDITIONING",
           "links": [
-            214
+            301
           ],
           "slot_index": 0,
           "shape": 3
@@ -385,97 +780,22 @@
         "Node name for S&R": "CLIPTextEncode"
       },
       "widgets_values": [
-        "worst quality, inconsistent motion, blurry, jittery, distorted, watermarks"
+        "watermark, logo, text, subtitles, worst quality, inconsistent motion, blurry, jittery, distorted"
       ]
-    },
-    {
-      "id": 105,
-      "type": "LTXVCLIPModelLoader",
-      "pos": [
-        -833,
-        -65
-      ],
-      "size": [
-        317.6802978515625,
-        58
-      ],
-      "flags": {},
-      "order": 1,
-      "mode": 0,
-      "inputs": [],
-      "outputs": [
-        {
-          "name": "clip",
-          "type": "CLIP",
-          "links": [
-            262,
-            263
-          ],
-          "slot_index": 0
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "LTXVCLIPModelLoader"
-      },
-      "widgets_values": [
-        "PixArt-XL-2-1024-MS/text_encoder/model-00001-of-00002.safetensors"
-      ]
-    },
-    {
-      "id": 8,
-      "type": "VAEDecode",
-      "pos": [
-        859,
-        107
-      ],
-      "size": [
-        210,
-        46
-      ],
-      "flags": {},
-      "order": 11,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "samples",
-          "type": "LATENT",
-          "link": 78
-        },
-        {
-          "name": "vae",
-          "type": "VAE",
-          "link": 261,
-          "slot_index": 1
-        }
-      ],
-      "outputs": [
-        {
-          "name": "IMAGE",
-          "type": "IMAGE",
-          "links": [
-            266
-          ],
-          "slot_index": 0
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "VAEDecode"
-      },
-      "widgets_values": []
     },
     {
       "id": 37,
       "type": "RandomNoise",
       "pos": [
-        397,
-        12
+        1290,
+        210
       ],
       "size": [
         315,
         82
       ],
       "flags": {},
-      "order": 2,
+      "order": 6,
       "mode": 0,
       "inputs": [],
       "outputs": [
@@ -493,29 +813,129 @@
         "Node name for S&R": "RandomNoise"
       },
       "widgets_values": [
-        42,
+        0,
         "fixed"
       ]
     },
     {
-      "id": 106,
-      "type": "VHS_VideoCombine",
+      "id": 175,
+      "type": "Note",
       "pos": [
-        882,
-        210
+        -557.6407470703125,
+        579.795654296875
       ],
       "size": [
-        219.3603515625,
-        456.9068908691406
+        383.26470947265625,
+        228.53770446777344
       ],
       "flags": {},
-      "order": 12,
+      "order": 7,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "For good results, you should follow the prompting style in the examples here: https://github.com/Lightricks/LTX-Video\n\nYou can use flux prompt enhancer to get the overall description of the scene and tweak it to get the desired results.\n\nThis enhancer doesn't address the kind of motion that happens in the scenes. Consider adding this part manually or using an LLM of your choice."
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 102,
+      "type": "LTXVLoader",
+      "pos": [
+        11.242873191833496,
+        200.9393310546875
+      ],
+      "size": [
+        412.85296630859375,
+        102
+      ],
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "links": [
+            296
+          ],
+          "slot_index": 0
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "links": [
+            255,
+            256
+          ],
+          "slot_index": 1
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LTXVLoader"
+      },
+      "widgets_values": [
+        "ltx-video-2b-v0.9.1.safetensors",
+        "bfloat16"
+      ]
+    },
+    {
+      "id": 142,
+      "type": "CLIPLoader",
+      "pos": [
+        15.098348617553711,
+        360.0001525878906
+      ],
+      "size": [
+        404.1546936035156,
+        82
+      ],
+      "flags": {},
+      "order": 9,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "CLIP",
+          "type": "CLIP",
+          "links": [
+            353,
+            354
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CLIPLoader"
+      },
+      "widgets_values": [
+        "t5xxl_fp8.safetensors",
+        "ltxv"
+      ]
+    },
+    {
+      "id": 60,
+      "type": "VHS_VideoCombine",
+      "pos": [
+        1726.3380126953125,
+        504.3022155761719
+      ],
+      "size": [
+        559.9261474609375,
+        683.9507446289062
+      ],
+      "flags": {},
+      "order": 25,
       "mode": 0,
       "inputs": [
         {
           "name": "images",
           "type": "IMAGE",
-          "link": 266
+          "link": 121,
+          "shape": 7
         },
         {
           "name": "audio",
@@ -540,75 +960,112 @@
         {
           "name": "Filenames",
           "type": "VHS_FILENAMES",
-          "links": null
+          "links": null,
+          "shape": 3
         }
       ],
       "properties": {
         "Node name for S&R": "VHS_VideoCombine"
       },
       "widgets_values": {
-        "frame_rate": 25,
+        "frame_rate": 24,
         "loop_count": 0,
         "filename_prefix": "LTXVideo",
         "format": "video/h264-mp4",
         "pix_fmt": "yuv420p",
         "crf": 19,
-        "save_metadata": true,
+        "save_metadata": false,
         "pingpong": false,
-        "save_output": true,
+        "save_output": false,
         "videopreview": {
           "hidden": false,
           "paused": false,
           "params": {
-            "filename": "AnimateDiff_00004.mp4",
+            "filename": "LTXVideo_00004.mp4",
             "subfolder": "",
-            "type": "output",
+            "type": "temp",
             "format": "video/h264-mp4",
-            "frame_rate": 25
-          },
-          "muted": false
+            "frame_rate": 24,
+            "workflow": "LTXVideo_00004.png",
+            "fullpath": "C:\\Users\\Zeev\\Projects\\ComfyUI\\temp\\LTXVideo_00004.mp4"
+          }
         }
       }
     },
     {
-      "id": 102,
-      "type": "LTXVLoader",
+      "id": 8,
+      "type": "VAEDecode",
       "pos": [
-        -833,
-        -196
+        1723.52490234375,
+        380.15924072265625
       ],
       "size": [
-        315,
-        78
+        210,
+        46
       ],
       "flags": {},
-      "order": 3,
+      "order": 24,
       "mode": 0,
-      "inputs": [],
-      "outputs": [
+      "inputs": [
         {
-          "name": "model",
-          "type": "MODEL",
-          "links": [
-            253
-          ],
-          "slot_index": 0
+          "name": "samples",
+          "type": "LATENT",
+          "link": 383
         },
         {
           "name": "vae",
           "type": "VAE",
-          "links": [
-            254,
-            261
-          ],
+          "link": 256,
           "slot_index": 1
         }
       ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            121
+          ],
+          "slot_index": 0
+        }
+      ],
       "properties": {
-        "Node name for S&R": "LTXVLoader"
+        "Node name for S&R": "VAEDecode"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 185,
+      "type": "FluxPromptEnhance",
+      "pos": [
+        -567.9957275390625,
+        866.2244873046875
+      ],
+      "size": [
+        400,
+        200
+      ],
+      "flags": {},
+      "order": 10,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "STRING",
+          "type": "STRING",
+          "links": [
+            402
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "FluxPromptEnhance"
       },
       "widgets_values": [
-        "ltx-video-2b-v0.9.safetensors"
+        "a guy riding a red motorcycle in gorgeous road",
+        1,
+        "fixed"
       ]
     }
   ],
@@ -630,47 +1087,15 @@
       "NOISE"
     ],
     [
-      78,
-      36,
-      0,
+      121,
       8,
       0,
-      "LATENT"
+      60,
+      0,
+      "IMAGE"
     ],
     [
-      87,
-      42,
-      0,
-      36,
-      1,
-      "GUIDER"
-    ],
-    [
-      214,
-      88,
-      0,
-      42,
-      2,
-      "CONDITIONING"
-    ],
-    [
-      215,
-      87,
-      0,
-      42,
-      1,
-      "CONDITIONING"
-    ],
-    [
-      253,
-      102,
-      0,
-      103,
-      0,
-      "MODEL"
-    ],
-    [
-      254,
+      255,
       102,
       1,
       103,
@@ -678,7 +1103,15 @@
       "VAE"
     ],
     [
-      255,
+      256,
+      102,
+      1,
+      8,
+      1,
+      "VAE"
+    ],
+    [
+      258,
       103,
       1,
       36,
@@ -686,15 +1119,7 @@
       "LATENT"
     ],
     [
-      257,
-      81,
-      0,
-      104,
-      0,
-      "SIGMAS"
-    ],
-    [
-      258,
+      259,
       103,
       2,
       104,
@@ -702,47 +1127,7 @@
       "FLOAT"
     ],
     [
-      259,
-      104,
-      0,
-      36,
-      3,
-      "SIGMAS"
-    ],
-    [
       261,
-      102,
-      1,
-      8,
-      1,
-      "VAE"
-    ],
-    [
-      262,
-      105,
-      0,
-      87,
-      0,
-      "CLIP"
-    ],
-    [
-      263,
-      105,
-      0,
-      88,
-      0,
-      "CLIP"
-    ],
-    [
-      264,
-      103,
-      0,
-      42,
-      0,
-      "MODEL"
-    ],
-    [
-      265,
       103,
       0,
       81,
@@ -750,23 +1135,178 @@
       "MODEL"
     ],
     [
-      266,
+      262,
+      81,
+      0,
+      104,
+      0,
+      "SIGMAS"
+    ],
+    [
+      272,
+      117,
+      0,
+      113,
+      0,
+      "STRING"
+    ],
+    [
+      273,
+      113,
+      0,
+      114,
+      0,
+      "STRING"
+    ],
+    [
+      276,
+      112,
+      0,
+      117,
+      0,
+      "STRING"
+    ],
+    [
+      296,
+      102,
+      0,
+      128,
+      0,
+      "MODEL"
+    ],
+    [
+      299,
+      103,
+      0,
+      130,
+      0,
+      "MODEL"
+    ],
+    [
+      300,
+      87,
+      0,
+      130,
+      1,
+      "CONDITIONING"
+    ],
+    [
+      301,
+      88,
+      0,
+      130,
+      2,
+      "CONDITIONING"
+    ],
+    [
+      302,
+      130,
+      0,
+      36,
+      1,
+      "GUIDER"
+    ],
+    [
+      303,
+      128,
+      0,
+      103,
+      0,
+      "MODEL"
+    ],
+    [
+      353,
+      142,
+      0,
+      87,
+      0,
+      "CLIP"
+    ],
+    [
+      354,
+      142,
+      0,
+      88,
+      0,
+      "CLIP"
+    ],
+    [
+      362,
+      115,
+      0,
+      87,
+      1,
+      "STRING"
+    ],
+    [
+      380,
+      104,
+      0,
+      36,
+      3,
+      "SIGMAS"
+    ],
+    [
+      383,
+      36,
+      1,
       8,
       0,
-      106,
+      "LATENT"
+    ],
+    [
+      400,
+      114,
       0,
-      "IMAGE"
+      115,
+      0,
+      "STRING"
+    ],
+    [
+      402,
+      185,
+      0,
+      112,
+      0,
+      "STRING"
     ]
   ],
-  "groups": [],
+  "groups": [
+    {
+      "id": 2,
+      "title": "Prompt Enhancer",
+      "bounding": [
+        -571.6630249023438,
+        498.7752685546875,
+        990.3524780273438,
+        780.5728149414062
+      ],
+      "color": "#3f789e",
+      "font_size": 24,
+      "flags": {},
+      "nodes": [
+        112,
+        117,
+        113,
+        174,
+        115,
+        114,
+        175,
+        185
+      ]
+    }
+  ],
   "config": {},
   "extra": {
     "ds": {
-      "scale": 0.6115909044841471,
+      "scale": 0.5559917313492239,
       "offset": [
-        1005.5451653281583,
-        472.87625895366426
+        624.5243449701064,
+        60.89219149368256
       ]
+    },
+    "workspace_info": {
+      "id": "tn2wr6gjBJPNV950dOz0l"
     }
   },
   "version": 0.4

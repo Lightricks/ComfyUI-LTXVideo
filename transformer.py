@@ -9,10 +9,9 @@ import comfy.supported_models_base
 import comfy.utils
 import torch
 from ltx_video.models.autoencoders.vae_encode import get_vae_size_scale_factor
-from ltx_video.models.transformers.symmetric_patchifier import SymmetricPatchifier
 
 from .img2vid import encode_media_conditioning
-from .model import LTXVSampling, LTXVTransformer3DWrapper
+from .model import LTXVSampling
 from .nodes_registry import comfy_node
 
 
@@ -88,14 +87,13 @@ class LTXVModelConfigurator:
                 "frame_rate": ("INT", {"default": 25, "min": 1, "max": 60}),
                 "batch": ("INT", {"default": 1, "min": 1, "max": 60}),
                 "mixed_precision": ("BOOLEAN", {"default": True}),
-                "noise_scale": (
-                    "FLOAT",
+                "img_compression": (
+                    "INT",
                     {
-                        "default": 0.15,
-                        "min": 0.0,
+                        "default": 29,
+                        "min": 0,
                         "max": 100,
-                        "step": 0.01,
-                        "tooltip": "Amount of noise to apply on conditioning image latent.",
+                        "tooltip": "Amount of compression to apply on conditioning image.",
                     },
                 ),
             },
@@ -103,7 +101,13 @@ class LTXVModelConfigurator:
                 "conditioning": (
                     "IMAGE",
                     {"tooltip": "Optional conditioning image or video."},
-                )
+                ),
+                "initial_latent": (
+                    "LATENT",
+                    {
+                        "tooltip": "initial latent that is combined with conditioning if given"
+                    },
+                ),
             },
         }
 
@@ -137,32 +141,6 @@ class LTXVModelConfigurator:
         ]
         return latent_shape, latent_frame_rate
 
-    def indices_grid(
-        self,
-        latent_shape,
-        vae_scale_factor,
-        latent_frame_rate,
-        patchifier,
-        use_rope,
-        device,
-    ):
-        scale_grid = (
-            (1 / latent_frame_rate, vae_scale_factor, vae_scale_factor)
-            if use_rope  # self.wrapped_transformer.transformer.use_rope
-            else None
-        )
-
-        indices_grid = patchifier.get_grid(
-            orig_num_frames=latent_shape[2],
-            orig_height=latent_shape[3],
-            orig_width=latent_shape[4],
-            batch_size=latent_shape[0],
-            scale_grid=scale_grid,
-            device=device,
-        )
-
-        return indices_grid
-
     def configure_sizes(
         self,
         model,
@@ -174,8 +152,9 @@ class LTXVModelConfigurator:
         frame_rate,
         batch,
         mixed_precision,
-        noise_scale,
+        img_compression,
         conditioning=None,
+        initial_latent=None,
     ):
         load_device = comfy.model_management.get_torch_device()
         if preset != "Custom":
@@ -193,43 +172,41 @@ class LTXVModelConfigurator:
             latent_shape[4],
         ]
         conditioning_mask = torch.zeros(mask_shape, device=load_device)
+        initial_latent = (
+            None
+            if initial_latent is None
+            else initial_latent["samples"].to(load_device)
+        )
+        guiding_latent = None
         if conditioning is not None:
             latent = encode_media_conditioning(
-                conditioning, vae, width, height, frames_number
+                conditioning,
+                vae,
+                width,
+                height,
+                frames_number,
+                image_compression=img_compression,
+                initial_latent=initial_latent,
             )
             conditioning_mask[:, :, 0] = 1.0
+            guiding_latent = latent[:, :, :1, ...]
         else:
-            latent = torch.zeros(latent_shape, dtype=torch.float32)
+            latent = torch.zeros(latent_shape, dtype=torch.float32, device=load_device)
+            if initial_latent is not None:
+                latent[:, :, : initial_latent.shape[2], ...] = initial_latent
 
-        patchifier = SymmetricPatchifier(1)
         _, vae_scale_factor, _ = get_vae_size_scale_factor(vae.first_stage_model)
-        use_rope = model.get_model_object("diffusion_model").transformer.use_rope
-        indices_grid = self.indices_grid(
-            latent_shape,
-            vae_scale_factor,
-            latent_frame_rate,
-            patchifier,
-            use_rope,
-            load_device,
-        )
-        wrapper = LTXVTransformer3DWrapper(
-            transformer=model.get_model_object("diffusion_model"),
-            patchifier=patchifier,
-            conditioning_mask=conditioning_mask,
-            indices_grid=indices_grid,
-        )
 
         patcher = model.clone()
-        patcher.add_object_patch("diffusion_model", wrapper)
+        patcher.add_object_patch("diffusion_model.conditioning_mask", conditioning_mask)
+        patcher.add_object_patch("diffusion_model.latent_frame_rate", latent_frame_rate)
+        patcher.add_object_patch("diffusion_model.vae_scale_factor", vae_scale_factor)
         patcher.add_object_patch(
-            "model_sampling", LTXVSampling(wrapper.conditioning_mask)
+            "model_sampling", LTXVSampling(conditioning_mask, guiding_latent)
         )
         patcher.model_options.setdefault("transformer_options", {})[
             "mixed_precision"
         ] = mixed_precision
-        patcher.model_options.setdefault("transformer_options", {})["noise_scale"] = (
-            noise_scale if conditioning is not None else 0.0
-        )
 
         num_latent_patches = latent_shape[2] * latent_shape[3] * latent_shape[4]
         return (patcher, {"samples": latent}, get_normal_shift(num_latent_patches))

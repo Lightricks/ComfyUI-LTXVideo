@@ -1,1 +1,2 @@
-ltx-video@git+https://github.com/Lightricks/LTX-Video@ltx-video-0.9
+av>=10.0.0
+ltx-video@git+https://github.com/Lightricks/LTX-Video@ltx-video-0.9.1
