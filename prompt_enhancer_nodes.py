@@ -38,7 +38,7 @@ class PromptEnhancer(torch.nn.Module):
             + 1073741824
         )
 
-    def forward(self, prompt, image_conditioning, max_resulting_tokens):
+    def forward(self, prompt, image_conditioning, max_resulting_tokens, seed=-1):
         enhanced_prompt = generate_cinematic_prompt(
             self.image_caption_model,
             self.image_caption_processor,
@@ -47,6 +47,7 @@ class PromptEnhancer(torch.nn.Module):
             prompt,
             image_conditioning,
             max_new_tokens=max_resulting_tokens,
+            seed=seed
         )
 
         return enhanced_prompt
@@ -172,6 +173,7 @@ class LTXVPromptEnhancer:
             },
             "optional": {
                 "image_prompt": ("IMAGE",),
+                "seed": ("INT", {"default": 0, "min": 0, "max": 0xffffffffffffffff}),
             },
         }
 
@@ -192,6 +194,7 @@ class LTXVPromptEnhancer:
         prompt_enhancer: comfy.model_patcher.ModelPatcher,
         image_prompt: torch.Tensor = None,
         max_resulting_tokens=256,
+        seed=-1,
     ):
         comfy.model_management.free_memory(
             prompt_enhancer.memory_required([]),
@@ -204,5 +207,5 @@ class LTXVPromptEnhancer:
             permuted_image = image_prompt.permute(3, 0, 1, 2)[None, :]
             image_conditioning = [(permuted_image, 0, 1.0)]
 
-        enhanced_prompt = model(prompt, image_conditioning, max_resulting_tokens)
+        enhanced_prompt = model(prompt, image_conditioning, max_resulting_tokens, seed)
         return (enhanced_prompt[0],)

@@ -80,7 +80,12 @@ def generate_cinematic_prompt(
     prompt: Union[str, List[str]],
     conditioning_items: Optional[List[Tuple[torch.Tensor, int, float]]] = None,
     max_new_tokens: int = 256,
+    seed: int = -1,
 ) -> List[str]:
+    from transformers import set_seed
+    if seed > -1:
+        set_seed(seed)
+    
     prompts = [prompt] if isinstance(prompt, str) else prompt
 
     if conditioning_items is None:
