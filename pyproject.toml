@@ -9,6 +9,7 @@ requires-python = ">=3.10"
 readme = "README.md"
 license = { file = "LICENSE" }
 dependencies = [
+    "diffusers",
     "huggingface_hub>=0.25.2",
     "transformers[timm]>=4.45.0",
     "einops"
@@ -16,7 +17,7 @@ dependencies = [
 
 [project.optional-dependencies]
 internal = [
-    "ltx-video@git+https://github.com/Lightricks/LTX-Video@ltx-video-0.9.7",
+    "ltx-video@git+https://github.com/Lightricks/LTX-Video@ltx-video-0.9.1",
     "av>=10.0.0",
     "q8-kernels==0.0.3"
 ]
