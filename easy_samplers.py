@@ -132,8 +132,7 @@ class LTXVBaseSampler:
                 width=width,
                 height=height,
                 length=num_frames,
-                batch_size=1,
-                strength=strength,
+                batch_size=1
             )
         else:
             (latents,) = EmptyLTXVLatentVideo().generate(width, height, num_frames, 1)
