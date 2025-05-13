@@ -90,9 +90,17 @@ class LTXVBaseSampler:
     ):
 
         if optional_cond_images is not None:
-            optional_cond_images = comfy.utils.common_upscale(
-                optional_cond_images.movedim(-1, 1), width, height, "bicubic", crop=crop
-            ).movedim(1, -1)
+            optional_cond_images = (
+                comfy.utils.common_upscale(
+                    optional_cond_images.movedim(-1, 1),
+                    width,
+                    height,
+                    "bilinear",
+                    crop=crop,
+                )
+                .movedim(1, -1)
+                .clamp(0, 1)
+            )
             print("optional_cond_images shape", optional_cond_images.shape)
             optional_cond_images = comfy_extras.nodes_lt.LTXVPreprocess().preprocess(
                 optional_cond_images, crf

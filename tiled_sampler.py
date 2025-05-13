@@ -28,10 +28,6 @@ class LTXVTiledSampler:
                 "horizontal_tiles": ("INT", {"default": 1, "min": 1, "max": 6}),
                 "vertical_tiles": ("INT", {"default": 1, "min": 1, "max": 6}),
                 "overlap": ("INT", {"default": 1, "min": 1, "max": 8}),
-                "first_frame_cond_strength": (
-                    "FLOAT",
-                    {"default": 0.9, "min": 0.0, "max": 1.0, "step": 0.01},
-                ),
                 "latents_cond_strength": (
                     "FLOAT",
                     {"default": 0.15, "min": 0.0, "max": 1.0, "step": 0.01},
@@ -43,7 +39,9 @@ class LTXVTiledSampler:
                 "crop": (["center", "disabled"], {"default": "disabled"}),
             },
             "optional": {
-                "optional_cond_image": ("IMAGE",),
+                "optional_cond_images": ("IMAGE",),
+                "optional_cond_indices": ("STRING", {"default": "0"}),
+                "images_cond_strengths": ("STRING", {"default": "0.9"}),
             },
         }
 
@@ -72,11 +70,12 @@ class LTXVTiledSampler:
         horizontal_tiles,
         vertical_tiles,
         overlap,
-        first_frame_cond_strength,
         latents_cond_strength,
         boost_latent_similarity,
         crop="disabled",
-        optional_cond_image=None,
+        optional_cond_images=None,
+        optional_cond_indices="0",
+        images_cond_strengths="0.9",
     ):
 
         # Get the latent samples
@@ -87,20 +86,36 @@ class LTXVTiledSampler:
             vae.downscale_index_formula
         )
         # Validate image dimensions if provided
-        if optional_cond_image is not None:
+        if optional_cond_images is not None:
             img_height = height * height_scale_factor
             img_width = width * width_scale_factor
-            cond_image = comfy.utils.common_upscale(
-                optional_cond_image.movedim(-1, 1),
+            cond_images = comfy.utils.common_upscale(
+                optional_cond_images.movedim(-1, 1),
                 img_width,
                 img_height,
                 "bicubic",
                 crop=crop,
             ).movedim(1, -1)
-            print("cond_image shape after resize", cond_image.shape)
-            img_batch, img_height, img_width, img_channels = cond_image.shape
+            print("cond_images shape after resize", cond_images.shape)
+            img_batch, img_height, img_width, img_channels = cond_images.shape
         else:
-            cond_image = None
+            cond_images = None
+
+        if optional_cond_indices is not None and optional_cond_images is not None:
+            optional_cond_indices = optional_cond_indices.split(",")
+            optional_cond_indices = [int(i) for i in optional_cond_indices]
+            assert len(optional_cond_indices) == len(
+                optional_cond_images
+            ), "Number of optional cond images must match number of optional cond indices"
+
+        images_cond_strengths = [float(i) for i in images_cond_strengths.split(",")]
+        if optional_cond_images is not None and len(images_cond_strengths) < len(
+            optional_cond_images
+        ):
+            # Repeat the last value to match the length of optional_cond_images
+            images_cond_strengths = images_cond_strengths + [
+                images_cond_strengths[-1]
+            ] * (len(optional_cond_images) - len(images_cond_strengths))
 
         # Calculate tile sizes with overlap
         base_tile_height = (height + (vertical_tiles - 1) * overlap) // vertical_tiles
@@ -155,45 +170,51 @@ class LTXVTiledSampler:
                 unconditioned_tile_latents = tile_latents.copy()
 
                 # Handle image conditioning if provided
-                if cond_image is not None:
+                if cond_images is not None:
                     # Scale coordinates for image
                     img_h_start = v_start * height_scale_factor
                     img_h_end = v_end * height_scale_factor
                     img_w_start = h_start * width_scale_factor
                     img_w_end = h_end * width_scale_factor
 
-                    # Extract image tile
-                    img_tile = cond_image[
-                        :, img_h_start:img_h_end, img_w_start:img_w_end, :
-                    ]
-
-                    print(f"Applying image conditioning for tile at row {v}, col {h}:")
-                    print(
-                        f"  Image tile position: ({img_h_start}:{img_h_end}, {img_w_start}:{img_w_end})"
-                    )
-                    print(f"  Image tile size: {img_tile.shape}")
-
                     # Create copies of conditioning for this tile
                     tile_positive = positive.copy()
                     tile_negative = negative.copy()
 
-                    print(
-                        f"using LTXVAddGuide on tiled latent with frame index 0 and strength {first_frame_cond_strength}"
-                    )
-                    # Add guide from image tile
-                    (
-                        tile_positive,
-                        tile_negative,
-                        tile_latents,
-                    ) = LTXVAddGuide().generate(
-                        positive=tile_positive,
-                        negative=tile_negative,
-                        vae=vae,
-                        latent=tile_latents,
-                        image=img_tile,
-                        frame_idx=0,
-                        strength=first_frame_cond_strength,
-                    )
+                    for i_cond_image, (
+                        cond_image,
+                        cond_image_idx,
+                        cond_image_strength,
+                    ) in enumerate(
+                        zip(cond_images, optional_cond_indices, images_cond_strengths)
+                    ):
+                        # Extract image tile
+                        img_tile = cond_image[
+                            img_h_start:img_h_end, img_w_start:img_w_end, :
+                        ].unsqueeze(0)
+
+                        print(
+                            f"Applying image conditioning on cond image {i_cond_image} for tile at row {v}, col {h} with strength {cond_image_strength} at position {cond_image_idx}:"
+                        )
+                        print(
+                            f"  Image tile position: ({img_h_start}:{img_h_end}, {img_w_start}:{img_w_end})"
+                        )
+                        print(f"  Image tile size: {img_tile.shape}")
+
+                        # Add guide from image tile
+                        (
+                            tile_positive,
+                            tile_negative,
+                            tile_latents,
+                        ) = LTXVAddGuide().generate(
+                            positive=tile_positive,
+                            negative=tile_negative,
+                            vae=vae,
+                            latent=tile_latents,
+                            image=img_tile,
+                            frame_idx=cond_image_idx,
+                            strength=cond_image_strength,
+                        )
                     if boost_latent_similarity:
                         middle_latent_idx = (frames - 1) // 2
                         middle_index_latent = LTXVSelectLatents().select_latents(
@@ -252,7 +273,7 @@ class LTXVTiledSampler:
                 )[0]
 
                 # Clean up guides if image conditioning was used
-                if cond_image is not None:
+                if cond_images is not None:
                     print("before guide crop", denoised_tile["samples"].shape)
                     tile_positive, tile_negative, denoised_tile = LTXVCropGuides().crop(
                         positive=tile_positive,

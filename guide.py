@@ -10,7 +10,7 @@ def blur_internal(image, blur_radius):
     if blur_radius > 0:
         # https://docs.opencv.org/2.4/modules/imgproc/doc/filtering.html#getgaussiankernel
         # sigma = 0.3 * blur_radius + 0.5 is what is recommended in the OpenCV doc for the
-        # relationshoip between sigma and kernel size 2*blur_radius + 1, hwoever we want somewhat weaker
+        # relationship between sigma and kernel size 2*blur_radius + 1, however we want somewhat weaker
         # blurring, so we use 0.3 * blur_radius instead, reducing the sigma value by 0.5
         sigma = 0.3 * blur_radius
         image = post_processing.Blur().blur(image, blur_radius, sigma)[0]
@@ -117,9 +117,13 @@ class LTXVAddGuideAdvanced:
             latent["samples"].shape[4] * width_scale_factor,
             latent["samples"].shape[3] * height_scale_factor,
         )
-        image = comfy.utils.common_upscale(
-            image.movedim(-1, 1), width, height, interpolation, crop=crop
-        ).movedim(1, -1)
+        image = (
+            comfy.utils.common_upscale(
+                image.movedim(-1, 1), width, height, interpolation, crop=crop
+            )
+            .movedim(1, -1)
+            .clamp(0, 1)
+        )
         image = nodes_lt.LTXVPreprocess().preprocess(image, crf)[0]
         image = blur_internal(image, blur_radius)
         return nodes_lt.LTXVAddGuide().generate(

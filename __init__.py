@@ -9,6 +9,7 @@ from .nodes_registry import NODE_CLASS_MAPPINGS as RUNTIME_NODE_CLASS_MAPPINGS
 from .nodes_registry import (
     NODE_DISPLAY_NAME_MAPPINGS as RUNTIME_NODE_DISPLAY_NAME_MAPPINGS,
 )
+from .nodes_registry import NODES_DISPLAY_NAME_PREFIX, camel_case_to_spaces
 from .prompt_enhancer_nodes import LTXVPromptEnhancer, LTXVPromptEnhancerLoader
 from .q8_nodes import LTXVQ8Patch
 from .recurrent_sampler import LinearOverlapLatentTransition, LTXVRecurrentKSampler
@@ -43,7 +44,13 @@ NODE_CLASS_MAPPINGS = {
     "STGGuiderAdvancedNode": STGGuiderAdvancedNode,
     "STGGuiderNode": STGGuiderNode,
 }
-NODE_DISPLAY_NAME_MAPPINGS = {}
+
+# Consistent display names between static and dynamic node mappings in nodes_registry.py,
+# to prevent ComfyUI initializing them with default display names.
+NODE_DISPLAY_NAME_MAPPINGS = {
+    name: f"{NODES_DISPLAY_NAME_PREFIX} {camel_case_to_spaces(name)}"
+    for name in NODE_CLASS_MAPPINGS.keys()
+}
 
 # Merge the node mappings from tricks into the main mappings
 NODE_CLASS_MAPPINGS.update(TRICKS_NODE_CLASS_MAPPINGS)

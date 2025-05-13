@@ -29,6 +29,10 @@ class LTXVQ8Patch:
                     "BOOLEAN",
                     {"default": False, "tooltip": "Use FP8 attention."},
                 ),
+                "transform_weights": (
+                    "BOOLEAN",
+                    {"default": True, "tooltip": "Transform weights to Q8 format."},
+                ),
             }
         }
 
@@ -37,7 +41,7 @@ class LTXVQ8Patch:
     CATEGORY = "lightricks/LTXV"
     TITLE = "LTXV Q8 Patcher"
 
-    def patch(self, model, use_fp8_attention):
+    def patch(self, model, use_fp8_attention, transform_weights):
         check_q8_available()
         m = model.clone()
         diffusion_key = "diffusion_model"
@@ -48,7 +52,7 @@ class LTXVQ8Patch:
         else:
             transformer_key = "diffusion_model"
             patcher = patch_comfyui_native_transformer
-        transformer = m.get_model_object(transformer_key).cuda()
-        patcher(transformer, use_fp8_attention)
+        transformer = m.get_model_object(transformer_key)
+        patcher(transformer, use_fp8_attention, transform_weights)
         m.add_object_patch(transformer_key, transformer)
         return (m,)

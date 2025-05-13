@@ -99,7 +99,7 @@ def _format_description(
 
     # If description is not provided, auto-generate one based on the class name
     if description is None:
-        description = _camel_case_to_spaces(class_name)
+        description = camel_case_to_spaces(class_name)
 
     # Strip the prefix if it's already there
     prefix_len = len(NODES_DISPLAY_NAME_PREFIX)
@@ -118,7 +118,7 @@ def _format_description(
     return description
 
 
-def _camel_case_to_spaces(text: str) -> str:
+def camel_case_to_spaces(text: str) -> str:
     # Add space before each capital letter except the first one
     spaced_text = re.sub(r"(?<=[a-z])(?=[A-Z])", " ", text)
     # Handle sequences of uppercase letters followed by a lowercase letter
