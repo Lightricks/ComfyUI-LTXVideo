@@ -50,6 +50,6 @@ class LTXVQ8Patch:
             transformer_key = "diffusion_model"
             patcher = patch_comfyui_native_transformer
         transformer = m.get_model_object(transformer_key)
-        patcher(transformer, use_fp8_attention, True)
+        patcher(transformer, use_fp8_attention)
         m.add_object_patch(transformer_key, transformer)
         return (m,)
