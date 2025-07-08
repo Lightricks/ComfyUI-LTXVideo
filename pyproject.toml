@@ -20,7 +20,7 @@ dependencies = [
 internal = [
     "ltx-video@git+https://github.com/Lightricks/LTX-Video@ltx-video-0.9.1",
     "av>=10.0.0",
-    "q8-kernels==0.0.6"
+    "q8-kernels~=0.1.0"
 ]
 dev = [
     "pre-commit>=4.0.1",

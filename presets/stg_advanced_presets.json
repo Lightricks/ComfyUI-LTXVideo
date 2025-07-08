@@ -33,6 +33,16 @@
         "stg_layers_indices": [[42], [42], [42], [42], [42], [42]]
     },
     {
+        "name": "13b Distilled",
+        "skip_steps_sigma_threshold": 0.997,
+        "cfg_star_rescale": true,
+        "sigmas": [1.0],
+        "cfg_values": [1],
+        "stg_scale_values": [0],
+        "stg_rescale_values": [1],
+        "stg_layers_indices": [[25]]
+    },
+    {
         "name": "2b",
         "skip_steps_sigma_threshold": 0.997,
         "cfg_star_rescale": true,

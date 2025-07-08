@@ -1,5 +1,10 @@
 from .decoder_noise import DecoderNoise
-from .easy_samplers import LTXVBaseSampler
+from .easy_samplers import (
+    LinearOverlapLatentTransition,
+    LTXVBaseSampler,
+    LTXVExtendSampler,
+    LTXVInContextSampler,
+)
 from .film_grain import LTXVFilmGrain
 from .guide import LTXVAddGuideAdvanced
 from .latent_adain import LTXVAdainLatent
@@ -13,26 +18,28 @@ from .nodes_registry import (
 from .nodes_registry import NODES_DISPLAY_NAME_PREFIX, camel_case_to_spaces
 from .prompt_enhancer_nodes import LTXVPromptEnhancer, LTXVPromptEnhancerLoader
 from .q8_nodes import LTXVQ8LoraModelLoader, LTXVQ8Patch
-from .recurrent_sampler import LinearOverlapLatentTransition, LTXVRecurrentKSampler
 from .stg import (
     LTXVApplySTG,
     STGAdvancedPresetsNode,
     STGGuiderAdvancedNode,
     STGGuiderNode,
 )
-from .tiled_sampler import LTXVTiledSampler
+from .tiled_sampler import LTXVLoopingSampler, LTXVTiledSampler, MultiPromptProvider
 from .tricks import NODE_CLASS_MAPPINGS as TRICKS_NODE_CLASS_MAPPINGS
 from .tricks import NODE_DISPLAY_NAME_MAPPINGS as TRICKS_NODE_DISPLAY_NAME_MAPPINGS
+from .utiltily_nodes import ImageToCPU
 from .vae_patcher.vae_patcher import LTXVPatcherVAE
 
 # Static node mappings, required for ComfyUI-Manager mapping to work
 NODE_CLASS_MAPPINGS = {
     "Set VAE Decoder Noise": DecoderNoise,
-    "LinearOverlapLatentTransition": LinearOverlapLatentTransition,
+    "LTXVLinearOverlapLatentTransition": LinearOverlapLatentTransition,
     "LTXVAddGuideAdvanced": LTXVAddGuideAdvanced,
     "LTXVAdainLatent": LTXVAdainLatent,
     "LTXVApplySTG": LTXVApplySTG,
     "LTXVBaseSampler": LTXVBaseSampler,
+    "LTXVInContextSampler": LTXVInContextSampler,
+    "LTXVExtendSampler": LTXVExtendSampler,
     "LTXVFilmGrain": LTXVFilmGrain,
     "LTXVPreprocessMasks": LTXVPreprocessMasks,
     "LTXVLatentUpsampler": LTXVLatentUpsampler,
@@ -41,13 +48,15 @@ NODE_CLASS_MAPPINGS = {
     "LTXVPromptEnhancerLoader": LTXVPromptEnhancerLoader,
     "LTXQ8Patch": LTXVQ8Patch,
     "LTXVQ8LoraModelLoader": LTXVQ8LoraModelLoader,
-    "LTXVRecurrentKSampler": LTXVRecurrentKSampler,
     "LTXVSelectLatents": LTXVSelectLatents,
     "LTXVSetVideoLatentNoiseMasks": LTXVSetVideoLatentNoiseMasks,
     "LTXVTiledSampler": LTXVTiledSampler,
+    "LTXVLoopingSampler": LTXVLoopingSampler,
     "STGAdvancedPresets": STGAdvancedPresetsNode,
     "STGGuiderAdvanced": STGGuiderAdvancedNode,
     "STGGuiderNode": STGGuiderNode,
+    "LTXVMultiPromptProvider": MultiPromptProvider,
+    "ImageToCPU": ImageToCPU,
 }
 
 # Consistent display names between static and dynamic node mappings in nodes_registry.py,

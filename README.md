@@ -1,8 +1,35 @@
 # ComfyUI-LTXVideo
 
+[![GitHub](https://img.shields.io/badge/LTXV-Repo-blue?logo=github)](https://github.com/Lightricks/LTX-Video)
+[![Website](https://img.shields.io/badge/Website-LTXV-181717?logo=google-chrome)](https://www.lightricks.com/ltxv)
+[![Model](https://img.shields.io/badge/HuggingFace-Model-orange?logo=huggingface)](https://huggingface.co/Lightricks/LTX-Video)
+[![LTXV Trainer](https://img.shields.io/badge/LTXV-Trainer%20Repo-9146FF)](https://github.com/Lightricks/LTX-Video-Trainer)
+[![Demo](https://img.shields.io/badge/Demo-Try%20Now-brightgreen?logo=vercel)](https://app.ltx.studio/ltx-video)
+[![Paper](https://img.shields.io/badge/Paper-arXiv-B31B1B?logo=arxiv)](https://arxiv.org/abs/2501.00103)
+[![Discord](https://img.shields.io/badge/Join-Discord-5865F2?logo=discord)](https://discord.gg/Mn8BRgUKKy)
+
 ComfyUI-LTXVideo is a collection of custom nodes for ComfyUI, designed to provide useful tools for working with the LTXV model.
 The model itself is supported in the core ComfyUI [code](https://github.com/comfyanonymous/ComfyUI/tree/master/comfy/ldm/lightricks).
 The main LTXVideo repository can be found [here](https://github.com/Lightricks/LTX-Video).
+
+# ⭐ 8.07.2025 - LTXVideo ICLora Release  ⭐
+### 🚀 What's New in LTXVideo ICLoRA
+
+1. **Three New ICLoRA Models**
+   Introducing powerful in-context LoRA models that enable precise control over video generation:
+   - Depth Control: [LTX-Video-ICLoRA-depth-13b-0.9.7](https://huggingface.co/Lightricks/LTX-Video-ICLoRA-depth-13b-0.9.7)
+   - Pose Control: [LTX-Video-ICLoRA-pose-13b-0.9.7](https://huggingface.co/Lightricks/LTX-Video-ICLoRA-pose-13b-0.9.7)
+   - Edge/Canny Control: [LTX-Video-ICLoRA-canny-13b-0.9.7](https://huggingface.co/Lightricks/LTX-Video-ICLoRA-canny-13b-0.9.7)
+
+2. **New Node: 🅛🅣🅧 LTXV In Context Sampler**
+   A dedicated node for seamlessly integrating ICLoRA models into your workflow, enabling fine-grained control over video generation using depth maps, pose estimation, or edge detection.
+
+3. **Example Workflow**
+   Check out [example workflow](#iclora) for a complete example demonstrating how to use the ICLoRA models effectively.
+
+4. **Custom ICLoRA Training**
+   We've released a trainer that allows you to create your own specialized ICLoRA models for custom control signals. Check out the [trainer repository](https://github.com/Lightricks/LTX-Video-Trainer) to get started.
+
 
 # ⭐ 9.06.2025 – LTXVideo VAE Patcher, Mask manipulation and Q8 LoRA loader nodes.  ⭐
 1. **LTXV Patcher VAE**<br> The new node improves VAE decoding performance by reducing runtime and cutting memory consumption by up to 50%. This allows generation of higher-resolution outputs on consumer-grade GPUs with limited VRAM, without needing to load the VAE partially or decode in tiles.<br>
@@ -153,6 +180,9 @@ Note that to run the example workflows, you need to have some additional custom 
 🧩 [Image to video with keyframes](example_workflows/13b-distilled/ltxv-13b-dist-i2v-keyframes.json)<br>
 🧩 [Image to video with duration extension](example_workflows/13b-distilled/ltxv-13b-dist-i2v-extend.json)<br>
 🧩 [Image to video 8b quantized](example_workflows/13b-distilled/ltxv-13b-dist-i2v-base-fp8.json)
+
+### ICLora
+🧩 [Download workflow](example_workflows/ic_lora/ic-lora.json)
 
 ### Inversion
 
