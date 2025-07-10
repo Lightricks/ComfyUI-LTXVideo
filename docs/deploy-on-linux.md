@@ -4,7 +4,7 @@ For easily deploy with Vast.ai, check out [this template](https://cloud.vast.ai/
 
 [The template script](https://gist.githubusercontent.com/ElishaKay/f92e86c2d43be9de20088991b89b0228/raw/419f67dcb0c393232d2745f63795624f6dfb0fea/ltx-video-lite.sh) provisions a full **ComfyUI environment with LTXVideo support** by downloading required nodes, models, workflows, and inputs.
 
-Please note: the downloading the relevant assets (listed below) can take upwards of an hour and may prevent the ComfyUI frontend from displaying during this time. To view the status of your downloads and machine setup, visit: `<your-ip:port>/#/logs`.
+Please note: the downloading stage of the relevant assets (listed below) can take upwards of an hour and may prevent the ComfyUI frontend from displaying during this time. To view the status of your downloads and machine setup, visit: `<your-ip:port>/#/logs`.
 
 ---
 
@@ -39,7 +39,6 @@ ${COMFYUI_DIR}/models/checkpoints/
 | File | Source |
 |------|--------|
 | `ltx-video-2b-v0.9.5.safetensors` | [HuggingFace - Lightricks](https://huggingface.co/Lightricks/LTX-Video) |
-| `ltxv-13b-0.9.7-distilled-fp8.safetensors` | [HuggingFace - Lightricks](https://huggingface.co/Lightricks/LTX-Video) |
 
 ---
 
@@ -103,7 +102,7 @@ These categories are defined in the script but **no URLs were provided**, so the
 | Component Type | Count | Destination |
 |----------------|-------|-------------|
 | Custom Nodes | 5 | `custom_nodes/` |
-| Checkpoint Models | 2 | `models/checkpoints/` |
+| Checkpoint Models | 1 | `models/checkpoints/` |
 | CLIP Models | 1 | `models/clip/` |
 | Workflows | 2 | `user/default/workflows/` |
 | Input Images | 1 | `input/` |
