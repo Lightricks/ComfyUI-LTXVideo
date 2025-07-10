@@ -39,6 +39,7 @@ ${COMFYUI_DIR}/models/checkpoints/
 | File | Source |
 |------|--------|
 | `ltx-video-2b-v0.9.5.safetensors` | [HuggingFace - Lightricks](https://huggingface.co/Lightricks/LTX-Video) |
+| `ltxv-13b-0.9.7-distilled-fp8.safetensors` | [HuggingFace - Lightricks](https://huggingface.co/Lightricks/LTX-Video) |
 
 ---
 
@@ -102,7 +103,7 @@ These categories are defined in the script but **no URLs were provided**, so the
 | Component Type | Count | Destination |
 |----------------|-------|-------------|
 | Custom Nodes | 5 | `custom_nodes/` |
-| Checkpoint Models | 1 | `models/checkpoints/` |
+| Checkpoint Models | 2 | `models/checkpoints/` |
 | CLIP Models | 1 | `models/clip/` |
 | Workflows | 2 | `user/default/workflows/` |
 | Input Images | 1 | `input/` |
