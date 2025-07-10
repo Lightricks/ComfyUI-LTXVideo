@@ -2,7 +2,9 @@
 
 For easily deploy with Vast.ai, check out [this template](https://cloud.vast.ai/?ref_id=276779&creator_id=276779&name=ComfyUI%20%2B%20LTX%20Video%20Lite).
 
-[The template script](https://gist.githubusercontent.com/ElishaKay/f92e86c2d43be9de20088991b89b0228/raw/419f67dcb0c393232d2745f63795624f6dfb0fea/ltx-video-lite.sh) provisions a full **ComfyUI environment with LTXVideo support** by downloading required nodes, models, workflows, and inputs. 
+[The template script](https://gist.githubusercontent.com/ElishaKay/f92e86c2d43be9de20088991b89b0228/raw/419f67dcb0c393232d2745f63795624f6dfb0fea/ltx-video-lite.sh) provisions a full **ComfyUI environment with LTXVideo support** by downloading required nodes, models, workflows, and inputs.
+
+Please note: the downloading the relevant assets (listed below) can take upwards of an hour and may prevent the ComfyUI frontend from displaying during this time. To view the status of your downloads and machine setup, visit: `<your-ip:port>/#/logs`.
 
 ---
 
