@@ -53,6 +53,10 @@ For portable ComfyUI installations, run
 1. Download [ltx-video-2b-v0.9.1.safetensors](https://huggingface.co/Lightricks/LTX-Video/blob/main/ltx-video-2b-v0.9.1.safetensors) from Hugging Face and place it under `models/checkpoints`.
 2. Install one of the t5 text encoders, for example [google_t5-v1_1-xxl_encoderonly](https://huggingface.co/mcmonkey/google_t5-v1_1-xxl_encoderonly/tree/main). You can install it using ComfyUI Model Manager.
 
+### Cloud Deployment
+
+In case your machine doesn't have an NVIDIA GPU, you may want to consider deploying ComfyUI (with the LTX Video Workflows) to [Vast.ai](https://cloud.vast.ai/?ref_id=276779&creator_id=276779&name=ComfyUI%20%2B%20LTX%20Video%20Lite). Check out the docs for more info about [deploying on linux](./docs/deploy-on-linux.md).
+
 # Workflows
 
 Note that to run the example workflows, you need to have some additional custom nodes, like [ComfyUI-VideoHelperSuite](https://github.com/kosinkadink/ComfyUI-VideoHelperSuite) and others, installed. You can do it by pressing "Install Missing Custom Nodes" button in ComfyUI Manager.
