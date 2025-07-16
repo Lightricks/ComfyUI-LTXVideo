@@ -10,6 +10,7 @@ from .guide import LTXVAddGuideAdvanced
 from .latent_adain import LTXVAdainLatent
 from .latent_upsampler import LTXVLatentUpsampler
 from .latents import LTXVSelectLatents, LTXVSetVideoLatentNoiseMasks
+from .looping_sampler import LTXVLoopingSampler, MultiPromptProvider
 from .masks import LTXVPreprocessMasks
 from .nodes_registry import NODE_CLASS_MAPPINGS as RUNTIME_NODE_CLASS_MAPPINGS
 from .nodes_registry import (
@@ -24,7 +25,8 @@ from .stg import (
     STGGuiderAdvancedNode,
     STGGuiderNode,
 )
-from .tiled_sampler import LTXVLoopingSampler, LTXVTiledSampler, MultiPromptProvider
+from .tiled_sampler import LTXVTiledSampler
+from .tiled_vae_decode import LTXVTiledVAEDecode
 from .tricks import NODE_CLASS_MAPPINGS as TRICKS_NODE_CLASS_MAPPINGS
 from .tricks import NODE_DISPLAY_NAME_MAPPINGS as TRICKS_NODE_DISPLAY_NAME_MAPPINGS
 from .utiltily_nodes import ImageToCPU
@@ -52,6 +54,7 @@ NODE_CLASS_MAPPINGS = {
     "LTXVSetVideoLatentNoiseMasks": LTXVSetVideoLatentNoiseMasks,
     "LTXVTiledSampler": LTXVTiledSampler,
     "LTXVLoopingSampler": LTXVLoopingSampler,
+    "LTXVTiledVAEDecode": LTXVTiledVAEDecode,
     "STGAdvancedPresets": STGAdvancedPresetsNode,
     "STGGuiderAdvanced": STGGuiderAdvancedNode,
     "STGGuiderNode": STGGuiderNode,

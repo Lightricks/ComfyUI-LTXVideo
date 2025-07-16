@@ -5,12 +5,7 @@ import comfy_extras
 import nodes
 import torch
 from comfy_extras.nodes_custom_sampler import SamplerCustomAdvanced
-from comfy_extras.nodes_lt import (
-    EmptyLTXVLatentVideo,
-    LTXVAddGuide,
-    LTXVCropGuides,
-    LTXVImgToVideo,
-)
+from comfy_extras.nodes_lt import EmptyLTXVLatentVideo, LTXVAddGuide, LTXVCropGuides
 from nodes import VAEEncode
 
 from .guide import blur_internal
@@ -130,6 +125,10 @@ class LTXVBaseSampler:
         crop="disabled",
         crf=35,
         blur=0,
+        optional_negative_index_latents=None,
+        optional_negative_index=-1,
+        optional_negative_index_strength=1.0,
+        optional_initialization_latents=None,
     ):
 
         if optional_cond_images is not None:
@@ -167,26 +166,36 @@ class LTXVBaseSampler:
                 "Please use STGGuiderAdvanced."
             )
 
-        if optional_cond_images is None:
+        if optional_initialization_latents is None:
             (latents,) = EmptyLTXVLatentVideo().generate(width, height, num_frames, 1)
-        elif optional_cond_images.shape[0] == 1 and optional_cond_indices[0] == 0:
-            (
-                positive,
-                negative,
-                latents,
-            ) = LTXVImgToVideo().generate(
-                positive=positive,
-                negative=negative,
-                vae=vae,
-                image=optional_cond_images[0].unsqueeze(0),
-                width=width,
-                height=height,
-                length=num_frames,
-                batch_size=1,
-                strength=strength,
-            )
         else:
-            (latents,) = EmptyLTXVLatentVideo().generate(width, height, num_frames, 1)
+            latents = optional_initialization_latents
+
+        if (
+            optional_cond_images is not None
+            and optional_cond_images.shape[0] == 1
+            and optional_cond_indices[0] == 0
+        ):
+            pixels = comfy.utils.common_upscale(
+                optional_cond_images[0].unsqueeze(0).movedim(-1, 1),
+                width,
+                height,
+                "bilinear",
+                "center",
+            ).movedim(1, -1)
+            encode_pixels = pixels[:, :, :, :3]
+            t = vae.encode(encode_pixels)
+            latents["samples"][:, :, : t.shape[2]] = t
+
+            conditioning_latent_frames_mask = torch.ones(
+                (1, 1, latents["samples"].shape[2], 1, 1),
+                dtype=torch.float32,
+                device=latents["samples"].device,
+            )
+            conditioning_latent_frames_mask[:, :, : t.shape[2]] = 1.0 - strength
+            latents["noise_mask"] = conditioning_latent_frames_mask
+
+        elif optional_cond_images is not None:
             for cond_image, cond_idx in zip(
                 optional_cond_images, optional_cond_indices
             ):
@@ -203,6 +212,21 @@ class LTXVBaseSampler:
                     frame_idx=cond_idx,
                     strength=strength,
                 )
+
+        if optional_negative_index_latents is not None:
+            (
+                positive,
+                negative,
+                latents,
+            ) = LTXVAddLatentGuide().generate(
+                vae=vae,
+                positive=positive,
+                negative=negative,
+                latent=latents,
+                guiding_latent=optional_negative_index_latents,
+                latent_idx=optional_negative_index,
+                strength=optional_negative_index_strength,
+            )
 
         guider = copy.copy(guider)
         guider.set_conds(positive, negative)
@@ -247,7 +271,7 @@ class LTXVExtendSampler:
                         "default": 80,
                         "min": -1,
                         "max": nodes.MAX_RESOLUTION,
-                        "step": 8,
+                        "step": 1,
                         "tooltip": "If -1, the number of frames will be based on the number of frames in the optional_guiding_latents.",
                     },
                 ),
@@ -306,6 +330,7 @@ class LTXVExtendSampler:
         guiding_strength=1.0,
         optional_guiding_latents=None,
         optional_reference_latents=None,
+        optional_initialization_latents=None,
         adain_factor=0.0,
         optional_negative_index_latents=None,
         optional_negative_index=-1,
@@ -336,12 +361,19 @@ class LTXVExtendSampler:
             latents, -overlap, -1
         )
 
-        new_latents = EmptyLTXVLatentVideo().generate(
-            width=width * width_scale_factor,
-            height=height * height_scale_factor,
-            length=overlap * time_scale_factor + num_new_frames,
-            batch_size=1,
-        )[0]
+        if optional_initialization_latents is None:
+            new_latents = EmptyLTXVLatentVideo().generate(
+                width=width * width_scale_factor,
+                height=height * height_scale_factor,
+                length=overlap * time_scale_factor + num_new_frames,
+                batch_size=1,
+            )[0]
+        else:
+            new_latents = optional_initialization_latents
+
+        last_overlap_latents["samples"] = last_overlap_latents["samples"].to(
+            new_latents["samples"].device
+        )
 
         (
             positive,
@@ -486,8 +518,13 @@ class LTXVInContextSampler:
         guiding_latents,
         optional_cond_image=None,
         num_frames=0,
+        optional_initialization_latents=None,
+        optional_negative_index_latents=None,
+        optional_negative_index=-1,
+        optional_negative_index_strength=1.0,
+        optional_cond_strength=1.0,
+        optional_guiding_strength=1.0,
     ):
-
         try:
             positive, negative = guider.raw_conds
         except AttributeError:
@@ -504,12 +541,15 @@ class LTXVInContextSampler:
         if num_frames != -1:
             frames = (num_frames - 1) // time_scale_factor + 1
 
-        new_latents = EmptyLTXVLatentVideo().generate(
-            width=width * width_scale_factor,
-            height=height * height_scale_factor,
-            length=(frames - 1) * time_scale_factor + 1,
-            batch_size=1,
-        )[0]
+        if optional_initialization_latents is not None:
+            new_latents = optional_initialization_latents
+        else:
+            new_latents = EmptyLTXVLatentVideo().generate(
+                width=width * width_scale_factor,
+                height=height * height_scale_factor,
+                length=(frames - 1) * time_scale_factor + 1,
+                batch_size=1,
+            )[0]
 
         if optional_cond_image is not None:
             optional_cond_image = (
@@ -535,7 +575,7 @@ class LTXVInContextSampler:
                 latent=new_latents,
                 guiding_latent=cond_image_latent,
                 latent_idx=0,
-                strength=1.0,
+                strength=optional_cond_strength,
             )
 
         if optional_cond_image is not None:
@@ -553,9 +593,23 @@ class LTXVInContextSampler:
             negative=negative,
             latent=new_latents,
             guiding_latent=guiding_latents,
-            latent_idx=0 if optional_cond_image is None else 1,
-            strength=1.0,
+            latent_idx=1 if optional_cond_image is not None else 0,
+            strength=optional_guiding_strength,
         )
+        if optional_negative_index_latents is not None:
+            (
+                positive,
+                negative,
+                new_latents,
+            ) = LTXVAddLatentGuide().generate(
+                vae=vae,
+                positive=positive,
+                negative=negative,
+                latent=new_latents,
+                guiding_latent=optional_negative_index_latents,
+                latent_idx=optional_negative_index,
+                strength=optional_negative_index_strength,
+            )
 
         guider = copy.copy(guider)
         guider.set_conds(positive, negative)

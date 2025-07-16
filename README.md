@@ -12,6 +12,26 @@ ComfyUI-LTXVideo is a collection of custom nodes for ComfyUI, designed to provid
 The model itself is supported in the core ComfyUI [code](https://github.com/comfyanonymous/ComfyUI/tree/master/comfy/ldm/lightricks).
 The main LTXVideo repository can be found [here](https://github.com/Lightricks/LTX-Video).
 
+
+
+# ⭐ 16.07.2025 - LTXV 0.9.8 Release ⭐
+
+### 🚀 What's New
+1. **LTXV 0.9.8 Model**<br>
+   The new model and its distilled variants offer improved prompt understanding and detail generation<br>
+   👉 [13B Distilled model](https://huggingface.co/Lightricks/LTX-Video/blob/main/ltxv-13b-0.9.8-distilled.safetensors)<br>
+   👉 [13B Distilled model 8-bit](https://huggingface.co/Lightricks/LTX-Video/blob/main/ltxv-13b-0.9.8-distilled-fp8.safetensors)<br>
+   👉 [2B from 13B Distilled model](https://huggingface.co/Lightricks/LTX-Video/blob/main/ltxv-2b-0.9.8-distilled.safetensors)<br>
+   👉 [2B from 13B Distilled model 8-bit](https://huggingface.co/Lightricks/LTX-Video/blob/main/ltxv-2b-0.9.8-distilled-fp8.safetensors)<br>
+2. **Autoregressive Generation**
+   Introducing new ComfyUI nodes that enable virtually infinite video generation. The new **LTXV Looping Sampler** node allows generation of videos with arbitrary length and consistent motion. **ICLoRAs** are supported as well—by providing guidance from existing videos (e.g., depth, pose, or Canny edges), you can generate long videos in a video-to-video manner.
+   👉 [Long Img2Video Generation Flow](#long-video-generation)
+   👉 [Long Video2Video Generation Flow](#long-video-generation)
+
+3. **Detailer ICLoRA**
+   Introducing the **Detailer ICLoRA**, which enhances generated latents with fine details by applying a few additional diffusion steps. This results in significantly more detailed generations.
+   👉 [Detailer ICLoRA Flow](#video-upscaling)
+
 # ⭐ 8.07.2025 - LTXVideo ICLora Release  ⭐
 ### 🚀 What's New in LTXVideo ICLoRA
 
@@ -164,6 +184,13 @@ For portable ComfyUI installations, run
 ## Example workflows
 
 Note that to run the example workflows, you need to have some additional custom nodes, like [ComfyUI-VideoHelperSuite](https://github.com/kosinkadink/ComfyUI-VideoHelperSuite) and others, installed. You can do it by pressing "Install Missing Custom Nodes" button in ComfyUI Manager.
+
+### Long Video Generation
+🧩 [Image to Video Long Video](example_workflows/ltxv-13b-i2v-long-multi-prompt.json): Long video generation with support for multiple prompts along the video duration.
+🧩 [Video to Video Long Video](example_workflows/ltxv-13b-v2v-long-depth.json): Long video-to-video generation. Given a guiding video—such as depth, pose, or edges—the flow generates a new video.
+
+### Video Upscaling
+🧩 [Video Upscaling](example_workflows/ltxv-13b-upscale.json): Upscales and adds fine details to any given video, increasing its spatial resolution by 2×.
 
 ### Easy to use multi scale generation workflows
 

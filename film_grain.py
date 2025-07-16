@@ -37,20 +37,24 @@ class LTXVFilmGrain:
     ) -> Tuple[torch.Tensor]:
         if grain_intensity < 0 or grain_intensity > 1:
             raise ValueError("Grain intensity must be between 0 and 1.")
-
         device = comfy.model_management.get_torch_device()
         images = images.to(device)
 
-        grain = torch.randn_like(images, device=device)
-        grain[:, :, :, 0] *= 2
-        grain[:, :, :, 2] *= 3
-        grain = grain * saturation + grain[:, :, :, 1].unsqueeze(3).repeat(
-            1, 1, 1, 3
-        ) * (1 - saturation)
+        grain = torch.zeros(images[0:1].shape, device=device)
 
-        # Blend the grain with the image
-        noised_images = images + grain_intensity * grain
-        noised_images.clamp_(0, 1)
-        noised_images = noised_images.to(comfy.model_management.intermediate_device())
+        # Process images in-place to reduce memory usage
+        for i in range(images.shape[0]):
+            # Generate grain for single image
+            torch.randn(grain.shape, device=device, out=grain)
+            grain[:, :, :, 0] *= 2
+            grain[:, :, :, 2] *= 3
+            grain = grain * saturation + grain[:, :, :, 1].unsqueeze(3).expand(
+                -1, -1, -1, 3
+            ) * (1 - saturation)
 
-        return (noised_images,)
+            # Blend the grain with the image in-place
+            images[i : i + 1].add_(grain_intensity * grain)
+            images[i : i + 1].clamp_(0, 1)
+
+        images = images.to(comfy.model_management.intermediate_device())
+        return (images,)

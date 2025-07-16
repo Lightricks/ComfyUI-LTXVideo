@@ -4272,7 +4272,7 @@
         "Node name for S&R": "LTXVLatentUpsamplerModelLoader"
       },
       "widgets_values": [
-        "ltxv-spatial-upscaler-0.9.7.safetensors",
+        "ltxv-spatial-upscaler-0.9.8.safetensors",
         true,
         false
       ]
@@ -5749,7 +5749,7 @@
       },
       "1828": {
         "inputs": {
-          "upscale_model": "ltxv-spatial-upscaler-0.9.7.safetensors",
+          "upscale_model": "ltxv-spatial-upscaler-0.9.8.safetensors",
           "spatial_upsample": true,
           "temporal_upsample": false
         },
