@@ -267,7 +267,7 @@ class LTXVBaseSampler:
                     time_scale_factor, _, _ = (
                         vae.downscale_index_formula
                     )
-                    latent_idx = int(cond_idx // time_scale_factor)
+                    latent_idx = int((cond_idx + 7) // time_scale_factor)
                     (cond_image_latent,) = VAEEncode().encode(vae, cond_image.unsqueeze(0))
                     (
                         positive,
@@ -280,7 +280,7 @@ class LTXVBaseSampler:
                         latent=latents,
                         guiding_latent=cond_image_latent,
                         latent_idx=latent_idx,
-                        strength=optional_cond_strength,
+                        strength=cond_strength,
                     )
 
         if optional_negative_index_latents is not None:
@@ -1016,6 +1016,29 @@ class LTXVInContextSampler:
         )
 
         return (denoised_output_latents, positive, negative)
+    
+def get_negative_indices(positive_indices, num_elements):
+    """
+    Converts a list of positive indices to their corresponding negative indices.
+
+    Args:
+        positive_indices: A list of 0-based positive indices.
+        num_elements: The total number of elements in the list.
+
+    Returns:
+        A list of negative indices.
+    """
+    negative_indices = []
+    for index in positive_indices:
+        # Check if the index is within the valid range.
+        if 0 <= index < num_elements:
+            # Convert to negative index.
+            negative_index = index - num_elements
+            negative_indices.append(negative_index)
+        else:
+            # Handle invalid index.
+            print(f"Warning: Index {index} is out of bounds for a list of size {num_elements}. Skipping.")
+    return negative_indices
 
 @comfy_node(
     name="LTXVHybridSampler",
@@ -1048,7 +1071,8 @@ class LTXVHybridSampler:
                 ),
                 "num_frames": (
                     "INT",
-                    {"default": 97, "min": 1, "max": nodes.MAX_RESOLUTION, "step": 8, "tooltip": "The number of frames to generate, if initial_video is specified the number of frames to extend with"},
+                    {"default": 97, "min": 1, "max": nodes.MAX_RESOLUTION, "tooltip": "The number of frames to generate, if initial_video is specified the number of frames " +
+                     "to extend with; if initial_video is specified frames should be divisible by 8 if not (frames - 1) should be divisible by 8"},
                 ),
                 "guider": (
                     "GUIDER",
@@ -1149,8 +1173,24 @@ class LTXVHybridSampler:
             },
         }
 
-    RETURN_TYPES = ("LATENT", "CONDITIONING", "CONDITIONING", "STRING", "STRING", "STRING", "LATENT", "STRING")
-    RETURN_NAMES = ("denoised_output", "positive", "negative", "generated_frames_idx", "reference_frames_idx", "relative_reference_frames_idx", "denoised_output_only_generated", "chunk_info")
+    RETURN_TYPES = (
+        "LATENT",
+        "CONDITIONING",
+        "CONDITIONING",
+        "STRING",
+        "STRING",
+        "LATENT",
+        "STRING",
+    )
+    RETURN_NAMES = (
+        "denoised_output",
+        "positive",
+        "negative",
+        "generated_frames_range",
+        "reference_frames_only_generated_idx",
+        "denoised_output_only_generated",
+        "chunk_info",
+    )
     FUNCTION = "sample"
     CATEGORY = "sampling"
 
@@ -1178,10 +1218,14 @@ class LTXVHybridSampler:
         guiding_video=None,
         guiding_video_strength=1.0,
     ):
+        if initial_video is None:
+            assert (num_frames - 1) % 8 == 0, "The number of frames minus 1 should be divisible by 8 when no initial video is specified"
+        else:
+            assert num_frames % 8 == 0, "The number of frames should be divisible by 8 when an initial video is specified"
+
         if initial_video is None and guiding_video is None:
-            generated_frames_idx = list(range(0, num_frames))
-            generated_frames_idx = ",".join(map(str, generated_frames_idx))
-            reference_frames_idx = "" if optional_cond_indices is None else optional_cond_indices
+            generated_frames_range = ":" + str(-num_frames)
+            reference_frames_only_generated_idx = "" if optional_cond_indices is None else optional_cond_indices
             latents, positive, negative = LTXVBaseSampler().sample(
                 model,
                 vae,
@@ -1214,7 +1258,7 @@ class LTXVHybridSampler:
                 "crop": crop,
                 "frame_overlap": frame_overlap,
             }
-            return (latents, positive, negative, generated_frames_idx, reference_frames_idx, reference_frames_idx, latents, json.dumps(info_dict))
+            return (latents, positive, negative, generated_frames_range, reference_frames_only_generated_idx, latents, json.dumps(info_dict))
 
         time_scale_factor, width_scale_factor, height_scale_factor = (
             vae.downscale_index_formula
@@ -1237,9 +1281,8 @@ class LTXVHybridSampler:
             assert gv_frames == num_frames, "The number of frames of the guiding video and the number of frames of the settings differs  " + str(num_frames) + " but the guiding video is " + str(gv_frames) + " set your frames to " + str(gv_frames)
 
             if initial_video is None:
-                generated_frames_idx = list(range(0, num_frames))
-                generated_frames_idx = ",".join(map(str, generated_frames_idx))
-                reference_frames_idx = "" if optional_cond_indices is None else optional_cond_indices
+                generated_frames_range = ":" + str(-num_frames)
+                reference_frames_only_generated_idx = "" if optional_cond_indices is None else optional_cond_indices
 
                 latents, positive, negative = LTXVInContextSampler().sample(
                     vae,
@@ -1272,23 +1315,15 @@ class LTXVHybridSampler:
                     "frame_overlap": frame_overlap,
                 }
 
-                return (latents, positive, negative, generated_frames_idx, reference_frames_idx, reference_frames_idx, latents, json.dumps(info_dict))
+                return (latents, positive, negative, generated_frames_range, reference_frames_only_generated_idx, latents, json.dumps(info_dict))
 
         samples = initial_video["samples"]
         batch, channels, frames, v_height, v_width = samples.shape
         v_px_height = v_height * height_scale_factor
         v_px_width = v_width * width_scale_factor
-        v_frames = (frames * time_scale_factor) - 7
 
         assert v_px_width == width, "The width of the provided video and the width of the settings do not match, provided " + str(width) + " but the video is " + str(v_px_width)
         assert v_px_height == height, "The height of the provided video and the height of the settings do not match, provided " + str(height) + " but the video is " + str(v_px_height)
-
-        optional_cond_indices_created = None
-        optional_cond_indices_created_relative = None
-        if optional_cond_indices is not None and optional_cond_indices:
-            optional_cond_indices_created = optional_cond_indices.split(",")
-            optional_cond_indices_created_relative = [int(i) for i in optional_cond_indices_created]
-            optional_cond_indices_created = [int(i) for i in optional_cond_indices_created]
 
         latents, positive, negative = LTXVExtendSampler().sample(
             model,
@@ -1313,33 +1348,18 @@ class LTXVHybridSampler:
             guiding_latents_already_cropped=True,
         )
 
-        # the extend sampler at the end removes 9 frames
-        # tried to somehow calculate it from the tensor but this wasn't possible
-        # or at least couldn't reliably figure out the 9 otherwise, but with the 8+1
-        # LTXV rule, I assumed it was always 9
-        # actual_num_frames = num_frames - 9;
+        generated_frames_range = ":" + str(-num_frames)
 
-        # On the contrary it was because doing a cropped decode, the actual number of frames
-        # is plus seven as the 1 frame doesnt occur in a extension
-        actual_num_frames = num_frames + 7;
-
-        generated_frames_idx = list(range(v_frames, v_frames + actual_num_frames))
-        generated_frames_idx = ",".join(map(str, generated_frames_idx))
-
-        ## TODO fix this use negative indices where possible
-
-        # so we want to figure what the difference was between the frames created and the number of frames
-        diff_frames = actual_num_frames - num_frames
         # and then we want to shift our conditional indices that way, first since the diff frames are removed at the start, and well
         # it is a negative number we add that, and then add the whole video frames that shift the whole thing
-        optional_cond_indices_created = [str(n + diff_frames + v_frames) for n in optional_cond_indices_created] if optional_cond_indices_created is not None else []
-        optional_cond_indices_created_relative = [str(n + diff_frames) for n in optional_cond_indices_created_relative] if optional_cond_indices_created_relative is not None else []
-        
-        reference_frames_idx = ",".join(optional_cond_indices_created)
-        relative_reference_frames_idx = ",".join(optional_cond_indices_created_relative)
+        reference_frames_only_generated_idx_parsed = [] if optional_cond_indices is None else [(float(i) - 7) for i in optional_cond_indices.split(",")]
+
+        for i in range(0, len(reference_frames_only_generated_idx_parsed)):
+            if (reference_frames_only_generated_idx_parsed[i] < 0):
+                reference_frames_only_generated_idx_parsed[i] = 0
 
         (reference_createdonly_latents,) = LTXVSelectLatents().select_latents(
-            latents, int(-((num_frames - 1) / 8)), -1
+            latents, -(num_frames / 8), -1
         )
 
         info_dict = {
@@ -1347,7 +1367,7 @@ class LTXVHybridSampler:
             "cond_strengths": None if optional_cond_strength is None else optional_cond_strength,
             "cond_use_latent_guide": None if optional_cond_use_latent_guide is None else optional_cond_use_latent_guide,
             "num_frames_requested": num_frames,
-            "frames_generated": actual_num_frames,
+            "frames_generated": num_frames,
             "images_used": 0 if optional_cond_images is None else len(optional_cond_images),
             "crf": crf,
             "blur": blur,
@@ -1355,7 +1375,7 @@ class LTXVHybridSampler:
             "frame_overlap": frame_overlap,
         }
 
-        return (latents, positive, negative, generated_frames_idx, reference_frames_idx, relative_reference_frames_idx, reference_createdonly_latents, info_dict) 
+        return (latents, positive, negative, generated_frames_range, ",".join(reference_frames_only_generated_idx_parsed), reference_createdonly_latents, info_dict) 
 
 
 @comfy_node(description="Linear transition with overlap")
