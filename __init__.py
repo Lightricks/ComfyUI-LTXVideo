@@ -16,6 +16,7 @@ from .nodes_registry import NODE_CLASS_MAPPINGS as RUNTIME_NODE_CLASS_MAPPINGS
 from .nodes_registry import (
     NODE_DISPLAY_NAME_MAPPINGS as RUNTIME_NODE_DISPLAY_NAME_MAPPINGS,
 )
+from .chunks_upscale_sampler import LTXVChunksUpscaleSampler, LTXVChunksUpscaleMerger
 from .nodes_registry import NODES_DISPLAY_NAME_PREFIX, camel_case_to_spaces
 from .prompt_enhancer_nodes import LTXVPromptEnhancer, LTXVPromptEnhancerLoader
 from .q8_nodes import LTXVQ8LoraModelLoader, LTXVQ8Patch
@@ -60,6 +61,8 @@ NODE_CLASS_MAPPINGS = {
     "STGGuiderNode": STGGuiderNode,
     "LTXVMultiPromptProvider": MultiPromptProvider,
     "ImageToCPU": ImageToCPU,
+    "LTXVChunksUpscaleSampler": LTXVChunksUpscaleSampler,
+    "LTXVChunksUpscaleMerger": LTXVChunksUpscaleMerger,
 }
 
 # Consistent display names between static and dynamic node mappings in nodes_registry.py,
