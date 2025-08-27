@@ -191,6 +191,8 @@ class LTXVChunksUpscaleSampler:
                 chunk = chunkssplitted[chunkindex]
                 num_frames = chunk.get("frames_generated", 0)
 
+                positive, negative = guider.raw_conds
+
                 for cond_image, cond_raw_idx, cond_strength, cond_use_latent_guide in zip(
                     chunk['cond_images'], chunk["cond_indices"], chunk["cond_strengths"], chunk["cond_use_latent_guide"]
                 ):
@@ -349,7 +351,7 @@ class LTXVChunksUpscaleSampler:
             # get the latent from the previous latent info
 
             if final_latents is None:
-                final_latents = LTXVInContextSampler().sample(
+                (final_latents, ) = LTXVInContextSampler().sample(
                     vae,
                     new_guider,
                     sampler,
@@ -368,7 +370,7 @@ class LTXVChunksUpscaleSampler:
                     blur=chunk.get("blur", 0),
                 )
             else:
-                return LTXVExtendSampler().sample(
+                (final_latents, ) = LTXVExtendSampler().sample(
                     model,
                     vae,
                     final_latents,
