@@ -25,6 +25,8 @@ For portable ComfyUI installations, run
 
 ## Example workflows
 
+Select an example workflow and download it. 
+
 Note that to run the example workflows, you need to have some additional custom nodes, like [ComfyUI-VideoHelperSuite](https://github.com/kosinkadink/ComfyUI-VideoHelperSuite) and others, installed. You can do it by pressing "Install Missing Custom Nodes" button in ComfyUI Manager.
 
 ### Long Video Generation
