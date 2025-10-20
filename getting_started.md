@@ -21,16 +21,16 @@ For portable ComfyUI installations, run
 ### Models
 
 1. Download [ltx-video-2b-v0.9.1.safetensors](https://huggingface.co/Lightricks/LTX-Video/blob/main/ltx-video-2b-v0.9.1.safetensors) from Hugging Face and place it under `models/checkpoints`.
-2. Install a t5 text encoder. We recommend [google_t5-v1_1-xxl_encoderonly](https://huggingface.co/mcmonkey/google_t5-v1_1-xxl_encoderonly/tree/main). You can install it using ComfyUI Model Manager.
+2. Install one of the t5 text encoders, for example [google_t5-v1_1-xxl_encoderonly](https://huggingface.co/mcmonkey/google_t5-v1_1-xxl_encoderonly/tree/main). You can install it using ComfyUI Model Manager.
 
-## Example Workflows
+## Example workflows
 
-Select a workflow from the examples and download it. 
+Select an example workflow and download it. 
 
-Note that to run the example workflows below, you need to have some additional custom nodes, like [ComfyUI-VideoHelperSuite](https://github.com/kosinkadink/ComfyUI-VideoHelperSuite) and others, installed. You can add them by pressing "Install Missing Custom Nodes" button in ComfyUI Manager.
+Note that to run the example workflows, you need to have some additional custom nodes, like [ComfyUI-VideoHelperSuite](https://github.com/kosinkadink/ComfyUI-VideoHelperSuite) and others, installed. You can do it by pressing "Install Missing Custom Nodes" button in ComfyUI Manager.
 
 ### Long Video Generation
-🧩 [Image to Video Long Video](example_workflows/ltxv-13b-i2v-long-multi-prompt.json): Long video generation with support for multiple prompts along the video duration.<br>
+🧩 [Image to Video Long Video](example_workflows/ltxv-13b-i2v-long-multi-prompt.json): Long video generation with support for multiple prompts along the video duration.
 🧩 [Video to Video Long Video](example_workflows/ltxv-13b-v2v-long-depth.json): Long video-to-video generation. Given a guiding video—such as depth, pose, or edges—the flow generates a new video.
 
 ### Video Upscaling
