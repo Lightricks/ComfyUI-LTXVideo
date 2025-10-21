@@ -12,7 +12,7 @@ ComfyUI-LTXVideo is a collection of custom nodes for ComfyUI, designed to provid
 The model itself is supported in the core ComfyUI [code](https://github.com/comfyanonymous/ComfyUI/tree/master/comfy/ldm/lightricks).
 The main LTXVideo repository can be found [here](https://github.com/Lightricks/LTX-Video).
 
-## 🚀 New to using LTXV with ComfyUI? See our [Getting Started](https://github.com/ComfyUI-LTXVideo/blob/master/getting_started.md) page 
+## 🚀 New to using LTXV with ComfyUI? See our [Getting Started](/getting_started.md) page 
 
 
 # ⭐ 16.07.2025 - LTXV 0.9.8 Release ⭐
