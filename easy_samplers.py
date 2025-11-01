@@ -1375,7 +1375,7 @@ class LTXVHybridSampler:
             "frame_overlap": frame_overlap,
         }
 
-        return (latents, positive, negative, generated_frames_range, ",".join([str(i) for i in reference_frames_only_generated_idx_parsed]), reference_createdonly_latents, info_dict) 
+        return (latents, positive, negative, generated_frames_range, ",".join([str(i) for i in reference_frames_only_generated_idx_parsed]), reference_createdonly_latents, json.dumps(info_dict)) 
 
 
 @comfy_node(description="Linear transition with overlap")
