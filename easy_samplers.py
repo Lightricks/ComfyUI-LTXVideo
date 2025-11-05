@@ -1257,6 +1257,8 @@ class LTXVHybridSampler:
                 "blur": blur,
                 "crop": crop,
                 "frame_overlap": frame_overlap,
+                "extra_latents_only_generated_provided": 0,
+                "extra_frames_only_generated_provided": 0,
             }
             return (latents, positive, negative, generated_frames_range, reference_frames_only_generated_idx, latents, json.dumps(info_dict))
 
@@ -1313,6 +1315,8 @@ class LTXVHybridSampler:
                     "blur": blur,
                     "crop": crop,
                     "frame_overlap": frame_overlap,
+                    "extra_latents_only_generated_provided": 0,
+                    "extra_frames_only_generated_provided": 0,
                 }
 
                 return (latents, positive, negative, generated_frames_range, reference_frames_only_generated_idx, latents, json.dumps(info_dict))
@@ -1359,7 +1363,7 @@ class LTXVHybridSampler:
                 reference_frames_only_generated_idx_parsed[i] = 0
 
         (reference_createdonly_latents,) = LTXVSelectLatents().select_latents(
-            latents, int(-(num_frames // 8)), -1
+            latents, int(-(num_frames // 8)) - 1, -1
         )
 
         info_dict = {
@@ -1373,9 +1377,11 @@ class LTXVHybridSampler:
             "blur": blur,
             "crop": crop,
             "frame_overlap": frame_overlap,
+            "extra_latents_only_generated_provided": 1,
+            "extra_frames_only_generated_provided": 1,
         }
 
-        return (latents, positive, negative, generated_frames_range, ",".join([str(i) for i in reference_frames_only_generated_idx_parsed]), reference_createdonly_latents, json.dumps(info_dict)) 
+        return (latents, positive, negative, generated_frames_range, ",".join([str(i) for i in reference_frames_only_generated_idx_parsed]), reference_createdonly_latents, json.dumps(info_dict))
 
 
 @comfy_node(description="Linear transition with overlap")
