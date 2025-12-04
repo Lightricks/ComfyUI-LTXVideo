@@ -1,5 +1,5 @@
 diffusers
 einops
-huggingface_hub>=0.25.2
-ninja~=1.11.1.4
-transformers[timm]>=4.45.0
+huggingface_hub
+ninja
+transformers[timm]
