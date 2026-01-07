@@ -1,0 +1,37 @@
+[project]
+name = "ltxvideo"
+description = "Custom nodes for LTX-Video support in ComfyUI"
+version = "1.0.0"
+license = {file = "LICENSE"} 
+# classifiers = [
+#     # For OS-independent nodes (works on all operating systems)
+#     "Operating System :: OS Independent",
+#
+#     # OR for OS-specific nodes, specify the supported systems:
+#     "Operating System :: Microsoft :: Windows",  # Windows specific
+#     "Operating System :: POSIX :: Linux",  # Linux specific
+#     "Operating System :: MacOS",  # macOS specific
+#
+#     # GPU Accelerator support. Pick the ones that are supported by your extension.
+#     "Environment :: GPU :: NVIDIA CUDA",    # NVIDIA CUDA support
+#     "Environment :: GPU :: AMD ROCm",       # AMD ROCm support
+#     "Environment :: GPU :: Intel Arc",      # Intel Arc support
+#     "Environment :: NPU :: Huawei Ascend",  # Huawei Ascend support
+#     "Environment :: GPU :: Apple Metal",    # Apple Metal support
+# ]
+
+dependencies = ["diffusers", "einops", "huggingface_hub>=0.25.2", "ninja~=1.11.1.4", "transformers[timm]>=4.50.0"]
+
+[project.urls]
+Repository = "https://github.com/Lightricks/ComfyUI-LTXVideo"
+#  Used by Comfy Registry https://registry.comfy.org
+Documentation = "https://github.com/Lightricks/ComfyUI-LTXVideo/wiki"
+"Bug Tracker" = "https://github.com/Lightricks/ComfyUI-LTXVideo/issues"
+
+[tool.comfy]
+PublisherId = ""
+DisplayName = "ComfyUI-LTXVideo"
+Icon = ""
+includes = [] 
+# "requires-comfyui" = ">=1.0.0"  # ComfyUI version compatibility
+
