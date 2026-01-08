@@ -597,10 +597,11 @@ class LTXVGemmaCLIPModelLoader:
 
         clip_dtype = torch.bfloat16
         try:
+            # MPS does not have full support bfloat16, use float16 instead
             if comfy.model_management.get_torch_device().type == "mps":
                 clip_dtype = torch.float16
-        except Exception:
-            pass
+        except Exception as e:
+            logger.debug(f"Could not detect device type for dtype selection: {e}")
 
         ltxv_full_path = folder_paths.get_full_path("checkpoints", ltxv_path)
         clip_target = comfy.supported_models_base.ClipTarget(
