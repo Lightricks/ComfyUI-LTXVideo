@@ -30,6 +30,16 @@ logger = logging.getLogger(__name__)
 PREFIX_BASE = "model.diffusion_model."
 
 
+def _get_device_list():
+    """Returns a list of available devices for the dropdown."""
+    devices = ["auto", "cpu"]
+    # Strictly list only detected CUDA devices
+    count = torch.cuda.device_count()
+    for i in range(count):
+        devices.append(f"cuda:{i}")
+    return devices
+
+
 def _load_system_prompt(filename: str) -> str:
     """Load system prompt from file at module level."""
     try:
@@ -204,16 +214,25 @@ class LTXVGemmaTextEncoderModel(torch.nn.Module):
         super().__init__()
         self.model = model
         self.processor = processor
-        self.feature_extractor_linear = feature_extractor_linear.to(dtype=dtype)
-        self.embeddings_connector = embeddings_connector.to(dtype=dtype)
+        self.dtypes = set([dtype])
+
+        # Ensure all sub-modules are initialized on the target device immediately
+        target_device = self.model.device
+
+        self.feature_extractor_linear = feature_extractor_linear.to(
+            dtype=dtype, device=target_device
+        )
+        self.embeddings_connector = embeddings_connector.to(
+            dtype=dtype, device=target_device
+        )
+
         self.audio_embeddings_connector = (
-            audio_embeddings_connector.to(dtype=dtype)
+            audio_embeddings_connector.to(dtype=dtype, device=target_device)
             if audio_embeddings_connector is not None
             else None
         )
-        self.dtypes = set([dtype])
+
         # Cache an estimate of memory required to load/keep the model on device
-        # weights size + small overhead
         self._model_memory_required = (
             comfy.model_management.module_size(self.model) + 256 * 1024 * 1024
         )
@@ -224,6 +243,61 @@ class LTXVGemmaTextEncoderModel(torch.nn.Module):
     def reset_clip_options(self):
         pass
 
+    def to(self, *args, **kwargs):
+        """Override .to() to ensure all sub-components move with the main model."""
+        super().to(*args, **kwargs)
+        
+        # Explicitly parse args/kwargs to find device/dtype
+        device = None
+        dtype = None
+        
+        for arg in args:
+            if isinstance(arg, (torch.device, str)):
+                device = arg
+            elif isinstance(arg, torch.dtype):
+                dtype = arg
+        
+        if "device" in kwargs:
+            device = kwargs["device"]
+        if "dtype" in kwargs:
+            dtype = kwargs["dtype"]
+            
+        if device is not None:
+            self.model.to(device)
+            self.feature_extractor_linear.to(device)
+            self.embeddings_connector.to(device)
+            if self.audio_embeddings_connector:
+                self.audio_embeddings_connector.to(device)
+                
+        if dtype is not None:
+             self.model.to(dtype=dtype)
+             self.feature_extractor_linear.to(dtype=dtype)
+             self.embeddings_connector.to(dtype=dtype)
+             if self.audio_embeddings_connector:
+                self.audio_embeddings_connector.to(dtype=dtype)
+
+        return self
+
+    @staticmethod
+    def _cat_with_padding(
+        tensor: torch.Tensor,
+        padding_length: int,
+        value: int | float,
+    ) -> torch.Tensor:
+        """Concatenate a tensor with a padding tensor of the given value."""
+        return torch.cat(
+            [
+                tensor,
+                torch.full(
+                    (1, padding_length),
+                    value,
+                    dtype=tensor.dtype,
+                    device=tensor.device,
+                ),
+            ],
+            dim=1,
+        )
+
     @staticmethod
     def norm_and_concat_padded_batch(
         encoded_text: torch.Tensor,
@@ -233,11 +307,6 @@ class LTXVGemmaTextEncoderModel(torch.nn.Module):
         """
         Normalize a 4D tensor [B, T, D, L] per sample and per layer, using sequence_lengths to mask.
         Returns [B, T,  D * L] tensor with original padding preserved.
-
-        Args:
-            encoded_text: 4D tensor [B, T, D, L]
-            sequence_lengths: 1D tensor [B] with actual sequence lengths
-            padding_side: "left" or "right" to indicate which side has padding
         """
         B, T, D, L = encoded_text.shape
         device = encoded_text.device
@@ -257,11 +326,10 @@ class LTXVGemmaTextEncoderModel(torch.nn.Module):
                 f"padding_side must be 'left' or 'right', got {padding_side}"
             )
 
-        mask = rearrange(mask, "b t -> b t 1 1")
+        mask = rearrange(mask, "b t 1 1")
 
         # Compute masked mean: [B, 1, 1, L]
         masked = encoded_text.masked_fill(~mask, 0.0)
-        # denom = mask.sum(dim=(1, 2), keepdim=True)  # [B, 1, 1, 1]
         denom = (sequence_lengths * D).view(B, 1, 1, 1)
         mean = masked.sum(dim=(1, 2), keepdim=True) / (denom + 1e-6)
 
@@ -287,6 +355,16 @@ class LTXVGemmaTextEncoderModel(torch.nn.Module):
         return normed
 
     def forward(self, input_ids, attention_mask, padding_side="right"):
+        # Runtime device alignment
+        device = self.model.device
+        if input_ids.device != device:
+            input_ids = input_ids.to(device)
+            attention_mask = attention_mask.to(device)
+
+        # Ensure submodules are aligned
+        if self.feature_extractor_linear.aggregate_embed.weight.device != device:
+            self.feature_extractor_linear.to(device)
+
         outputs = self.model(
             input_ids=input_ids,
             attention_mask=attention_mask,
@@ -310,20 +388,24 @@ class LTXVGemmaTextEncoderModel(torch.nn.Module):
 
     def encode_token_weights(self, token_weight_pairs):
         token_pairs = token_weight_pairs["gemma"]
-        input_ids = torch.tensor(
-            [[t[0] for t in token_pairs]], device=self.model.device
-        )
-        attention_mask = torch.tensor(
-            [[w[1] for w in token_pairs]], device=self.model.device
-        )
 
-        self.to(self.model.device)
+        # Use the device the model is currently on
+        device = self.model.device
+
+        input_ids = torch.tensor([[t[0] for t in token_pairs]], device=device)
+        attention_mask = torch.tensor([[w[1] for w in token_pairs]], device=device)
+
+        # Ensure submodules are on the right device
+        if self.embeddings_connector.positional_embedding.device != device:
+            self.embeddings_connector.to(device)
 
         encoded_input = self(input_ids, attention_mask, padding_side="left")
+
         # convert attention mask to format embeddings connector expects.
         connector_attention_mask = (attention_mask - 1).to(encoded_input.dtype).reshape(
             (attention_mask.shape[0], 1, -1, attention_mask.shape[-1])
         ) * torch.finfo(encoded_input.dtype).max
+
         encoded, encoded_connector_attention_mask = self.embeddings_connector(
             encoded_input,
             connector_attention_mask,
@@ -336,6 +418,10 @@ class LTXVGemmaTextEncoderModel(torch.nn.Module):
         encoded = encoded * attention_mask
 
         if self.audio_embeddings_connector is not None:
+            # Ensure audio connector alignment
+            if self.audio_embeddings_connector.positional_embedding.device != device:
+                self.audio_embeddings_connector.to(device)
+
             encoded_for_audio, _ = self.audio_embeddings_connector(
                 encoded_input, connector_attention_mask
             )
@@ -352,33 +438,8 @@ class LTXVGemmaTextEncoderModel(torch.nn.Module):
         # Return a conservative estimate in bytesed(input_shape)
         return self._model_memory_required
 
-    @staticmethod
-    def _cat_with_padding(
-        tensor: torch.Tensor,
-        padding_length: int,
-        value: int | float,
-    ) -> torch.Tensor:
-        """Concatenate a tensor with a padding tensor of the given value."""
-        return torch.cat(
-            [
-                tensor,
-                torch.full(
-                    (1, padding_length),
-                    value,
-                    dtype=tensor.dtype,
-                    device=tensor.device,
-                ),
-            ],
-            dim=1,
-        )
-
     def _pad_inputs_for_attention_alignment(self, model_inputs, alignment: int = 8):
-        """Pad sequence length to multiple of alignment for Flash Attention compatibility.
-
-        Flash Attention within SDPA requires sequence lengths aligned to 8 bytes.
-        This pads input_ids, attention_mask, and token_type_ids (if present) to prevent
-        'p.attn_bias_ptr is not correctly aligned' errors.
-        """
+        """Pad sequence length to multiple of alignment for Flash Attention compatibility."""
         seq_len = model_inputs.input_ids.shape[1]
         padded_len = ((seq_len + alignment - 1) // alignment) * alignment
         padding_length = padded_len - seq_len
@@ -414,34 +475,55 @@ class LTXVGemmaTextEncoderModel(torch.nn.Module):
         image: Optional[Image.Image] = None,
         max_new_tokens: int = 512,
         seed: int = 42,
+        forced_target_device: Optional[torch.device] = None,
     ) -> str:
         """Common enhancement logic for both T2V and I2V modes."""
         if self.processor is None:
             raise ValueError("Processor not loaded - enhancement not available")
 
-        text = self.processor.tokenizer.apply_chat_template(
-            messages, tokenize=False, add_generation_prompt=True
-        )
+        # 1. Determine target device
+        if forced_target_device is not None:
+            device = forced_target_device
+            # 2. FORCE move entire model to this device
+            logger.info(f"Moving Gemma model to {device}...")
+            self.model.to(device)
+            # 3. FORCE move auxiliary components
+            self.to(device)
+        else:
+            device = self.model.device
 
-        model_inputs = self.processor(
-            text=text,
-            images=image,
-            return_tensors="pt",
-        ).to(self.model.device)
-        model_inputs = self._pad_inputs_for_attention_alignment(model_inputs)
+        # 4. Strict Context Manager: Set default CUDA device to prevent 'cuda:0' leakage
+        cuda_ctx = torch.cuda.device(device) if device.type == "cuda" else torch.no_grad()
+        
+        with cuda_ctx:
+            text = self.processor.tokenizer.apply_chat_template(
+                messages, tokenize=False, add_generation_prompt=True
+            )
 
-        with torch.inference_mode(), torch.random.fork_rng(devices=[self.model.device]):
-            torch.manual_seed(seed)
-            outputs = self.model.generate(
-                **model_inputs,
-                max_new_tokens=max_new_tokens,
-                do_sample=True,
-                temperature=0.7,
+            model_inputs = self.processor(
+                text=text,
+                images=image,
+                return_tensors="pt",
             )
-            generated_ids = outputs[0][len(model_inputs.input_ids[0]) :]
-            enhanced_prompt = self.processor.tokenizer.decode(
-                generated_ids, skip_special_tokens=True
-            )
+            
+            # 5. Move inputs to device (redundant but safe)
+            model_inputs = model_inputs.to(device)
+            
+            # 6. Pad inputs (uses tensor.device, so inputs must be moved FIRST)
+            model_inputs = self._pad_inputs_for_attention_alignment(model_inputs)
+
+            with torch.inference_mode(), torch.random.fork_rng(devices=[device]):
+                torch.manual_seed(seed)
+                outputs = self.model.generate(
+                    **model_inputs,
+                    max_new_tokens=max_new_tokens,
+                    do_sample=True,
+                    temperature=0.7,
+                )
+                generated_ids = outputs[0][len(model_inputs.input_ids[0]) :]
+                enhanced_prompt = self.processor.tokenizer.decode(
+                    generated_ids, skip_special_tokens=True
+                )
 
         return enhanced_prompt
 
@@ -451,13 +533,19 @@ class LTXVGemmaTextEncoderModel(torch.nn.Module):
         system_prompt: str,
         max_new_tokens: int = 512,
         seed: int = 42,
+        target_device: Optional[torch.device] = None,
     ) -> str:
         """Enhance a text prompt for T2V generation."""
         messages = [
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": f"User Raw Input Prompt: {prompt}."},
         ]
-        return self._enhance(messages, max_new_tokens=max_new_tokens, seed=seed)
+        return self._enhance(
+            messages, 
+            max_new_tokens=max_new_tokens, 
+            seed=seed, 
+            forced_target_device=target_device
+        )
 
     def enhance_i2v(
         self,
@@ -466,6 +554,7 @@ class LTXVGemmaTextEncoderModel(torch.nn.Module):
         system_prompt: str,
         max_new_tokens: int = 512,
         seed: int = 42,
+        target_device: Optional[torch.device] = None,
     ) -> str:
         """Enhance a text prompt for I2V generation using a reference image."""
         messages = [
@@ -479,7 +568,11 @@ class LTXVGemmaTextEncoderModel(torch.nn.Module):
             },
         ]
         return self._enhance(
-            messages, image=image, max_new_tokens=max_new_tokens, seed=seed
+            messages, 
+            image=image, 
+            max_new_tokens=max_new_tokens, 
+            seed=seed,
+            forced_target_device=target_device
         )
 
 
@@ -491,15 +584,29 @@ def ltxv_gemma_tokenizer(tokenizer_path, max_length=256):
     return _LTXVGemmaTokenizer
 
 
-def ltxv_gemma_clip(encoder_path, ltxv_path, processor=None, dtype=None):
+def ltxv_gemma_clip(
+    encoder_path, ltxv_path, processor=None, dtype=None, load_device_str="cpu"
+):
     class _LTXVGemmaTextEncoderModel(LTXVGemmaTextEncoderModel):
         def __init__(self, device="cpu", dtype=dtype, model_options={}):
             dtype = torch.bfloat16  # TODO: make this configurable
+
+            # CRITICAL: Disable device_map to prevent Accelerate from "pinning" weights
             gemma_model = Gemma3ForConditionalGeneration.from_pretrained(
                 encoder_path,
                 local_files_only=True,
                 torch_dtype=dtype,
+                device_map=None, 
+                low_cpu_mem_usage=True,
             )
+
+            # Manually handle initial placement
+            if load_device_str != "cpu":
+                try:
+                    target_device = torch.device(load_device_str)
+                    gemma_model = gemma_model.to(target_device)
+                except Exception as e:
+                    logger.warning(f"Failed to move model to {load_device_str}: {e}. Keeping on CPU.")
 
             feature_extractor_linear = load_proj_matrix_from_ltxv(
                 ltxv_path,
@@ -512,6 +619,7 @@ def ltxv_gemma_clip(encoder_path, ltxv_path, processor=None, dtype=None):
 
             embeddings_connector = load_video_embeddings_connector(ltxv_path)
             audio_embeddings_connector = load_audio_embeddings_connector(ltxv_path)
+
             super().__init__(
                 model=gemma_model,
                 feature_extractor_linear=feature_extractor_linear,
@@ -559,6 +667,7 @@ class LTXVGemmaCLIPModelLoader:
                     "INT",
                     {"default": 1024, "min": 16, "max": 131072, "step": 8},
                 ),
+                "device": (_get_device_list(), {"default": "auto"}),
             }
         }
 
@@ -569,7 +678,13 @@ class LTXVGemmaCLIPModelLoader:
     TITLE = "LTXV Gemma CLIP Loader"
     OUTPUT_NODE = False
 
-    def load_model(self, gemma_path: str, ltxv_path: str, max_length: int):
+    def load_model(
+        self,
+        gemma_path: str,
+        ltxv_path: str,
+        max_length: int,
+        device: str = "auto",
+    ):
         path = Path(folder_paths.get_full_path("text_encoders", gemma_path))
         model_root = path.parents[1]
         tokenizer_path = Path(find_matching_dir(model_root, "tokenizer.model"))
@@ -591,12 +706,24 @@ class LTXVGemmaCLIPModelLoader:
         except Exception as e:
             logger.warning(f"Could not load processor from {model_root}: {e}")
 
+        # Determine loading device string
+        if device.startswith("cuda:"):
+            load_device_str = device
+        elif device == "cpu":
+            load_device_str = "cpu"
+        else:
+            load_device_str = "cpu"  # default for auto
+
         clip_dtype = torch.bfloat16
         ltxv_full_path = folder_paths.get_full_path("checkpoints", ltxv_path)
         clip_target = comfy.supported_models_base.ClipTarget(
             tokenizer=tokenizer_class,
             clip=ltxv_gemma_clip(
-                gemma_model_path, ltxv_full_path, processor=processor, dtype=clip_dtype
+                gemma_model_path,
+                ltxv_full_path,
+                processor=processor,
+                dtype=clip_dtype,
+                load_device_str=load_device_str,
             ),
         )
 
@@ -640,6 +767,7 @@ class LTXVGemmaEnhancePrompt:
                     {"default": 512, "min": 32, "max": 1024, "step": 16},
                 ),
                 "bypass_i2v": ("BOOLEAN", {"default": False}),
+                "device": (_get_device_list(), {"default": "auto"}),
             },
             "optional": {
                 "image": ("IMAGE",),
@@ -667,14 +795,27 @@ class LTXVGemmaEnhancePrompt:
         system_prompt: str,
         max_tokens: int,
         bypass_i2v: bool,
+        device: str = "auto",
         image: Optional[torch.Tensor] = None,
         seed: int = 42,
     ):
         if not isinstance(seed, int):
             seed = 42
 
+        # Standard Comfy loading
         clip.load_model()
         encoder = clip.cond_stage_model
+
+        # Determine target device
+        target_device = None
+        if device.startswith("cuda:"):
+            target_device = torch.device(device)
+        elif device == "cpu":
+            target_device = torch.device("cpu")
+        
+        # NOTE: For 'auto', we rely on clip.load_model()'s placement.
+        # If 'cuda' or 'cpu' is selected, we pass `target_device` to the
+        # enhance methods, which will FORCE all tensors to that device.
 
         if encoder.processor is None:
             raise ValueError(
@@ -704,6 +845,7 @@ class LTXVGemmaEnhancePrompt:
                 system_prompt=system_prompt,
                 max_new_tokens=max_tokens,
                 seed=seed,
+                target_device=target_device,
             )
         else:
             enhanced_prompt = encoder.enhance_t2v(
@@ -711,6 +853,7 @@ class LTXVGemmaEnhancePrompt:
                 system_prompt=system_prompt,
                 max_new_tokens=max_tokens,
                 seed=seed,
+                target_device=target_device,
             )
 
         enhanced_prompt = clean_response(enhanced_prompt)
