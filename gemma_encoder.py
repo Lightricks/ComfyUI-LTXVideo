@@ -1,5 +1,6 @@
 import json
 import logging
+import gc
 from glob import glob
 from pathlib import Path
 from typing import Optional
@@ -478,52 +479,73 @@ class LTXVGemmaTextEncoderModel(torch.nn.Module):
         forced_target_device: Optional[torch.device] = None,
     ) -> str:
         """Common enhancement logic for both T2V and I2V modes."""
+        
         if self.processor is None:
             raise ValueError("Processor not loaded - enhancement not available")
 
         # 1. Determine target device
         if forced_target_device is not None:
             device = forced_target_device
-            # 2. FORCE move entire model to this device
             logger.info(f"Moving Gemma model to {device}...")
             self.model.to(device)
-            # 3. FORCE move auxiliary components
             self.to(device)
         else:
             device = self.model.device
 
-        # 4. Strict Context Manager: Set default CUDA device to prevent 'cuda:0' leakage
-        cuda_ctx = torch.cuda.device(device) if device.type == "cuda" else torch.no_grad()
+        # 2. Strict Device Context
+        # This ensures internal buffers are created on the correct GPU
+        if device.type == "cuda":
+            # Explicitly set the current device index to prevent fallback to cuda:0
+            torch.cuda.set_device(device)
+            cuda_ctx = torch.cuda.device(device)
+        else:
+            cuda_ctx = torch.no_grad() # Dummy context for CPU
         
-        with cuda_ctx:
-            text = self.processor.tokenizer.apply_chat_template(
-                messages, tokenize=False, add_generation_prompt=True
-            )
+        enhanced_prompt = ""
+        model_inputs = None
+        outputs = None
 
-            model_inputs = self.processor(
-                text=text,
-                images=image,
-                return_tensors="pt",
-            )
-            
-            # 5. Move inputs to device (redundant but safe)
-            model_inputs = model_inputs.to(device)
-            
-            # 6. Pad inputs (uses tensor.device, so inputs must be moved FIRST)
-            model_inputs = self._pad_inputs_for_attention_alignment(model_inputs)
+        try:
+            with cuda_ctx:
+                text = self.processor.tokenizer.apply_chat_template(
+                    messages, tokenize=False, add_generation_prompt=True
+                )
 
-            with torch.inference_mode(), torch.random.fork_rng(devices=[device]):
-                torch.manual_seed(seed)
-                outputs = self.model.generate(
-                    **model_inputs,
-                    max_new_tokens=max_new_tokens,
-                    do_sample=True,
-                    temperature=0.7,
+                model_inputs = self.processor(
+                    text=text,
+                    images=image,
+                    return_tensors="pt",
                 )
-                generated_ids = outputs[0][len(model_inputs.input_ids[0]) :]
-                enhanced_prompt = self.processor.tokenizer.decode(
-                    generated_ids, skip_special_tokens=True
-                )
+                
+                # Move inputs to device explicitly
+                model_inputs = model_inputs.to(device)
+                
+                # Pad inputs
+                model_inputs = self._pad_inputs_for_attention_alignment(model_inputs)
+
+                with torch.inference_mode(), torch.random.fork_rng(devices=[device]):
+                    torch.manual_seed(seed)
+                    outputs = self.model.generate(
+                        **model_inputs,
+                        max_new_tokens=max_new_tokens,
+                        do_sample=True,
+                        temperature=0.7,
+                    )
+                    generated_ids = outputs[0][len(model_inputs.input_ids[0]) :]
+                    enhanced_prompt = self.processor.tokenizer.decode(
+                        generated_ids, skip_special_tokens=True
+                    )
+        except Exception as e:
+            logger.error(f"Error during enhancement: {e}")
+            raise e
+        finally:
+            # 3. Cleanup to prevent fragmentation
+            del model_inputs
+            del outputs
+            gc.collect()
+            if device.type == "cuda":
+                torch.cuda.empty_cache()
+                torch.cuda.ipc_collect()
 
         return enhanced_prompt
 
@@ -589,46 +611,53 @@ def ltxv_gemma_clip(
 ):
     class _LTXVGemmaTextEncoderModel(LTXVGemmaTextEncoderModel):
         def __init__(self, device="cpu", dtype=dtype, model_options={}):
-            dtype = torch.bfloat16  # TODO: make this configurable
-
-            # CRITICAL: Disable device_map to prevent Accelerate from "pinning" weights
-            gemma_model = Gemma3ForConditionalGeneration.from_pretrained(
-                encoder_path,
-                local_files_only=True,
-                torch_dtype=dtype,
-                device_map=None, 
-                low_cpu_mem_usage=True,
-            )
-
-            # Manually handle initial placement
-            if load_device_str != "cpu":
+            # Force context to target device if CUDA to prevent cuda:0 leakage
+            ctx = torch.no_grad()
+            if load_device_str.startswith("cuda:"):
                 try:
-                    target_device = torch.device(load_device_str)
-                    gemma_model = gemma_model.to(target_device)
-                except Exception as e:
-                    logger.warning(f"Failed to move model to {load_device_str}: {e}. Keeping on CPU.")
+                    target_idx = int(load_device_str.split(":")[-1])
+                    ctx = torch.cuda.device(target_idx)
+                except ValueError:
+                    pass
 
-            feature_extractor_linear = load_proj_matrix_from_ltxv(
-                ltxv_path,
-                "text_embedding_projection.",
-            )
-            if feature_extractor_linear is None:
-                feature_extractor_linear = load_proj_matrix_from_checkpoint(
-                    encoder_path / "proj_linear.safetensors"
+            with ctx:
+                dtype = torch.bfloat16 
+
+                # CRITICAL: Disable device_map to prevent Accelerate from "pinning" weights
+                gemma_model = Gemma3ForConditionalGeneration.from_pretrained(
+                    encoder_path,
+                    local_files_only=True,
+                    torch_dtype=dtype,
+                    device_map=None, 
+                    low_cpu_mem_usage=True,
                 )
 
-            embeddings_connector = load_video_embeddings_connector(ltxv_path)
-            audio_embeddings_connector = load_audio_embeddings_connector(ltxv_path)
+                feature_extractor_linear = load_proj_matrix_from_ltxv(
+                    ltxv_path,
+                    "text_embedding_projection.",
+                )
+                if feature_extractor_linear is None:
+                    feature_extractor_linear = load_proj_matrix_from_checkpoint(
+                        encoder_path / "proj_linear.safetensors"
+                    )
 
-            super().__init__(
-                model=gemma_model,
-                feature_extractor_linear=feature_extractor_linear,
-                embeddings_connector=embeddings_connector,
-                audio_embeddings_connector=audio_embeddings_connector,
-                processor=processor,
-                dtype=dtype,
-                device=device,
-            )
+                embeddings_connector = load_video_embeddings_connector(ltxv_path)
+                audio_embeddings_connector = load_audio_embeddings_connector(ltxv_path)
+
+                # Move to target device immediately inside the context
+                if load_device_str != "cpu":
+                    target_device = torch.device(load_device_str)
+                    gemma_model = gemma_model.to(target_device)
+                
+                super().__init__(
+                    model=gemma_model,
+                    feature_extractor_linear=feature_extractor_linear,
+                    embeddings_connector=embeddings_connector,
+                    audio_embeddings_connector=audio_embeddings_connector,
+                    processor=processor,
+                    dtype=dtype,
+                    device=device,
+                )
 
     return _LTXVGemmaTextEncoderModel
 
@@ -802,21 +831,24 @@ class LTXVGemmaEnhancePrompt:
         if not isinstance(seed, int):
             seed = 42
 
-        # Standard Comfy loading
-        clip.load_model()
-        encoder = clip.cond_stage_model
-
-        # Determine target device
+        # Device Handling Strategy
         target_device = None
+        bypass_comfy_load = False
+
         if device.startswith("cuda:"):
             target_device = torch.device(device)
+            bypass_comfy_load = True
         elif device == "cpu":
             target_device = torch.device("cpu")
+            bypass_comfy_load = True
         
-        # NOTE: For 'auto', we rely on clip.load_model()'s placement.
-        # If 'cuda' or 'cpu' is selected, we pass `target_device` to the
-        # enhance methods, which will FORCE all tensors to that device.
-
+        # If specific device is requested, BYPASS Comfy's load_model()
+        if not bypass_comfy_load:
+            clip.load_model()
+            encoder = clip.cond_stage_model
+        else:
+            encoder = clip.cond_stage_model
+        
         if encoder.processor is None:
             raise ValueError(
                 "Processor not loaded - enhancement not available. "
@@ -827,7 +859,7 @@ class LTXVGemmaEnhancePrompt:
         # Determine mode: use I2V if image is provided and not bypassed
         use_i2v = image is not None and not bypass_i2v
 
-        # Auto-select the appropriate system prompt if user is using default T2V prompt
+        # Auto-select the appropriate system prompt
         if use_i2v and system_prompt.strip() == DEFAULT_T2V_SYSTEM_PROMPT.strip():
             system_prompt = DEFAULT_I2V_SYSTEM_PROMPT
             logger.info("Auto-selected I2V system prompt for image-to-video mode")
@@ -837,24 +869,32 @@ class LTXVGemmaEnhancePrompt:
                 "system_prompt is required and cannot be empty or whitespace-only"
             )
 
-        if use_i2v:
-            pil_image = tensor_to_pil(image)
-            enhanced_prompt = encoder.enhance_i2v(
-                prompt=prompt,
-                image=pil_image,
-                system_prompt=system_prompt,
-                max_new_tokens=max_tokens,
-                seed=seed,
-                target_device=target_device,
-            )
-        else:
-            enhanced_prompt = encoder.enhance_t2v(
-                prompt=prompt,
-                system_prompt=system_prompt,
-                max_new_tokens=max_tokens,
-                seed=seed,
-                target_device=target_device,
-            )
+        try:
+            if use_i2v:
+                pil_image = tensor_to_pil(image)
+                enhanced_prompt = encoder.enhance_i2v(
+                    prompt=prompt,
+                    image=pil_image,
+                    system_prompt=system_prompt,
+                    max_new_tokens=max_tokens,
+                    seed=seed,
+                    target_device=target_device,
+                )
+            else:
+                enhanced_prompt = encoder.enhance_t2v(
+                    prompt=prompt,
+                    system_prompt=system_prompt,
+                    max_new_tokens=max_tokens,
+                    seed=seed,
+                    target_device=target_device,
+                )
+        finally:
+            # MEMORY UNLOAD: If we moved it to GPU manually, move it back to CPU
+            if target_device is not None and target_device.type == "cuda":
+                logger.info("Unloading Gemma model to CPU...")
+                encoder.to("cpu")
+                torch.cuda.empty_cache()
+                gc.collect()
 
         enhanced_prompt = clean_response(enhanced_prompt)
 
