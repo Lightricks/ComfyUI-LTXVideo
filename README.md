@@ -43,9 +43,9 @@ The nodes will appear in your node menu under the “LTXVideo” category. Requi
 
 The ComfyUI-LTXVideo installation includes several example workflows.
 You can see them all at:
-'''
+```
 ComfyUI/custom_nodes/ComfyUI-LTXVideo/example_workflows/
-'''
+```
 
 * [`Text to video full model`](./example_workflows/LTX-2_T2V_Full_wLora.json)
 * [`Text to video distilled model (Fast)`](./example_workflows/LTX-2_T2V_Distilled_wLora.json)
@@ -53,6 +53,23 @@ ComfyUI/custom_nodes/ComfyUI-LTXVideo/example_workflows/
 * [`Image to video distilled model (Fast)`](./example_workflows/LTX-2_I2V_Distilled_wLora.json)
 * [`Video to video detailer`](./example_workflows/LTX-2_V2V_Detailer.json)
 * [`IC-LoRA distilled model (depth + human pose + edges)`](./example_workflows/LTX-2_ICLoRA_All_Distilled.json)
+* [`IC-LoRA distilled model with downscaled reference latents`](./example_workflows/LTX-2_ICLoRA_All_Distilled_ref0.5.json)
+
+## Union IC-LoRA Model
+
+We introduce a new **Union IC-LoRA** model that combines depth, pose, and edge control conditions into a single unified LoRA.
+
+### Key Features
+
+- **Unified Control**: A single LoRA that supports multiple control conditions (depth, human pose, or edges).
+- **Downsampled Latent Processing**: The union LoRA operates on a downsampled latent size, which reduces memory usage and significantly speeds up inference while maintaining quality.
+
+### How It Works
+
+The union LoRA is trained to understand and respond to all three control signals (depth maps, pose skeletons, and edge maps) within a single model. The model learns to:
+
+1. **Parse multiple conditions**: Identify which control signals are present in the input
+2. **Process at reduced resolution**: Work on downsampled latents to improve efficiency
 
 ## Required Models
 
@@ -77,6 +94,7 @@ Download the following models:
   * [`Gemma 3`](https://huggingface.co/google/gemma-3-12b-it-qat-q4_0-unquantized)
 
 **LoRAs** Choose and download to `COMFYUI_ROOT_FOLDER/models/loras` folder.
+  * [`ltx-2-19b-ic-lora-union-ref0.5.safetensors`](https://huggingface.co/Lightricks/LTX-2-19b-IC-LoRA-Union-Ref0.5/blob/main/ltx-2-19b-ic-lora-union-ref0.5.safetensors) *(Union LoRA - supports depth, pose, and edges in one model)*
   * [`ltx-2-19b-ic-lora-canny-control.safetensors`](https://huggingface.co/Lightricks/LTX-2-19b-IC-LoRA-Canny-Control/blob/main/ltx-2-19b-ic-lora-canny-control.safetensors)
   * [`ltx-2-19b-ic-lora-depth-control.safetensors`](https://huggingface.co/Lightricks/LTX-2-19b-IC-LoRA-Depth-Control/blob/main/ltx-2-19b-ic-lora-depth-control.safetensors)
   * [`ltx-2-19b-ic-lora-detailer.safetensors`](https://huggingface.co/Lightricks/LTX-2-19b-IC-LoRA-Detailer/blob/main/ltx-2-19b-ic-lora-detailer.safetensors)
