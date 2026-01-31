@@ -44,7 +44,7 @@ class DecoderNoise:
 
     FUNCTION = "add_noise"
     RETURN_TYPES = ("VAE",)
-    CATEGORY = "lightricks/LTXV"
+    CATEGORY = "Lightricks/LTXV/Latent"
 
     def add_noise(self, vae, timestep, scale, seed):
         result = copy(vae)

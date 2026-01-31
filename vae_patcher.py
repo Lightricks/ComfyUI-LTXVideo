@@ -15,7 +15,7 @@ class LTXVPatcherVAE:
 
     RETURN_TYPES = ("VAE",)
     FUNCTION = "patch"
-    CATEGORY = "lightricks/LTXV"
+    CATEGORY = "Lightricks/LTXV/Model Patches"
     TITLE = "LTXV VAE Patcher"
 
     def patch(self, vae):

@@ -47,7 +47,7 @@ class ImageToCPU:
 
     RETURN_TYPES = ("IMAGE",)
     FUNCTION = "run"
-    CATEGORY = "utility"
+    CATEGORY = "Lightricks/LTXV/Utility"
 
     def run(self, image):
         return (image.cpu(),)

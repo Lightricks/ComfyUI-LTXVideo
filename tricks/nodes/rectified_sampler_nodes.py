@@ -194,7 +194,7 @@ class LTXRFForwardODESamplerNode:
     RETURN_TYPES = ("SAMPLER",)
     FUNCTION = "build"
 
-    CATEGORY = "ltxtricks"
+    CATEGORY = "Lightricks/LTXV/Sampling"
 
     def build(
         self,
@@ -245,7 +245,7 @@ class LTXRFReverseODESamplerNode:
     RETURN_TYPES = ("SAMPLER",)
     FUNCTION = "build"
 
-    CATEGORY = "ltxtricks"
+    CATEGORY = "Lightricks/LTXV/Sampling"
 
     def build(
         self,

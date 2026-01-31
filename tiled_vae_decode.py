@@ -32,7 +32,7 @@ class LTXVTiledVAEDecode:
 
     FUNCTION = "decode"
 
-    CATEGORY = "latent"
+    CATEGORY = "Lightricks/LTXV/Latent"
 
     def decode(
         self,
@@ -344,7 +344,7 @@ class LTXVSpatioTemporalTiledVAEDecode(LTXVTiledVAEDecode):
 
     FUNCTION = "decode_spatial_temporal"
 
-    CATEGORY = "latent"
+    CATEGORY = "Lightricks/LTXV/Latent"
 
     def decode_spatial_temporal(
         self,

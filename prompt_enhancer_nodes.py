@@ -87,7 +87,7 @@ class LTXVPromptEnhancerLoader:
     RETURN_TYPES = ("LTXV_PROMPT_ENHANCER",)
     RETURN_NAMES = ("prompt_enhancer",)
     FUNCTION = "load"
-    CATEGORY = "lightricks/LTXV"
+    CATEGORY = "Lightricks/LTXV/Loaders"
     TITLE = "LTXV Prompt Enhancer (Down)Loader"
     OUTPUT_NODE = False
     DESCRIPTION = "Downloads and initializes LLM and image captioning models from Hugging Face to enhance text prompts for image generation."
@@ -178,7 +178,7 @@ class LTXVPromptEnhancer:
     RETURN_TYPES = ("STRING",)
     RETURN_NAMES = ("str",)
     FUNCTION = "enhance"
-    CATEGORY = "lightricks/LTXV"
+    CATEGORY = "Lightricks/LTXV/Conditioning"
     TITLE = "LTXV Prompt Enhancer"
     OUTPUT_NODE = False
     DESCRIPTION = (

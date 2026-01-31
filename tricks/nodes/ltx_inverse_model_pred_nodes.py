@@ -30,7 +30,7 @@ class LTXForwardModelSamplingPredNode:
     RETURN_TYPES = ("MODEL",)
     FUNCTION = "patch"
 
-    CATEGORY = "ltxtricks"
+    CATEGORY = "Lightricks/LTXV/Prediction"
 
     def patch(self, model):
         m = model.clone()
@@ -74,7 +74,7 @@ class LTXReverseModelSamplingPredNode:
     RETURN_TYPES = ("MODEL",)
     FUNCTION = "patch"
 
-    CATEGORY = "ltxtricks"
+    CATEGORY = "Lightricks/LTXV/Prediction"
 
     def patch(self, model):
         m = model.clone()

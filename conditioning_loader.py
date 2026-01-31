@@ -20,7 +20,7 @@ class LTXVLoadConditioning(io.ComfyNode):
         return io.Schema(
             node_id="LTXVLoadConditioning",
             display_name="🅛🅣🅧 LTXV Load Conditioning",
-            category="lightricks/LTXV",
+            category="Lightricks/LTXV/Conditioning",
             inputs=[
                 io.Combo.Input("file_name", options=sorted(files)),
                 io.Combo.Input("device", options=["cpu", "gpu"]),

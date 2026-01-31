@@ -236,7 +236,7 @@ class LTXVLoopingSampler:
     RETURN_NAMES = ("denoised_output",)
 
     FUNCTION = "sample"
-    CATEGORY = "sampling"
+    CATEGORY = "Lightricks/LTXV/Sampling"
 
     def _extract_latent_spatial_tile(self, latent_dict, v_start, v_end, h_start, h_end):
         """Extract spatial tile from a latent dictionary."""
@@ -962,7 +962,7 @@ class MultiPromptProvider:
     RETURN_NAMES = ("conditionings",)
 
     FUNCTION = "get_prompt_list"
-    CATEGORY = "prompt"
+    CATEGORY = "Lightricks/LTXV/Conditioning"
 
     def get_prompt_list(self, prompts, clip):
         prompt_list = prompts.split("|")

@@ -56,7 +56,7 @@ class LTXVTiledSampler:
 
     FUNCTION = "sample"
 
-    CATEGORY = "sampling"
+    CATEGORY = "Lightricks/LTXV/Sampling"
 
     def sample(
         self,
