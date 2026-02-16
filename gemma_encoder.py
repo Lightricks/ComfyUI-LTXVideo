@@ -1,8 +1,9 @@
 import json
 import logging
+import gc
 from glob import glob
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import Optional
 
 import comfy.model_management
 import comfy.ops
@@ -18,12 +19,9 @@ from PIL import Image
 from transformers import (
     AutoImageProcessor,
     AutoTokenizer,
-    Gemma3Config,
     Gemma3ForConditionalGeneration,
     Gemma3Processor,
 )
-from transformers.modeling_rope_utils import ROPE_INIT_FUNCTIONS
-from transformers.models.auto.modeling_auto import MODEL_MAPPING_NAMES
 
 from .embeddings_connector import Embeddings1DConnector
 from .nodes_registry import comfy_node
@@ -31,6 +29,16 @@ from .nodes_registry import comfy_node
 logger = logging.getLogger(__name__)
 
 PREFIX_BASE = "model.diffusion_model."
+
+
+def _get_device_list():
+    """Returns a list of available devices for the dropdown."""
+    devices = ["auto", "cpu"]
+    # Strictly list only detected CUDA devices
+    count = torch.cuda.device_count()
+    for i in range(count):
+        devices.append(f"cuda:{i}")
+    return devices
 
 
 def _load_system_prompt(filename: str) -> str:
@@ -207,16 +215,25 @@ class LTXVGemmaTextEncoderModel(torch.nn.Module):
         super().__init__()
         self.model = model
         self.processor = processor
-        self.feature_extractor_linear = feature_extractor_linear.to(dtype=dtype)
-        self.embeddings_connector = embeddings_connector.to(dtype=dtype)
+        self.dtypes = set([dtype])
+
+        # Ensure all sub-modules are initialized on the target device immediately
+        target_device = self.model.device
+
+        self.feature_extractor_linear = feature_extractor_linear.to(
+            dtype=dtype, device=target_device
+        )
+        self.embeddings_connector = embeddings_connector.to(
+            dtype=dtype, device=target_device
+        )
+
         self.audio_embeddings_connector = (
-            audio_embeddings_connector.to(dtype=dtype)
+            audio_embeddings_connector.to(dtype=dtype, device=target_device)
             if audio_embeddings_connector is not None
             else None
         )
-        self.dtypes = set([dtype])
+
         # Cache an estimate of memory required to load/keep the model on device
-        # weights size + small overhead
         self._model_memory_required = (
             comfy.model_management.module_size(self.model) + 256 * 1024 * 1024
         )
@@ -227,6 +244,61 @@ class LTXVGemmaTextEncoderModel(torch.nn.Module):
     def reset_clip_options(self):
         pass
 
+    def to(self, *args, **kwargs):
+        """Override .to() to ensure all sub-components move with the main model."""
+        super().to(*args, **kwargs)
+        
+        # Explicitly parse args/kwargs to find device/dtype
+        device = None
+        dtype = None
+        
+        for arg in args:
+            if isinstance(arg, (torch.device, str)):
+                device = arg
+            elif isinstance(arg, torch.dtype):
+                dtype = arg
+        
+        if "device" in kwargs:
+            device = kwargs["device"]
+        if "dtype" in kwargs:
+            dtype = kwargs["dtype"]
+            
+        if device is not None:
+            self.model.to(device)
+            self.feature_extractor_linear.to(device)
+            self.embeddings_connector.to(device)
+            if self.audio_embeddings_connector:
+                self.audio_embeddings_connector.to(device)
+                
+        if dtype is not None:
+             self.model.to(dtype=dtype)
+             self.feature_extractor_linear.to(dtype=dtype)
+             self.embeddings_connector.to(dtype=dtype)
+             if self.audio_embeddings_connector:
+                self.audio_embeddings_connector.to(dtype=dtype)
+
+        return self
+
+    @staticmethod
+    def _cat_with_padding(
+        tensor: torch.Tensor,
+        padding_length: int,
+        value: int | float,
+    ) -> torch.Tensor:
+        """Concatenate a tensor with a padding tensor of the given value."""
+        return torch.cat(
+            [
+                tensor,
+                torch.full(
+                    (1, padding_length),
+                    value,
+                    dtype=tensor.dtype,
+                    device=tensor.device,
+                ),
+            ],
+            dim=1,
+        )
+
     @staticmethod
     def norm_and_concat_padded_batch(
         encoded_text: torch.Tensor,
@@ -236,11 +308,6 @@ class LTXVGemmaTextEncoderModel(torch.nn.Module):
         """
         Normalize a 4D tensor [B, T, D, L] per sample and per layer, using sequence_lengths to mask.
         Returns [B, T,  D * L] tensor with original padding preserved.
-
-        Args:
-            encoded_text: 4D tensor [B, T, D, L]
-            sequence_lengths: 1D tensor [B] with actual sequence lengths
-            padding_side: "left" or "right" to indicate which side has padding
         """
         B, T, D, L = encoded_text.shape
         device = encoded_text.device
@@ -260,11 +327,10 @@ class LTXVGemmaTextEncoderModel(torch.nn.Module):
                 f"padding_side must be 'left' or 'right', got {padding_side}"
             )
 
-        mask = rearrange(mask, "b t -> b t 1 1")
+        mask = rearrange(mask, "b t 1 1")
 
         # Compute masked mean: [B, 1, 1, L]
         masked = encoded_text.masked_fill(~mask, 0.0)
-        # denom = mask.sum(dim=(1, 2), keepdim=True)  # [B, 1, 1, 1]
         denom = (sequence_lengths * D).view(B, 1, 1, 1)
         mean = masked.sum(dim=(1, 2), keepdim=True) / (denom + 1e-6)
 
@@ -290,6 +356,16 @@ class LTXVGemmaTextEncoderModel(torch.nn.Module):
         return normed
 
     def forward(self, input_ids, attention_mask, padding_side="right"):
+        # Runtime device alignment
+        device = self.model.device
+        if input_ids.device != device:
+            input_ids = input_ids.to(device)
+            attention_mask = attention_mask.to(device)
+
+        # Ensure submodules are aligned
+        if self.feature_extractor_linear.aggregate_embed.weight.device != device:
+            self.feature_extractor_linear.to(device)
+
         outputs = self.model(
             input_ids=input_ids,
             attention_mask=attention_mask,
@@ -313,20 +389,24 @@ class LTXVGemmaTextEncoderModel(torch.nn.Module):
 
     def encode_token_weights(self, token_weight_pairs):
         token_pairs = token_weight_pairs["gemma"]
-        input_ids = torch.tensor(
-            [[t[0] for t in token_pairs]], device=self.model.device
-        )
-        attention_mask = torch.tensor(
-            [[w[1] for w in token_pairs]], device=self.model.device
-        )
 
-        self.to(self.model.device)
+        # Use the device the model is currently on
+        device = self.model.device
+
+        input_ids = torch.tensor([[t[0] for t in token_pairs]], device=device)
+        attention_mask = torch.tensor([[w[1] for w in token_pairs]], device=device)
+
+        # Ensure submodules are on the right device
+        if self.embeddings_connector.positional_embedding.device != device:
+            self.embeddings_connector.to(device)
 
         encoded_input = self(input_ids, attention_mask, padding_side="left")
+
         # convert attention mask to format embeddings connector expects.
         connector_attention_mask = (attention_mask - 1).to(encoded_input.dtype).reshape(
             (attention_mask.shape[0], 1, -1, attention_mask.shape[-1])
         ) * torch.finfo(encoded_input.dtype).max
+
         encoded, encoded_connector_attention_mask = self.embeddings_connector(
             encoded_input,
             connector_attention_mask,
@@ -339,6 +419,10 @@ class LTXVGemmaTextEncoderModel(torch.nn.Module):
         encoded = encoded * attention_mask
 
         if self.audio_embeddings_connector is not None:
+            # Ensure audio connector alignment
+            if self.audio_embeddings_connector.positional_embedding.device != device:
+                self.audio_embeddings_connector.to(device)
+
             encoded_for_audio, _ = self.audio_embeddings_connector(
                 encoded_input, connector_attention_mask
             )
@@ -355,6 +439,164 @@ class LTXVGemmaTextEncoderModel(torch.nn.Module):
         # Return a conservative estimate in bytesed(input_shape)
         return self._model_memory_required
 
+    def _pad_inputs_for_attention_alignment(self, model_inputs, alignment: int = 8):
+        """Pad sequence length to multiple of alignment for Flash Attention compatibility."""
+        seq_len = model_inputs.input_ids.shape[1]
+        padded_len = ((seq_len + alignment - 1) // alignment) * alignment
+        padding_length = padded_len - seq_len
+
+        if padding_length > 0:
+            pad_token_id = (
+                self.processor.tokenizer.pad_token_id
+                if self.processor.tokenizer.pad_token_id is not None
+                else 0
+            )
+
+            model_inputs["input_ids"] = self._cat_with_padding(
+                model_inputs.input_ids, padding_length, pad_token_id
+            )
+
+            model_inputs["attention_mask"] = self._cat_with_padding(
+                model_inputs.attention_mask, padding_length, 0
+            )
+
+            if (
+                "token_type_ids" in model_inputs
+                and model_inputs["token_type_ids"] is not None
+            ):
+                model_inputs["token_type_ids"] = self._cat_with_padding(
+                    model_inputs["token_type_ids"], padding_length, 0
+                )
+
+        return model_inputs
+
+    def _enhance(
+        self,
+        messages: list,
+        image: Optional[Image.Image] = None,
+        max_new_tokens: int = 512,
+        seed: int = 42,
+        forced_target_device: Optional[torch.device] = None,
+    ) -> str:
+        """Common enhancement logic for both T2V and I2V modes."""
+        
+        if self.processor is None:
+            raise ValueError("Processor not loaded - enhancement not available")
+
+        # 1. Determine target device
+        if forced_target_device is not None:
+            device = forced_target_device
+            logger.info(f"Moving Gemma model to {device}...")
+            self.model.to(device)
+            self.to(device)
+        else:
+            device = self.model.device
+
+        # 2. Strict Device Context
+        # This ensures internal buffers are created on the correct GPU
+        if device.type == "cuda":
+            # Explicitly set the current device index to prevent fallback to cuda:0
+            torch.cuda.set_device(device)
+            cuda_ctx = torch.cuda.device(device)
+        else:
+            cuda_ctx = torch.no_grad() # Dummy context for CPU
+        
+        enhanced_prompt = ""
+        model_inputs = None
+        outputs = None
+
+        try:
+            with cuda_ctx:
+                text = self.processor.tokenizer.apply_chat_template(
+                    messages, tokenize=False, add_generation_prompt=True
+                )
+
+                model_inputs = self.processor(
+                    text=text,
+                    images=image,
+                    return_tensors="pt",
+                )
+                
+                # Move inputs to device explicitly
+                model_inputs = model_inputs.to(device)
+                
+                # Pad inputs
+                model_inputs = self._pad_inputs_for_attention_alignment(model_inputs)
+
+                with torch.inference_mode(), torch.random.fork_rng(devices=[device]):
+                    torch.manual_seed(seed)
+                    outputs = self.model.generate(
+                        **model_inputs,
+                        max_new_tokens=max_new_tokens,
+                        do_sample=True,
+                        temperature=0.7,
+                    )
+                    generated_ids = outputs[0][len(model_inputs.input_ids[0]) :]
+                    enhanced_prompt = self.processor.tokenizer.decode(
+                        generated_ids, skip_special_tokens=True
+                    )
+        except Exception as e:
+            logger.error(f"Error during enhancement: {e}")
+            raise e
+        finally:
+            # 3. Cleanup to prevent fragmentation
+            del model_inputs
+            del outputs
+            gc.collect()
+            if device.type == "cuda":
+                torch.cuda.empty_cache()
+                torch.cuda.ipc_collect()
+
+        return enhanced_prompt
+
+    def enhance_t2v(
+        self,
+        prompt: str,
+        system_prompt: str,
+        max_new_tokens: int = 512,
+        seed: int = 42,
+        target_device: Optional[torch.device] = None,
+    ) -> str:
+        """Enhance a text prompt for T2V generation."""
+        messages = [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": f"User Raw Input Prompt: {prompt}."},
+        ]
+        return self._enhance(
+            messages, 
+            max_new_tokens=max_new_tokens, 
+            seed=seed, 
+            forced_target_device=target_device
+        )
+
+    def enhance_i2v(
+        self,
+        prompt: str,
+        image: Image.Image,
+        system_prompt: str,
+        max_new_tokens: int = 512,
+        seed: int = 42,
+        target_device: Optional[torch.device] = None,
+    ) -> str:
+        """Enhance a text prompt for I2V generation using a reference image."""
+        messages = [
+            {"role": "system", "content": system_prompt},
+            {
+                "role": "user",
+                "content": [
+                    {"type": "image"},
+                    {"type": "text", "text": f"User Raw Input Prompt: {prompt}."},
+                ],
+            },
+        ]
+        return self._enhance(
+            messages, 
+            image=image, 
+            max_new_tokens=max_new_tokens, 
+            seed=seed,
+            forced_target_device=target_device
+        )
+
 
 def ltxv_gemma_tokenizer(tokenizer_path, max_length=256):
     class _LTXVGemmaTokenizer(LTXVGemmaTokenizer):
@@ -364,36 +606,58 @@ def ltxv_gemma_tokenizer(tokenizer_path, max_length=256):
     return _LTXVGemmaTokenizer
 
 
-def ltxv_gemma_clip(encoder_path, ltxv_path, processor=None, dtype=None):
+def ltxv_gemma_clip(
+    encoder_path, ltxv_path, processor=None, dtype=None, load_device_str="cpu"
+):
     class _LTXVGemmaTextEncoderModel(LTXVGemmaTextEncoderModel):
         def __init__(self, device="cpu", dtype=dtype, model_options={}):
-            dtype = torch.bfloat16  # TODO: make this configurable
-            gemma_model = Gemma3ForConditionalGeneration.from_pretrained(
-                encoder_path,
-                local_files_only=True,
-                torch_dtype=dtype,
-            )
+            # Force context to target device if CUDA to prevent cuda:0 leakage
+            ctx = torch.no_grad()
+            if load_device_str.startswith("cuda:"):
+                try:
+                    target_idx = int(load_device_str.split(":")[-1])
+                    ctx = torch.cuda.device(target_idx)
+                except ValueError:
+                    pass
 
-            feature_extractor_linear = load_proj_matrix_from_ltxv(
-                ltxv_path,
-                "text_embedding_projection.",
-            )
-            if feature_extractor_linear is None:
-                feature_extractor_linear = load_proj_matrix_from_checkpoint(
-                    encoder_path / "proj_linear.safetensors"
+            with ctx:
+                dtype = torch.bfloat16 
+
+                # CRITICAL: Disable device_map to prevent Accelerate from "pinning" weights
+                gemma_model = Gemma3ForConditionalGeneration.from_pretrained(
+                    encoder_path,
+                    local_files_only=True,
+                    torch_dtype=dtype,
+                    device_map=None, 
+                    low_cpu_mem_usage=True,
                 )
 
-            embeddings_connector = load_video_embeddings_connector(ltxv_path)
-            audio_embeddings_connector = load_audio_embeddings_connector(ltxv_path)
-            super().__init__(
-                model=gemma_model,
-                feature_extractor_linear=feature_extractor_linear,
-                embeddings_connector=embeddings_connector,
-                audio_embeddings_connector=audio_embeddings_connector,
-                processor=processor,
-                dtype=dtype,
-                device=device,
-            )
+                feature_extractor_linear = load_proj_matrix_from_ltxv(
+                    ltxv_path,
+                    "text_embedding_projection.",
+                )
+                if feature_extractor_linear is None:
+                    feature_extractor_linear = load_proj_matrix_from_checkpoint(
+                        encoder_path / "proj_linear.safetensors"
+                    )
+
+                embeddings_connector = load_video_embeddings_connector(ltxv_path)
+                audio_embeddings_connector = load_audio_embeddings_connector(ltxv_path)
+
+                # Move to target device immediately inside the context
+                if load_device_str != "cpu":
+                    target_device = torch.device(load_device_str)
+                    gemma_model = gemma_model.to(target_device)
+                
+                super().__init__(
+                    model=gemma_model,
+                    feature_extractor_linear=feature_extractor_linear,
+                    embeddings_connector=embeddings_connector,
+                    audio_embeddings_connector=audio_embeddings_connector,
+                    processor=processor,
+                    dtype=dtype,
+                    device=device,
+                )
 
     return _LTXVGemmaTextEncoderModel
 
@@ -432,6 +696,7 @@ class LTXVGemmaCLIPModelLoader:
                     "INT",
                     {"default": 1024, "min": 16, "max": 131072, "step": 8},
                 ),
+                "device": (_get_device_list(), {"default": "auto"}),
             }
         }
 
@@ -442,7 +707,13 @@ class LTXVGemmaCLIPModelLoader:
     TITLE = "LTXV Gemma CLIP Loader"
     OUTPUT_NODE = False
 
-    def load_model(self, gemma_path: str, ltxv_path: str, max_length: int):
+    def load_model(
+        self,
+        gemma_path: str,
+        ltxv_path: str,
+        max_length: int,
+        device: str = "auto",
+    ):
         path = Path(folder_paths.get_full_path("text_encoders", gemma_path))
         model_root = path.parents[1]
         tokenizer_path = Path(find_matching_dir(model_root, "tokenizer.model"))
@@ -464,12 +735,24 @@ class LTXVGemmaCLIPModelLoader:
         except Exception as e:
             logger.warning(f"Could not load processor from {model_root}: {e}")
 
+        # Determine loading device string
+        if device.startswith("cuda:"):
+            load_device_str = device
+        elif device == "cpu":
+            load_device_str = "cpu"
+        else:
+            load_device_str = "cpu"  # default for auto
+
         clip_dtype = torch.bfloat16
         ltxv_full_path = folder_paths.get_full_path("checkpoints", ltxv_path)
         clip_target = comfy.supported_models_base.ClipTarget(
             tokenizer=tokenizer_class,
             clip=ltxv_gemma_clip(
-                gemma_model_path, ltxv_full_path, processor=processor, dtype=clip_dtype
+                gemma_model_path,
+                ltxv_full_path,
+                processor=processor,
+                dtype=clip_dtype,
+                load_device_str=load_device_str,
             ),
         )
 
@@ -513,6 +796,7 @@ class LTXVGemmaEnhancePrompt:
                     {"default": 512, "min": 32, "max": 1024, "step": 16},
                 ),
                 "bypass_i2v": ("BOOLEAN", {"default": False}),
+                "device": (_get_device_list(), {"default": "auto"}),
             },
             "optional": {
                 "image": ("IMAGE",),
@@ -540,27 +824,46 @@ class LTXVGemmaEnhancePrompt:
         system_prompt: str,
         max_tokens: int,
         bypass_i2v: bool,
+        device: str = "auto",
         image: Optional[torch.Tensor] = None,
         seed: int = 42,
     ):
         if not isinstance(seed, int):
             seed = 42
 
-        clip.load_model()
-        encoder = clip.cond_stage_model
+        # Device Handling Strategy
+        target_device = None
+        bypass_comfy_load = False
 
-        if not hasattr(encoder, "processor") or encoder.processor is None:
-            if hasattr(encoder, "gemma3_12b"):
-                model, processor = transformers_gemma3_from_encoder(encoder)
-            else:
-                raise ValueError(
-                    "Processor not loaded - enhancement not available. "
-                    "Ensure your model directory has chat_template.json, processor_config.json, "
-                    "and preprocessor_config.json files."
-                )
-        elif isinstance(encoder, LTXVGemmaTextEncoderModel):
-            model = encoder.model
-            processor = encoder.processor
+        if device.startswith("cuda:"):
+            target_device = torch.device(device)
+            bypass_comfy_load = True
+        elif device == "cpu":
+            target_device = torch.device("cpu")
+            bypass_comfy_load = True
+        
+        # If specific device is requested, BYPASS Comfy's load_model()
+        # This prevents Comfy from defaulting to cuda:0
+        if not bypass_comfy_load:
+            clip.load_model()
+            encoder = clip.cond_stage_model
+        else:
+            # Manually get the model wrapper. It might be on CPU (RAM).
+            # This avoids the overhead of checking Comfy's VRAM management
+            # which usually defaults to cuda:0.
+            encoder = clip.cond_stage_model
+            
+            # NOTE: If bypassing comfy load, we must ensure the model is
+            # moved to the target device inside the enhance function.
+            # The 'encoder' object here is LTXVGemmaTextEncoderModel.
+        
+        if encoder.processor is None:
+            raise ValueError(
+                "Processor not loaded - enhancement not available. "
+                "Ensure your model directory has chat_template.json, processor_config.json, "
+                "and preprocessor_config.json files."
+            )
+
         # Determine mode: use I2V if image is provided and not bypassed
         use_i2v = image is not None and not bypass_i2v
 
@@ -576,297 +879,23 @@ class LTXVGemmaEnhancePrompt:
 
         if use_i2v:
             pil_image = tensor_to_pil(image)
-            enhanced_prompt = enhance_i2v(
-                processor=processor,
-                model=model,
+            enhanced_prompt = encoder.enhance_i2v(
                 prompt=prompt,
                 image=pil_image,
                 system_prompt=system_prompt,
                 max_new_tokens=max_tokens,
                 seed=seed,
+                target_device=target_device,
             )
         else:
-            enhanced_prompt = enhance_t2v(
-                processor=processor,
-                model=model,
+            enhanced_prompt = encoder.enhance_t2v(
                 prompt=prompt,
                 system_prompt=system_prompt,
                 max_new_tokens=max_tokens,
                 seed=seed,
+                target_device=target_device,
             )
 
         enhanced_prompt = clean_response(enhanced_prompt)
 
         return (enhanced_prompt,)
-
-
-def _enhance(
-    processor: Gemma3Processor,
-    model: Gemma3ForConditionalGeneration,
-    messages: list,
-    image: Optional[Image.Image] = None,
-    max_new_tokens: int = 512,
-    seed: int = 42,
-) -> str:
-    """Common enhancement logic for both T2V and I2V modes."""
-    if processor is None:
-        raise ValueError("Processor not loaded - enhancement not available")
-
-    text = processor.tokenizer.apply_chat_template(
-        messages, tokenize=False, add_generation_prompt=True
-    )
-
-    model_inputs = processor(
-        text=text,
-        images=image,
-        return_tensors="pt",
-    ).to(model.device)
-
-    pad_token_id = (
-        processor.tokenizer.pad_token_id
-        if processor.tokenizer.pad_token_id is not None
-        else 0
-    )
-    model_inputs = _pad_inputs_for_attention_alignment(model_inputs, pad_token_id)
-
-    with (
-        torch.inference_mode(),
-        torch.random.fork_rng(devices=[model.device]),
-        torch.autocast(device_type=model.device.type, dtype=model.dtype),
-    ):
-        torch.manual_seed(seed)
-        outputs = model.generate(
-            **model_inputs,
-            max_new_tokens=max_new_tokens,
-            do_sample=True,
-            temperature=0.7,
-        )
-        generated_ids = outputs[0][len(model_inputs.input_ids[0]) :]
-        enhanced_prompt = processor.tokenizer.decode(
-            generated_ids, skip_special_tokens=True
-        )
-
-    return enhanced_prompt
-
-
-def enhance_t2v(
-    processor: Gemma3Processor,
-    model: Gemma3ForConditionalGeneration,
-    prompt: str,
-    system_prompt: str,
-    max_new_tokens: int = 512,
-    seed: int = 42,
-) -> str:
-    """Enhance a text prompt for T2V generation."""
-    messages = [
-        {"role": "system", "content": system_prompt},
-        {"role": "user", "content": f"User Raw Input Prompt: {prompt}."},
-    ]
-    return _enhance(
-        processor, model, messages, max_new_tokens=max_new_tokens, seed=seed
-    )
-
-
-def enhance_i2v(
-    processor: Gemma3Processor,
-    model: Gemma3ForConditionalGeneration,
-    prompt: str,
-    image: Image.Image,
-    system_prompt: str,
-    max_new_tokens: int = 512,
-    seed: int = 42,
-) -> str:
-    """Enhance a text prompt for I2V generation using a reference image."""
-    messages = [
-        {"role": "system", "content": system_prompt},
-        {
-            "role": "user",
-            "content": [
-                {"type": "image"},
-                {"type": "text", "text": f"User Raw Input Prompt: {prompt}."},
-            ],
-        },
-    ]
-    return _enhance(
-        processor,
-        model,
-        messages,
-        image=image,
-        max_new_tokens=max_new_tokens,
-        seed=seed,
-    )
-
-
-def _cat_with_padding(
-    tensor: torch.Tensor,
-    padding_length: int,
-    value: int | float,
-) -> torch.Tensor:
-    """Concatenate a tensor with a padding tensor of the given value."""
-    return torch.cat(
-        [
-            tensor,
-            torch.full(
-                (1, padding_length),
-                value,
-                dtype=tensor.dtype,
-                device=tensor.device,
-            ),
-        ],
-        dim=1,
-    )
-
-
-def _pad_inputs_for_attention_alignment(model_inputs, pad_token_id, alignment: int = 8):
-    """Pad sequence length to multiple of alignment for Flash Attention compatibility.
-
-    Flash Attention within SDPA requires sequence lengths aligned to 8 bytes.
-    This pads input_ids, attention_mask, and token_type_ids (if present) to prevent
-    'p.attn_bias_ptr is not correctly aligned' errors.
-    """
-    seq_len = model_inputs.input_ids.shape[1]
-    padded_len = ((seq_len + alignment - 1) // alignment) * alignment
-    padding_length = padded_len - seq_len
-
-    if padding_length > 0:
-        model_inputs["input_ids"] = _cat_with_padding(
-            model_inputs.input_ids, padding_length, pad_token_id
-        )
-
-        model_inputs["attention_mask"] = _cat_with_padding(
-            model_inputs.attention_mask, padding_length, 0
-        )
-
-        if (
-            "token_type_ids" in model_inputs
-            and model_inputs["token_type_ids"] is not None
-        ):
-            model_inputs["token_type_ids"] = _cat_with_padding(
-                model_inputs["token_type_ids"], padding_length, 0
-            )
-
-    return model_inputs
-
-
-def _locate_model_within_model(super_model, model_name):
-    class_name = MODEL_MAPPING_NAMES.get(model_name, None)
-    if class_name is None:
-        return None
-    for module in super_model.modules():
-        if module.__class__.__name__ == class_name:
-            return module
-    return None
-
-
-def _locate_unique_parameter_owner_by_leaf(
-    root: torch.nn.Module,
-    leaf_param_name: str,
-    must_have_in_path: Optional[str] = None,
-) -> Optional[Tuple[torch.nn.Module, str, torch.nn.Parameter, str]]:
-
-    modules = dict(root.named_modules())
-
-    candidates: List[Tuple[torch.nn.Module, str, torch.nn.Parameter, str]] = []
-    for full_name, p in root.named_parameters(recurse=True):
-        parts = full_name.split(".")
-        leaf = parts[-1]
-        if leaf != leaf_param_name:
-            continue
-        if must_have_in_path is not None and must_have_in_path not in parts:
-            continue
-
-        owner_path = ".".join(parts[:-1])
-        owner = modules.get(owner_path, root if owner_path == "" else None)
-        if owner is None:
-            continue
-        candidates.append((owner, leaf, p, full_name))
-
-    if not candidates:
-        return None
-    return candidates[0]
-
-
-def transformers_gemma3_from_encoder(encoder):
-    jsons_path = Path(__file__).parent / "gemma_configs"
-    config = Gemma3Config.from_json_file(jsons_path / "gemma3cfg.json")
-    with torch.device("meta"):
-        metamodel = Gemma3ForConditionalGeneration(config)
-    t_model_name = config.text_config.model_type
-    t_model = _locate_model_within_model(metamodel, t_model_name)
-    if t_model is None:
-        raise ValueError(
-            "Can't locate text model while converting text encoder to Gemma3ForConditionalGeneration"
-        )
-    t_model.load_state_dict(
-        encoder.gemma3_12b.transformer.model.state_dict(), assign=True, strict=False
-    )
-    v_tower_name = config.vision_config.model_type
-    v_tower = _locate_model_within_model(metamodel, v_tower_name)
-    if v_tower is None:
-        raise ValueError(
-            "Can't locate vision model while converting text encoder to Gemma3ForConditionalGeneration"
-        )
-    v_model = v_tower.vision_model
-    v_model.load_state_dict(
-        encoder.gemma3_12b.transformer.vision_model.state_dict(),
-        assign=True,
-        strict=False,
-    )
-    metamodel.multi_modal_projector.load_state_dict(
-        encoder.gemma3_12b.transformer.multi_modal_projector.state_dict(),
-        assign=True,
-        strict=False,
-    )
-    config = config.text_config
-    dim = getattr(config, "head_dim", config.hidden_size // config.num_attention_heads)
-    base = config.rope_local_base_freq
-
-    device = encoder.device
-    positions_length = len(v_model.embeddings.position_ids[0])
-    position_ids = torch.arange(
-        positions_length, dtype=torch.long, device="cpu"
-    ).unsqueeze(0)
-    v_model.embeddings.register_buffer("position_ids", position_ids)
-    embed_scale = torch.tensor(config.hidden_size**0.5, device=device)
-    t_model.embed_tokens.register_buffer("embed_scale", embed_scale)
-    local_rope_freqs = 1.0 / (
-        base
-        ** (
-            torch.arange(0, dim, 2, dtype=torch.int64).to(
-                device=device, dtype=torch.float
-            )
-            / dim
-        )
-    )
-    t_model.rotary_emb_local.register_buffer("inv_freq", local_rope_freqs)
-    rope_freqs, _ = ROPE_INIT_FUNCTIONS[config.rope_scaling["rope_type"]](
-        config, device
-    )
-    t_model.rotary_emb.register_buffer("inv_freq", rope_freqs)
-    lm_head_requires_grad = False
-    loc_result = _locate_unique_parameter_owner_by_leaf(
-        metamodel, leaf_param_name="weight", must_have_in_path="lm_head"
-    )
-    if loc_result is None:
-        raise ValueError(
-            "Can't locate lm_head while converting text encoder to Gemma3ForConditionalGeneration"
-        )
-    lm_head_owner, lm_head_attr, _, _ = loc_result
-    real_w = t_model.embed_tokens.weight
-    setattr(
-        lm_head_owner,
-        lm_head_attr,
-        torch.nn.Parameter(real_w, requires_grad=lm_head_requires_grad),
-    )
-    metamodel.to(device)
-
-    tokenizer_class = ltxv_gemma_tokenizer(jsons_path, max_length=1024)
-    image_processor = AutoImageProcessor.from_pretrained(
-        str(jsons_path),
-        local_files_only=True,
-    )
-    processor = Gemma3Processor(
-        image_processor=image_processor,
-        tokenizer=tokenizer_class().tokenizer,
-    )
-    return metamodel, processor
