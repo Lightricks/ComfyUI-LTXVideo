@@ -6,10 +6,15 @@ Provides the 3-block Gemma text encoder pipeline:
   3. Embeddings Processor (Video / AV) -- wraps Embeddings1DConnector(s)
 """
 
+import glob
+import importlib.util
 import json
+import logging
 import math
+import os
 from pathlib import Path
 
+import folder_paths
 import torch
 from comfy.utils import load_torch_file
 from einops import rearrange
@@ -20,6 +25,8 @@ from .embeddings_connector import (
     load_audio_embeddings_connector,
     load_video_embeddings_connector,
 )
+
+logger = logging.getLogger(__name__)
 
 _PREFIX_BASE = "model.diffusion_model."
 _PREFIX_TEXT_PROJ = "text_embedding_projection."
@@ -316,7 +323,8 @@ def _load_single_aggregate_embed_from_file(path, dtype):
 
 def _load_gguf_connector_sd(gguf_path):
     """Load connector + projection tensors from GGUF for LTXVGemmaCLIPModelLoader."""
-    import gguf as _gguf, numpy as np, torch, importlib.util
+    import gguf as _gguf
+    import numpy as np
     reader = _gguf.GGUFReader(str(gguf_path))
     sd = {}
     prefixes = ('video_embeddings_connector', 'audio_embeddings_connector', 'text_embedding_projection', 'audio_adaln_single')
@@ -340,8 +348,8 @@ def _load_gguf_connector_sd(gguf_path):
                     m = importlib.util.module_from_spec(spec); spec.loader.exec_module(m)
                     sd[f"model.diffusion_model.{t.name}"] = torch.tensor(m.dequantize(t.data, t.tensor_type), dtype=torch.float32).reshape(shape)
         except Exception as e:
-            print(f"  skip tensor {t.name}: {e}")
-    print(f"  GGUF connector: loaded {len(sd)} tensors")
+            logger.warning("Skipping GGUF tensor %s: %s", t.name, e)
+    logger.info("GGUF connector: loaded %d tensors", len(sd))
     return sd
 
 def load_text_embeddings_pipeline(
@@ -363,11 +371,6 @@ def load_text_embeddings_pipeline(
     """
     if ltxv_path and str(ltxv_path).endswith('.gguf'):
         sd = _load_gguf_connector_sd(ltxv_path)
-        print(f"DEBUG gguf_path={ltxv_path}")
-        print(f"DEBUG sd keys={len(sd)}, first connector key shapes:")
-        for k,v in list(sd.items())[:5]:
-            if 'video_embeddings_connector' in k:
-                print(f"  {k.split('video_embeddings_connector.')[-1]}: {v.shape}")
         transformer_config = {
             "caption_projection_first_linear": False,
             "caption_proj_input_norm": False,
@@ -383,10 +386,9 @@ def load_text_embeddings_pipeline(
             "audio_connector_attention_head_dim": 64,
         }
         # Merge text_embedding_projection keys from proj_linear.safetensors
-        import folder_paths as _fp, glob as _glob, os as _os
         _proj_candidates = [
-            f for d in _fp.get_folder_paths("text_encoders")
-            for f in _glob.glob(_os.path.join(d, "*/proj_linear.safetensors"))
+            f for d in folder_paths.get_folder_paths("text_encoders")
+            for f in glob.glob(os.path.join(d, "*/proj_linear.safetensors"))
         ]
         _proj_path = fallback_proj_path or (_proj_candidates[0] if _proj_candidates else None)
         if _proj_path is not None:
@@ -394,11 +396,11 @@ def load_text_embeddings_pipeline(
                 from comfy.utils import load_torch_file as _ltf2
                 proj_sd = _ltf2(str(_proj_path))
                 sd.update(proj_sd)
-                print(f"  Merged {len(proj_sd)} proj_linear keys from {_proj_path}")
+                logger.info("Merged %d proj_linear keys from %s", len(proj_sd), _proj_path)
             except Exception as e:
-                print(f"  Could not merge proj keys: {e}")
+                logger.warning("Could not merge proj_linear keys: %s", e)
         else:
-            print("  WARNING: proj_linear.safetensors not found")
+            logger.warning("proj_linear.safetensors not found; text projection may be missing")
     else:
         sd, metadata = load_torch_file(str(ltxv_path), return_metadata=True)
         config = json.loads(metadata.get("config", "{}"))

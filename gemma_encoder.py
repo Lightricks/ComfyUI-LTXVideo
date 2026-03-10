@@ -1,4 +1,5 @@
 import logging
+import os
 from glob import glob
 from pathlib import Path
 from typing import List, Optional, Tuple
@@ -157,7 +158,7 @@ class LTXVGemmaTextEncoderModel(torch.nn.Module):
         return self.model.load_state_dict(sd, strict=False)
 
     def memory_required(self, input_shape):
-        # Return a conservative estimate in bytesed(input_shape)
+        # Return a conservative estimate in bytes
         return self._model_memory_required
 
 
@@ -282,9 +283,8 @@ class LTXVGemmaCLIPModelLoader:
         if ltxv_path:
             ltxv_full_path = folder_paths.get_full_path("checkpoints", ltxv_path)
         else:
-            import glob as _glob, os as os
             _unet_dirs = folder_paths.get_folder_paths("unet")
-            _ggufs = [g for d in _unet_dirs for g in _glob.glob(os.path.join(d, "*.gguf"))]
+            _ggufs = [g for d in _unet_dirs for g in glob(os.path.join(d, "*.gguf"))]
             ltxv_full_path = _ggufs[0] if _ggufs else str(gemma_model_path / "proj_linear.safetensors")
             logger.info(f"GGUF connector path: {ltxv_full_path}")
         clip_target = comfy.supported_models_base.ClipTarget(
