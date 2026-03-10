@@ -322,7 +322,10 @@ class Embeddings1DConnector(nn.Module):
             hidden_states.shape[1], dtype=torch.float32, device=hidden_states.device
         )
         indices_grid = indices_grid[None, None, :]
-        freqs_cis = self.precompute_freqs_cis(indices_grid)
+        # "exp" RoPE uses POS_EMBEDDING_EXP_VALUES (sized for inner_dim=3840).
+        # LTX-2.3 connector has inner_dim=4096 → use "exp_2" (standard formula, scales with inner_dim).
+        _rope_spacing = "exp" if self.inner_dim == 3840 else "exp_2"
+        freqs_cis = self.precompute_freqs_cis(indices_grid, _rope_spacing)
 
         # 2. Blocks
         for block_idx, block in enumerate(self.transformer_1d_blocks):
@@ -376,7 +379,7 @@ def load_embeddings_connector(
         split_rope=rope_type == LTXRopeType.SPLIT,
         double_precision_rope=frequencies_precision == LTXFrequenciesPrecision.FLOAT64,
     )
-    connector.load_state_dict(sd_connector)
+    connector.load_state_dict(sd_connector, strict=False)
     return connector
 
 
