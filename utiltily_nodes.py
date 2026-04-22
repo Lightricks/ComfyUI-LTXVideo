@@ -35,6 +35,20 @@ def _build_av_meta(video_latent: dict, audio_latent: dict) -> dict:
     }
 
 
+@comfy_node(name="LTXFloatToInt", description="Float To Int")
+class FloatToInt:
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {"required": {"a": ("FLOAT", {"default": 0.0})}}
+
+    RETURN_TYPES = ("INT",)
+    FUNCTION = "op"
+    CATEGORY = "math/conversion"
+
+    def op(self, a: float) -> tuple[int]:
+        return (round(a),)
+
+
 @comfy_node(description="Image to CPU")
 class ImageToCPU:
     @classmethod

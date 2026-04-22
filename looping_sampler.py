@@ -6,7 +6,7 @@ import comfy
 import torch
 from comfy.nested_tensor import NestedTensor
 
-from .easy_samplers import LTXVBaseSampler, LTXVExtendSampler, LTXVInContextSampler
+from .easy_samplers import LTXVBaseSampler, LTXVExtendSampler, LTXVInContextSampler, _get_raw_conds_from_guider
 from .latents import LTXVDilateLatent, LTXVSelectLatents
 from .nodes_registry import comfy_node
 
@@ -231,6 +231,16 @@ class LTXVLoopingSampler:
                         "tooltip": "The latents to use for normalizing the output latents, they will be used to normalize the output latents to the same statistics as the input latents."
                     },
                 ),
+                "optional_negative_index_strength": (
+                    "FLOAT",
+                    {
+                        "default": 1.0,
+                        "min": 0.0,
+                        "max": 1.0,
+                        "step": 0.01,
+                        "tooltip": "The strength of the negative-index latent conditioning. Lower values reduce the influence of the reference image(s) provided via optional_negative_index_latents.",
+                    },
+                ),
             },
         }
 
@@ -246,9 +256,14 @@ class LTXVLoopingSampler:
             return None
         tile_samples = latent_dict["samples"][:, :, :, v_start:v_end, h_start:h_end]
         if "noise_mask" in latent_dict and latent_dict["noise_mask"] is not None:
-            tile_masks = latent_dict["noise_mask"][
-                :, :, :, v_start:v_end, h_start:h_end
-            ]
+            noise_mask = latent_dict["noise_mask"]
+            # If the noise mask has broadcast spatial dims (1x1), keep them
+            # as-is rather than slicing (which would produce zero-size dims
+            # for tiles starting past index 0).
+            if noise_mask.ndim == 5 and noise_mask.shape[3] <= 1 and noise_mask.shape[4] <= 1:
+                tile_masks = noise_mask
+            else:
+                tile_masks = noise_mask[:, :, :, v_start:v_end, h_start:h_end]
             return {"samples": tile_samples, "noise_mask": tile_masks}
         else:
             return {"samples": tile_samples}
@@ -697,17 +712,24 @@ class LTXVLoopingSampler:
         """Prepare the guider for a specific chunk, handling optional positive conditionings."""
         if optional_positive_conditionings is not None:
             new_guider = copy.copy(guider)
-            positive, negative = guider.raw_conds
+            positive, negative = _get_raw_conds_from_guider(guider)
             # Use the conditioning at chunk_index, or the last one if we've run out
             conditioning_index = min(
                 chunk_index, len(optional_positive_conditionings) - 1
             )
+            new_cond = optional_positive_conditionings[conditioning_index]
+            print(
+                f"[LoopingSampler] Chunk {chunk_index}: using prompt {conditioning_index} "
+                f"(of {len(optional_positive_conditionings)}), "
+                f"cond shape={new_cond[0][0].shape if new_cond and len(new_cond[0]) > 0 else 'N/A'}, "
+                f"has frame_rate={'frame_rate' in new_cond[0][1] if new_cond and len(new_cond[0]) > 1 else 'N/A'}"
+            )
             new_guider.set_conds(
-                optional_positive_conditionings[conditioning_index],
+                new_cond,
                 negative,
             )
             new_guider.raw_conds = (
-                optional_positive_conditionings[conditioning_index],
+                new_cond,
                 negative,
             )
             return new_guider
@@ -807,7 +829,7 @@ class LTXVLoopingSampler:
         cond_image_strength=1.0,
         optional_guiding_latents=None,
         optional_negative_index_latents=None,
-        optional_negative_index_strength=1.0,  # hidden interface
+        optional_negative_index_strength=1.0,
         optional_positive_conditionings=None,
         guiding_start_step=0,
         guiding_end_step=1000,
@@ -1087,10 +1109,22 @@ class MultiPromptProvider:
                     {
                         "multiline": True,
                         "dynamicPrompts": True,
-                        "tooltip": "Prompts to encode, one per line. Each prompt will be encoded separately. Each prompt will be used in one temporal_tile in LTXVLoopingSampler.",
+                        "tooltip": "Prompts to encode, separated by |. Each prompt will be encoded separately. Each prompt will be used in one temporal_tile in LTXVLoopingSampler.",
                     },
                 ),
                 "clip": ("CLIP", {"tooltip": "CLIP model to encode the prompts."}),
+            },
+            "optional": {
+                "frame_rate": (
+                    "FLOAT",
+                    {
+                        "default": 24.0,
+                        "min": 0.0,
+                        "max": 1000.0,
+                        "step": 0.01,
+                        "tooltip": "Frame rate to embed in the conditioning (same as LTXVConditioning). Required for proper temporal and audio generation.",
+                    },
+                ),
             },
         }
 
@@ -1100,11 +1134,16 @@ class MultiPromptProvider:
     FUNCTION = "get_prompt_list"
     CATEGORY = "prompt"
 
-    def get_prompt_list(self, prompts, clip):
+    def get_prompt_list(self, prompts, clip, frame_rate=24.0):
+        import node_helpers
+
         prompt_list = prompts.split("|")
         prompt_list = [prompt.strip() for prompt in prompt_list]
         encoded_prompt_list = [
-            clip.encode_from_tokens_scheduled(clip.tokenize(prompt))
+            node_helpers.conditioning_set_values(
+                clip.encode_from_tokens_scheduled(clip.tokenize(prompt)),
+                {"frame_rate": frame_rate},
+            )
             for prompt in prompt_list
         ]
         return (encoded_prompt_list,)
