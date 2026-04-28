@@ -1,0 +1,4 @@
+{
+  "image_seq_length": 256,
+  "processor_class": "Gemma3Processor"
+}

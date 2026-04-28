@@ -19,7 +19,7 @@ class LTXVPatcherVAE:
     TITLE = "LTXV VAE Patcher"
 
     def patch(self, vae):
-        from .vae_patcher.patch import patch_vae
+        from q8_kernels.integration.patch_vae import patch_vae
 
         vae_model = vae.first_stage_model
         vae.memory_used_decode = (

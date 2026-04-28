@@ -5,7 +5,7 @@ import comfy
 import torch
 
 from .easy_samplers import LTXVBaseSampler, LTXVExtendSampler, LTXVInContextSampler
-from .latents import LTXVSelectLatents
+from .latents import LTXVDilateLatent, LTXVSelectLatents
 from .nodes_registry import comfy_node
 
 
@@ -16,7 +16,9 @@ class TileConfig:
     tile_latents: dict
     tile_guiding_latents: dict
     tile_negative_index_latents: dict
-    tile_cond_image: torch.Tensor
+    tile_keyframes: torch.Tensor
+    keyframe_per_tile_indices: list
+    tile_normalizing_latents: dict
     tile_height: int
     tile_width: int
     v: int
@@ -33,6 +35,7 @@ class SamplingConfig:
     temporal_tile_size: int
     temporal_overlap: int
     temporal_overlap_cond_strength: float
+    cond_image_strength: float
     guiding_strength: float
     adain_factor: float
     optional_negative_index: int
@@ -42,7 +45,8 @@ class SamplingConfig:
     width_scale_factor: int
     height_scale_factor: int
     per_tile_seed_offsets: list
-    per_tile_use_negative_latents: list
+    guiding_start_step: int
+    guiding_end_step: int
 
 
 @dataclass
@@ -81,16 +85,6 @@ class LTXVLoopingSampler:
                         "tooltip": "The latents to use for creating the long video, they can be guiding latents or empty latents when no guidance is used."
                     },
                 ),
-                "guiding_strength": (
-                    "FLOAT",
-                    {
-                        "default": 1.0,
-                        "min": 0.0,
-                        "max": 1.0,
-                        "step": 0.01,
-                        "tooltip": "The strength of the conditioning on guiding latents, when optional_guiding_latents are provided.",
-                    },
-                ),
                 "temporal_tile_size": (
                     "INT",
                     {
@@ -111,6 +105,16 @@ class LTXVLoopingSampler:
                         "tooltip": "The overlap between the temporal tiles, in pixel frames.",
                     },
                 ),
+                "guiding_strength": (
+                    "FLOAT",
+                    {
+                        "default": 1.0,
+                        "min": 0.0,
+                        "max": 1.0,
+                        "step": 0.01,
+                        "tooltip": "The strength of the conditioning on guiding latents, when optional_guiding_latents are provided.",
+                    },
+                ),
                 "temporal_overlap_cond_strength": (
                     "FLOAT",
                     {
@@ -119,6 +123,16 @@ class LTXVLoopingSampler:
                         "max": 1.0,
                         "step": 0.01,
                         "tooltip": "The strength of the conditioning on the latents from the previous temporal tile.",
+                    },
+                ),
+                "cond_image_strength": (
+                    "FLOAT",
+                    {
+                        "default": 1.0,
+                        "min": 0.0,
+                        "max": 1.0,
+                        "step": 0.01,
+                        "tooltip": "The strength of the conditioning on the optional_cond_images.",
                     },
                 ),
                 "horizontal_tiles": (
@@ -150,7 +164,7 @@ class LTXVLoopingSampler:
                 ),
             },
             "optional": {
-                "optional_cond_image": (
+                "optional_cond_images": (
                     "IMAGE",
                     {
                         "tooltip": "The image to use for conditioning the first frame in the video (i2v setup). If not provided, the first frame will be unconditioned (t2v setup). The image will be resized to the size of the first frame."
@@ -184,6 +198,37 @@ class LTXVLoopingSampler:
                         "tooltip": "Special optional latents to condition on a negative index before each new temporal tile as a way to provide long term context during video generation."
                     },
                 ),
+                "guiding_start_step": (
+                    "INT",
+                    {
+                        "default": 0,
+                        "min": 0,
+                        "max": 1000,
+                        "tooltip": "The step at which the guiding latents start to be used.",
+                    },
+                ),
+                "guiding_end_step": (
+                    "INT",
+                    {
+                        "default": 1000,
+                        "min": 0,
+                        "max": 1000,
+                        "tooltip": "The step at which the guiding latents stop to be used.",
+                    },
+                ),
+                "optional_cond_image_indices": (
+                    "STRING",
+                    {
+                        "default": "0",
+                        "tooltip": "The indices of the keyframes to use for the sampling, separated by commas. The indices are counted from the end of the video.",
+                    },
+                ),
+                "optional_normalizing_latents": (
+                    "LATENT",
+                    {
+                        "tooltip": "The latents to use for normalizing the output latents, they will be used to normalize the output latents to the same statistics as the input latents."
+                    },
+                ),
             },
         }
 
@@ -198,14 +243,21 @@ class LTXVLoopingSampler:
         if latent_dict is None:
             return None
         tile_samples = latent_dict["samples"][:, :, :, v_start:v_end, h_start:h_end]
-        return {"samples": tile_samples}
+        if "noise_mask" in latent_dict and latent_dict["noise_mask"] is not None:
+            tile_masks = latent_dict["noise_mask"][
+                :, :, :, v_start:v_end, h_start:h_end
+            ]
+            return {"samples": tile_samples, "noise_mask": tile_masks}
+        else:
+            return {"samples": tile_samples}
 
     def _extract_spatial_tile(
         self,
-        samples,
+        latents,
         optional_guiding_latents,
         optional_negative_index_latents,
-        optional_cond_image,
+        optional_normalizing_latents,
+        optional_keyframes,
         v_start,
         v_end,
         h_start,
@@ -216,7 +268,7 @@ class LTXVLoopingSampler:
         """Extract spatial tiles from all inputs for a given spatial region."""
         # Extract spatial tile from latents
         tile_latents = self._extract_latent_spatial_tile(
-            {"samples": samples}, v_start, v_end, h_start, h_end
+            latents, v_start, v_end, h_start, h_end
         )
 
         # Extract spatial tile from guiding latents if provided
@@ -229,25 +281,30 @@ class LTXVLoopingSampler:
             optional_negative_index_latents, v_start, v_end, h_start, h_end
         )
 
-        # Extract spatial tile from conditioning image if provided
-        tile_cond_image = None
-        if optional_cond_image is not None:
+        # Extract spatial tile from normalizing latents if provided
+        tile_normalizing_latents = self._extract_latent_spatial_tile(
+            optional_normalizing_latents, v_start, v_end, h_start, h_end
+        )
+
+        if optional_keyframes is not None:
             # Scale coordinates for image
             img_h_start = v_start * height_scale_factor
             img_h_end = v_end * height_scale_factor
             img_w_start = h_start * width_scale_factor
             img_w_end = h_end * width_scale_factor
 
-            # Extract image tile
-            tile_cond_image = optional_cond_image[
+            tile_keyframes = optional_keyframes[
                 :, img_h_start:img_h_end, img_w_start:img_w_end, :
             ]
+        else:
+            tile_keyframes = None
 
         return (
             tile_latents,
             tile_guiding_latents,
             tile_negative_index_latents,
-            tile_cond_image,
+            tile_keyframes,
+            tile_normalizing_latents,
         )
 
     def _process_temporal_chunks(
@@ -309,9 +366,28 @@ class LTXVLoopingSampler:
             seed_offset = self._get_per_tile_value(
                 sampling_config.per_tile_seed_offsets, i_temporal_tile
             )
-            use_negative_latents = self._get_per_tile_value(
-                sampling_config.per_tile_use_negative_latents, i_temporal_tile
-            )
+
+            if tile_config.tile_normalizing_latents is not None:
+                normalizing_latent_chunk = LTXVSelectLatents().select_latents(
+                    tile_config.tile_normalizing_latents,
+                    start_index,
+                    min(
+                        end_index - 1,
+                        tile_config.tile_normalizing_latents["samples"].shape[2] - 1,
+                    ),
+                )[0]
+                normalize_per_frame = True
+                print(
+                    "Normalizing latents provided, normalizing per frame and channel with factor",
+                    sampling_config.adain_factor,
+                )
+            else:
+                normalizing_latent_chunk = first_tile_out_latents
+                normalize_per_frame = False
+                print(
+                    "No normalizing latents provided, normalizing per channel using first chunk with factor",
+                    sampling_config.adain_factor,
+                )
 
             model_config.noise.seed = self._calculate_tile_seed(
                 tile_config.first_seed,
@@ -330,6 +406,30 @@ class LTXVLoopingSampler:
                 chunk_index,
             )
 
+            this_chunk_keyframe_indices = [
+                in_tile_index
+                for (tile_index, in_tile_index) in tile_config.keyframe_per_tile_indices
+                if tile_index == i_temporal_tile
+            ]
+            if this_chunk_keyframe_indices and tile_config.tile_keyframes is not None:
+                this_chunk_keyframes = torch.cat(
+                    [
+                        tile_config.tile_keyframes[i_keyframe].unsqueeze(0)
+                        for (i_keyframe, (tile_index, in_tile_index)) in enumerate(
+                            tile_config.keyframe_per_tile_indices
+                        )
+                        if tile_index == i_temporal_tile
+                    ]
+                )
+                print(
+                    f"Chunk {i_temporal_tile} keyframe indices: {this_chunk_keyframe_indices}"
+                )
+            else:
+                this_chunk_keyframes = None
+                print(f"Chunk {i_temporal_tile} has no keyframes")
+            this_chunk_keyframe_indices = ",".join(
+                [str(i) for i in this_chunk_keyframe_indices]
+            )
             if start_index == 0:
                 if tile_config.tile_guiding_latents is not None:
                     tile_out_latents = LTXVInContextSampler().sample(
@@ -339,18 +439,17 @@ class LTXVLoopingSampler:
                         sigmas=model_config.sigmas,
                         noise=model_config.noise,
                         guiding_latents=guiding_latent_chunk,
-                        optional_cond_image=tile_config.tile_cond_image,
+                        optional_cond_images=this_chunk_keyframes,
+                        optional_cond_indices=this_chunk_keyframe_indices,
                         num_frames=-1,
-                        optional_negative_index_latents=(
-                            tile_config.tile_negative_index_latents
-                            if use_negative_latents
-                            else None
-                        ),
+                        optional_negative_index_latents=tile_config.tile_negative_index_latents,
                         optional_negative_index=sampling_config.optional_negative_index,
                         optional_negative_index_strength=sampling_config.optional_negative_index_strength,
                         optional_initialization_latents=latent_chunk,
-                        optional_cond_strength=sampling_config.temporal_overlap_cond_strength,
-                        optional_guiding_strength=sampling_config.guiding_strength,
+                        cond_image_strength=sampling_config.cond_image_strength,
+                        guiding_strength=sampling_config.guiding_strength,
+                        guiding_start_step=sampling_config.guiding_start_step,
+                        guiding_end_step=sampling_config.guiding_end_step,
                     )[0]
                 else:
                     tile_out_latents = LTXVBaseSampler().sample(
@@ -373,19 +472,17 @@ class LTXVLoopingSampler:
                         * sampling_config.width_scale_factor,
                         height=tile_config.tile_height
                         * sampling_config.height_scale_factor,
-                        optional_cond_images=tile_config.tile_cond_image,
-                        optional_cond_indices="0",
+                        optional_cond_images=this_chunk_keyframes,
+                        optional_cond_indices=this_chunk_keyframe_indices,
                         crop="center",
                         crf=30,
-                        strength=sampling_config.temporal_overlap_cond_strength,
-                        optional_negative_index_latents=(
-                            tile_config.tile_negative_index_latents
-                            if use_negative_latents
-                            else None
-                        ),
+                        strength=sampling_config.cond_image_strength,
+                        optional_negative_index_latents=tile_config.tile_negative_index_latents,
                         optional_negative_index=sampling_config.optional_negative_index,
                         optional_negative_index_strength=sampling_config.optional_negative_index_strength,
                         optional_initialization_latents=latent_chunk,
+                        guiding_start_step=sampling_config.guiding_start_step,
+                        guiding_end_step=sampling_config.guiding_end_step,
                     )[0]
                 first_tile_out_latents = copy.deepcopy(tile_out_latents)
             else:
@@ -406,17 +503,19 @@ class LTXVLoopingSampler:
                     guider=new_guider,
                     strength=sampling_config.temporal_overlap_cond_strength,
                     guiding_strength=sampling_config.guiding_strength,
+                    cond_image_strength=sampling_config.cond_image_strength,
                     optional_guiding_latents=guiding_latent_chunk,
-                    optional_reference_latents=first_tile_out_latents,
+                    optional_cond_images=this_chunk_keyframes,
+                    optional_cond_indices=this_chunk_keyframe_indices,
+                    optional_reference_latents=normalizing_latent_chunk,
+                    normalize_per_frame=normalize_per_frame,
                     adain_factor=sampling_config.adain_factor,
-                    optional_negative_index_latents=(
-                        tile_config.tile_negative_index_latents
-                        if use_negative_latents
-                        else None
-                    ),
+                    optional_negative_index_latents=tile_config.tile_negative_index_latents,
                     optional_negative_index=sampling_config.optional_negative_index,
                     optional_negative_index_strength=sampling_config.optional_negative_index_strength,
                     optional_initialization_latents=latent_chunk,
+                    guiding_start_step=sampling_config.guiding_start_step,
+                    guiding_end_step=sampling_config.guiding_end_step,
                 )[0]
 
             chunk_index += 1
@@ -424,25 +523,33 @@ class LTXVLoopingSampler:
         return tile_out_latents
 
     def _create_spatial_weights(
-        self, tile_samples, v, h, horizontal_tiles, vertical_tiles, spatial_overlap
+        self,
+        tile_shape,
+        v,
+        h,
+        horizontal_tiles,
+        vertical_tiles,
+        spatial_overlap,
+        device,
+        dtype,
     ):
         """Create blending weights for spatial tiles."""
-        tile_weights = torch.ones_like(tile_samples, device=tile_samples.device)
+        tile_weights = torch.ones(tile_shape, device=device, dtype=dtype)
 
         # Apply horizontal blending weights
         if h > 0:  # Left overlap
-            h_blend = torch.linspace(0, 1, spatial_overlap, device=tile_samples.device)
+            h_blend = torch.linspace(0, 1, spatial_overlap, device=device, dtype=dtype)
             tile_weights[:, :, :, :, :spatial_overlap] *= h_blend.view(1, 1, 1, 1, -1)
         if h < horizontal_tiles - 1:  # Right overlap
-            h_blend = torch.linspace(1, 0, spatial_overlap, device=tile_samples.device)
+            h_blend = torch.linspace(1, 0, spatial_overlap, device=device, dtype=dtype)
             tile_weights[:, :, :, :, -spatial_overlap:] *= h_blend.view(1, 1, 1, 1, -1)
 
         # Apply vertical blending weights
         if v > 0:  # Top overlap
-            v_blend = torch.linspace(0, 1, spatial_overlap, device=tile_samples.device)
+            v_blend = torch.linspace(0, 1, spatial_overlap, device=device, dtype=dtype)
             tile_weights[:, :, :, :spatial_overlap, :] *= v_blend.view(1, 1, 1, -1, 1)
         if v < vertical_tiles - 1:  # Bottom overlap
-            v_blend = torch.linspace(1, 0, spatial_overlap, device=tile_samples.device)
+            v_blend = torch.linspace(1, 0, spatial_overlap, device=device, dtype=dtype)
             tile_weights[:, :, :, -spatial_overlap:, :] *= v_blend.view(1, 1, 1, -1, 1)
 
         return tile_weights
@@ -470,11 +577,22 @@ class LTXVLoopingSampler:
         """Get a value from a per-tile configuration list, using the last value if the list is shorter."""
         return value_list[min(tile_index, len(value_list) - 1)]
 
-    def _parse_per_tile_config(self, config_string, default_value, converter_func):
-        """Parse a comma-separated per-tile configuration string into a list with type conversion."""
+    def _parse_comma_separated_string(
+        self, config_string, default_value, converter_func, optional_total_size=None
+    ):
+        """Parse a comma-separated configuration string into a list with type conversion."""
         if config_string == "":
             config_string = default_value
-        return [converter_func(item.strip()) for item in config_string.split(",")]
+        values = [converter_func(item.strip()) for item in config_string.split(",")]
+
+        def handle_negative_index(value):
+            if value < 0:
+                return value + optional_total_size
+            return value
+
+        if optional_total_size is not None:
+            values = [handle_negative_index(value) for value in values]
+        return values
 
     def _prepare_guider_for_chunk(
         self, guider, optional_positive_conditionings, chunk_index
@@ -499,6 +617,78 @@ class LTXVLoopingSampler:
         else:
             return guider
 
+    def _calculate_keyframe_per_tile_indices(
+        self, keyframe_indices, temporal_tile_size, temporal_overlap, num_frames
+    ):
+        """
+        Calculate which temporal tile each keyframe falls into.
+
+        Returns a list of tuples (temporal_tile_index, in_tile_index) for each keyframe.
+        - temporal_tile_index: which temporal tile the keyframe falls in
+        - in_tile_index: index within that specific temporal tile
+
+        First tile: frames [0, temporal_tile_size - 8] (size = temporal_tile_size - 8 + 1)
+        Subsequent tiles follow the pattern from _process_temporal_chunks:
+        - Tile n starts at: n * (temporal_tile_size - temporal_overlap)
+        - Tile n ends at: temporal_tile_size + n * (temporal_tile_size - temporal_overlap) - 1
+
+        For subsequent tiles, keyframes with in_tile_index < temporal_overlap
+        don't count as falling in that tile.
+        """
+        result = []
+
+        for keyframe_index in keyframe_indices:
+            if keyframe_index >= num_frames:
+                print(
+                    f"Keyframe index {keyframe_index} is greater than num_frames {num_frames}, skipping"
+                )
+                continue
+            # First tile (tile 0): covers frames [0, temporal_tile_size - 8]
+            if keyframe_index < temporal_tile_size - 7:
+                result.append((0, keyframe_index))
+                continue
+
+            # Find which subsequent tile this keyframe could fall into
+            # Tile n starts at: n * (temporal_tile_size - temporal_overlap) - 7
+            # Tile n ends at: temporal_tile_size + n * (temporal_tile_size - temporal_overlap) - 1 - 7
+
+            tile_step = temporal_tile_size - temporal_overlap
+            tile_index = 1
+
+            while True:
+                tile_start = tile_index * tile_step - 7
+                tile_end = temporal_tile_size + tile_index * tile_step - 1 - 7
+                print(
+                    f"Tile {tile_index} starts at {tile_start} and ends at {tile_end}"
+                )
+
+                # Check if keyframe falls within this tile's range
+                if keyframe_index <= tile_end:
+                    in_tile_index = (
+                        keyframe_index - tile_start - 7
+                    )  # this extra  -7 is needed because the first latent is re-interpreted inside the temporal tile as 1 pixel frame
+
+                    # For tiles > 0, if in_tile_index < temporal_overlap,
+                    # the keyframe doesn't "fall" in this tile - assign to previous tile
+                    if in_tile_index < temporal_overlap:
+                        tile_index -= 1
+                        if tile_index == 0:
+                            # Previous tile is the first tile
+                            in_tile_index = keyframe_index
+                        else:
+                            # Previous tile starts at (tile_index) * tile_step
+                            prev_start = tile_start - tile_step
+                            in_tile_index = (
+                                keyframe_index - prev_start - 7
+                            )  # same reason as above
+
+                    result.append((tile_index, in_tile_index))
+                    break
+
+                tile_index += 1
+
+        return result
+
     def sample(
         self,
         model,
@@ -516,18 +706,27 @@ class LTXVLoopingSampler:
         horizontal_tiles,
         vertical_tiles,
         spatial_overlap,
-        optional_cond_image=None,
+        optional_cond_images=None,
+        cond_image_strength=1.0,
         optional_guiding_latents=None,
         optional_negative_index_latents=None,
-        optional_negative_index=-1,
-        optional_negative_index_strength=1.0,
+        optional_negative_index_strength=1.0,  # hidden interface
         optional_positive_conditionings=None,
-        per_tile_seed_offsets="0",
-        per_tile_use_negative_latents="1",
+        guiding_start_step=0,
+        guiding_end_step=1000,
+        optional_cond_image_indices="0",
+        optional_normalizing_latents=None,
+        per_tile_seed_offsets="0",  # hidden interface
     ):
-
         # Get dimensions and prepare for spatial tiling
         samples = latents["samples"]
+        if (
+            isinstance(samples, comfy.nested_tensor.NestedTensor)
+            and len(samples.tensors) == 2
+        ):
+            raise ValueError(
+                "LoopingSampler currently does not support Audio Visual latents. please only use video latents."
+            )
         batch, channels, frames, height, width = samples.shape
         time_scale_factor, width_scale_factor, height_scale_factor = (
             vae.downscale_index_formula
@@ -536,18 +735,52 @@ class LTXVLoopingSampler:
         temporal_overlap = temporal_overlap // time_scale_factor
         first_seed = noise.seed
 
-        per_tile_seed_offsets = self._parse_per_tile_config(
+        per_tile_seed_offsets = self._parse_comma_separated_string(
             per_tile_seed_offsets, "0", int
         )
-        per_tile_use_negative_latents = self._parse_per_tile_config(
-            per_tile_use_negative_latents, "1", lambda x: bool(int(x))
+
+        keyframe_indices = self._parse_comma_separated_string(
+            optional_cond_image_indices,
+            "0",
+            int,
+            optional_total_size=frames * time_scale_factor - 7,
         )
+        keyframe_per_tile_indices = self._calculate_keyframe_per_tile_indices(
+            keyframe_indices,
+            temporal_tile_size * time_scale_factor,
+            temporal_overlap * time_scale_factor,
+            frames * time_scale_factor - 7,
+        )
+        print(f"Keyframe per tile indices: {keyframe_per_tile_indices}")
+        if optional_cond_images is not None:
+            optional_keyframes = (
+                comfy.utils.common_upscale(
+                    optional_cond_images.movedim(-1, 1),
+                    width * width_scale_factor,
+                    height * height_scale_factor,
+                    "bilinear",
+                    crop="center",
+                )
+                .movedim(1, -1)
+                .clamp(0, 1)
+            )
+        else:
+            optional_keyframes = None
 
         if optional_guiding_latents is not None:
+            guide = optional_guiding_latents["samples"]
             assert (
-                latents["samples"].shape[2]
-                == optional_guiding_latents["samples"].shape[2]
+                samples.shape[2] == guide.shape[2]
             ), "The number of frames in the latents and optional_guiding_latents must be the same"
+            assert (
+                samples.shape[3] % guide.shape[3] == 0
+                and samples.shape[4] % guide.shape[4] == 0
+            ), "The ratio of the height and width of the latents and optional_guiding_latents must be an integer"
+            grid_size_h = samples.shape[3] // guide.shape[3]
+            grid_size_w = samples.shape[4] // guide.shape[4]
+            optional_guiding_latents = LTXVDilateLatent().dilate_latent(
+                optional_guiding_latents, grid_size_w, grid_size_h
+            )[0]
 
         # Calculate tile sizes with overlap
         base_tile_height = (
@@ -557,21 +790,9 @@ class LTXVLoopingSampler:
             width + (horizontal_tiles - 1) * spatial_overlap
         ) // horizontal_tiles
 
-        # Initialize output tensor and weight tensor
-        final_output = torch.zeros_like(samples, device=samples.device)
-        weights = torch.zeros_like(samples, device=samples.device)
-
-        if optional_cond_image is not None:
-            img_height = height * height_scale_factor
-            img_width = width * width_scale_factor
-            optional_cond_image = comfy.utils.common_upscale(
-                optional_cond_image.movedim(-1, 1),
-                img_width,
-                img_height,
-                "bicubic",
-                crop="center",
-            ).movedim(1, -1)
-            img_batch, img_height, img_width, img_channels = optional_cond_image.shape
+        # Output tensors will be initialized after first tile to get correct temporal dimension
+        final_output = None
+        weights = None
 
         # Process each spatial tile
         for v in range(vertical_tiles):
@@ -605,12 +826,14 @@ class LTXVLoopingSampler:
                     tile_latents,
                     tile_guiding_latents,
                     tile_negative_index_latents,
-                    tile_cond_image,
+                    tile_keyframes,
+                    tile_normalizing_latents,
                 ) = self._extract_spatial_tile(
-                    samples,
+                    latents,
                     optional_guiding_latents,
                     optional_negative_index_latents,
-                    optional_cond_image,
+                    optional_normalizing_latents,
+                    optional_keyframes,
                     v_start,
                     v_end,
                     h_start,
@@ -624,7 +847,9 @@ class LTXVLoopingSampler:
                     tile_latents=tile_latents,
                     tile_guiding_latents=tile_guiding_latents,
                     tile_negative_index_latents=tile_negative_index_latents,
-                    tile_cond_image=tile_cond_image,
+                    tile_keyframes=tile_keyframes,
+                    keyframe_per_tile_indices=keyframe_per_tile_indices,
+                    tile_normalizing_latents=tile_normalizing_latents,
                     tile_height=tile_height,
                     tile_width=tile_width,
                     v=v,
@@ -638,16 +863,22 @@ class LTXVLoopingSampler:
                     temporal_tile_size=temporal_tile_size,
                     temporal_overlap=temporal_overlap,
                     temporal_overlap_cond_strength=temporal_overlap_cond_strength,
+                    cond_image_strength=cond_image_strength,
                     guiding_strength=guiding_strength,
                     adain_factor=adain_factor,
-                    optional_negative_index=optional_negative_index,
+                    optional_negative_index=(
+                        -1 * tile_negative_index_latents["samples"].shape[2]
+                        if tile_negative_index_latents is not None
+                        else -1
+                    ),
                     optional_negative_index_strength=optional_negative_index_strength,
                     optional_positive_conditionings=optional_positive_conditionings,
                     time_scale_factor=time_scale_factor,
                     width_scale_factor=width_scale_factor,
                     height_scale_factor=height_scale_factor,
                     per_tile_seed_offsets=per_tile_seed_offsets,
-                    per_tile_use_negative_latents=per_tile_use_negative_latents,
+                    guiding_start_step=guiding_start_step,
+                    guiding_end_step=guiding_end_step,
                 )
 
                 model_config = ModelConfig(
@@ -665,19 +896,36 @@ class LTXVLoopingSampler:
                     model_config,
                 )
 
-                # Create weight mask for this spatial tile
+                # Initialize output tensors on first tile (to get correct temporal dimension)
+                if final_output is None:
+                    out_temporal = tile_out_latents["samples"].shape[2]
+                    final_output = torch.zeros(
+                        batch,
+                        channels,
+                        out_temporal,
+                        height,
+                        width,
+                        device=samples.device,
+                        dtype=samples.dtype,
+                    )
+                    weights = torch.zeros_like(final_output)
+
+                # Move tile samples to output device and create weight mask
+                tile_samples = tile_out_latents["samples"].to(final_output.device)
                 tile_weights = self._create_spatial_weights(
-                    tile_latents["samples"],
+                    tile_samples.shape,
                     v,
                     h,
                     horizontal_tiles,
                     vertical_tiles,
                     spatial_overlap,
+                    final_output.device,
+                    final_output.dtype,
                 )
 
                 # Add weighted tile to final output
                 final_output[:, :, :, v_start:v_end, h_start:h_end] += (
-                    tile_out_latents["samples"].to(final_output.device) * tile_weights
+                    tile_samples * tile_weights
                 )
                 weights[:, :, :, v_start:v_end, h_start:h_end] += tile_weights
 

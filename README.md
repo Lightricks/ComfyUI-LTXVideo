@@ -1,162 +1,135 @@
 # ComfyUI-LTXVideo
 
-[![GitHub](https://img.shields.io/badge/LTXV-Repo-blue?logo=github)](https://github.com/Lightricks/LTX-Video)
-[![Website](https://img.shields.io/badge/Website-LTXV-181717?logo=google-chrome)](https://www.lightricks.com/ltxv)
-[![Model](https://img.shields.io/badge/HuggingFace-Model-orange?logo=huggingface)](https://huggingface.co/Lightricks/LTX-Video)
-[![LTXV Trainer](https://img.shields.io/badge/LTXV-Trainer%20Repo-9146FF)](https://github.com/Lightricks/LTX-Video-Trainer)
-[![Demo](https://img.shields.io/badge/Demo-Try%20Now-brightgreen?logo=vercel)](https://app.ltx.studio/ltx-video)
-[![Paper](https://img.shields.io/badge/Paper-arXiv-B31B1B?logo=arxiv)](https://arxiv.org/abs/2501.00103)
-[![Discord](https://img.shields.io/badge/Join-Discord-5865F2?logo=discord)](https://discord.gg/Mn8BRgUKKy)
-
-ComfyUI-LTXVideo is a collection of custom nodes for ComfyUI, designed to provide useful tools for working with the LTXV model.
-The model itself is supported in the core ComfyUI [code](https://github.com/comfyanonymous/ComfyUI/tree/master/comfy/ldm/lightricks).
-The main LTXVideo repository can be found [here](https://github.com/Lightricks/LTX-Video).
-
-## 🚀 New to using LTXV with ComfyUI? See our [Getting Started](https://github.com/ComfyUI-LTXVideo/blob/master/getting_started.md) page 
+[![GitHub](https://img.shields.io/badge/LTX-Repo-blue?logo=github)](https://github.com/Lightricks/LTX-2)
+[![Website](https://img.shields.io/badge/Website-LTX-181717?logo=google-chrome)](https://ltx.io/model)
+[![Model](https://img.shields.io/badge/HuggingFace-Model-orange?logo=huggingface)](https://huggingface.co/Lightricks/LTX-2.3)
+[![LTXV Trainer](https://img.shields.io/badge/LTX-Trainer%20Repo-9146FF)](https://github.com/Lightricks/LTX-2/tree/main/packages/ltx-trainer)
+[![Demo](https://img.shields.io/badge/Demo-Try%20Now-brightgreen?logo=vercel)](https://app.ltx.studio/ltx-2-playground/i2v)
+[![Paper](https://img.shields.io/badge/Paper-arXiv-B31B1B?logo=arxiv)](https://videos.ltx.io/LTX-2/grants/LTX_2_Technical_Report_compressed.pdf)
+[![Discord](https://img.shields.io/badge/Join-Discord-5865F2?logo=discord)](https://discord.gg/ltxplatform)
 
 
-# ⭐ 16.07.2025 - LTXV 0.9.8 Release ⭐
+A collection of powerful custom nodes that extend ComfyUI's capabilities for the LTX-2 video generation model.
 
-### 🚀 What's New
-1. **LTXV 0.9.8 Model**<br>
-   The new model and its distilled variants offer improved prompt understanding and detail generation<br>
-   👉 [13B Distilled model](https://huggingface.co/Lightricks/LTX-Video/blob/main/ltxv-13b-0.9.8-distilled.safetensors)<br>
-   👉 [13B Distilled model 8-bit](https://huggingface.co/Lightricks/LTX-Video/blob/main/ltxv-13b-0.9.8-distilled-fp8.safetensors)<br>
-   👉 [2B from 13B Distilled model](https://huggingface.co/Lightricks/LTX-Video/blob/main/ltxv-2b-0.9.8-distilled.safetensors)<br>
-   👉 [2B from 13B Distilled model 8-bit](https://huggingface.co/Lightricks/LTX-Video/blob/main/ltxv-2b-0.9.8-distilled-fp8.safetensors)<br>
-   👉 [IC Lora Detailer](https://huggingface.co/Lightricks/LTX-Video-ICLoRA-detailer-13b-0.9.8/resolve/main/ltxv-098-ic-lora-detailer-comfyui.safetensors)<br>
+LTX-2 is built into ComfyUI core ([see it here](https://github.com/comfyanonymous/ComfyUI/tree/master/comfy/ldm/lightricks)), making it readily accessible to all ComfyUI users. This repository hosts additional nodes and workflows to help you get the most out of LTX-2's advanced features.
+
+**To learn more about LTX-2** See the [main LTX-2 repository](https://github.com/Lightricks/LTX-2) for model details and additional resources.
 
 
-2. **Autoregressive Generation**
-   Introducing new ComfyUI nodes that enable virtually infinite video generation. The new **LTXV Looping Sampler** node allows generation of videos with arbitrary length and consistent motion. **ICLoRAs** are supported as well—by providing guidance from existing videos (e.g., depth, pose, or Canny edges), you can generate long videos in a video-to-video manner.
-   👉 [Long Img2Video Generation Flow](#long-video-generation)
-   👉 [Long Video2Video Generation Flow](#long-video-generation)
+## Prerequisites
+Before you begin using an LTX-2 workflow in ComfyUI, make sure you have:
 
-3. **Detailer ICLoRA**
-   Introducing the **Detailer ICLoRA**, which enhances generated latents with fine details by applying a few additional diffusion steps. This results in significantly more detailed generations.
-   👉 [Detailer ICLoRA Flow](#video-upscaling)
-
-# ⭐ 8.07.2025 - LTXVideo ICLora Release  ⭐
-### 🚀 What's New in LTXVideo ICLoRA
-
-1. **Three New ICLoRA Models**
-   Introducing powerful in-context LoRA models that enable precise control over video generation:
-   - Depth Control: [LTX-Video-ICLoRA-depth-13b-0.9.7](https://huggingface.co/Lightricks/LTX-Video-ICLoRA-depth-13b-0.9.7)
-   - Pose Control: [LTX-Video-ICLoRA-pose-13b-0.9.7](https://huggingface.co/Lightricks/LTX-Video-ICLoRA-pose-13b-0.9.7)
-   - Edge/Canny Control: [LTX-Video-ICLoRA-canny-13b-0.9.7](https://huggingface.co/Lightricks/LTX-Video-ICLoRA-canny-13b-0.9.7)
-
-2. **New Node: 🅛🅣🅧 LTXV In Context Sampler**
-   A dedicated node for seamlessly integrating ICLoRA models into your workflow, enabling fine-grained control over video generation using depth maps, pose estimation, or edge detection.
-
-3. **Example Workflow**
-   Check out [example workflow](#iclora) for a complete example demonstrating how to use the ICLoRA models effectively.
-
-4. **Custom ICLoRA Training**
-   We've released a trainer that allows you to create your own specialized ICLoRA models for custom control signals. Check out the [trainer repository](https://github.com/Lightricks/LTX-Video-Trainer) to get started.
+* ComfyUI installed (Download here](https://www.comfy.org/download)
+* CUDA-compatible GPU with 32GB+ VRAM
+* 100GB+ free disk space for models and cache
 
 
-# ⭐ 9.06.2025 – LTXVideo VAE Patcher, Mask manipulation and Q8 LoRA loader nodes.  ⭐
-1. **LTXV Patcher VAE**<br> The new node improves VAE decoding performance by reducing runtime and cutting memory consumption by up to 50%. This allows generation of higher-resolution outputs on consumer-grade GPUs with limited VRAM, without needing to load the VAE partially or decode in tiles.<br>
-⚠️ On *Windows*, you may need to add the paths to the *MSVC compiler (cl.exe)* and *ninja.exe* to your system environment PATH variable. <br>
-2. **LTXV Preprocess Masks**<br>
-Preprocesses masks for use with the LTXVideo model's latent masking. It validates mask dimensions based on VAE downscaling, supports optional inversion, handles the first frame mask separately, combines temporal masks via max pooling, applies morphological operations to grow or shrink masks, and clamps values to ensure correct opacity. The result is a set of masks ready for latent-space masking.
-3. **LTXV Q8 Lora Model Loader**<br>
-Applying LoRA to an FP8-quantized model requires special handling to preserve output quality. It's crucial to apply LoRA weights using the correct precision, as the current LoRA implementation in ComfyUI does so in a non-optimal way. This node addresses that limitation by ensuring LoRA weights are applied properly, resulting in significantly better quality. If you're working with an FP8 LTXV model, using this node guarantees that LoRA behaves as expected and delivers the intended effect.
+## Quick Start 🚀
+
+We recommend using the LTX-2 workflows available in Comfy Manager.
+
+1. Open ComfyUI
+2. Click the Manager button (or press Ctrl+M)
+3. Select Install Custom Nodes
+4. Search for “LTXVideo”
+5. Click Install
+6. Wait for installation to complete
+7. Restart ComfyUI
+
+The nodes will appear in your node menu under the “LTXVideo” category. Required models will be downloaded on first use.
 
 
-# ⭐ 14.05.2025 – LTXVideo 13B 0.9.7 Distilled Release ⭐
+## Example Workflows
 
-### 🚀 What's New in LTXVideo 13B 0.9.7 Distilled
-1. **LTXV 13B Distilled 🥳 0.9.7**<br>
-   Delivers cinematic-quality videos at fraction of steps needed to run full model. Only 4 or 8 steps needed for single generation.<br>
-   👉 [Download here](https://huggingface.co/Lightricks/LTX-Video/blob/main/ltxv-13b-0.9.7-distilled.safetensors)
+The ComfyUI-LTXVideo installation includes several example workflows.
+You can see them all at:
+```
+ComfyUI/custom_nodes/ComfyUI-LTXVideo/example_workflows/
+```
 
-2. **LTXV 13B Distilled Quantized 0.9.7**<br>
-   Offers reduced memory requirements and even faster inference speeds.
-   Ideal for consumer-grade GPUs (e.g., NVIDIA 4090, 5090).<br>
-   ***Important:*** In order to get the best performance with the quantized version please install [q8_kernels](https://github.com/Lightricks/LTXVideo-Q8-Kernels) package and use dedicated flow below. <br>
-   👉 [Download here](https://huggingface.co/Lightricks/LTX-Video/blob/main/ltxv-13b-0.9.7-distilled-fp8.safetensors)<br>
-   🧩 Example ComfyUI flow available in the [Example Workflows](#example-workflows) section.
+LTX-2.3 Workflows:
 
-3. **Updated LTV 13B Quantized version**<br>
-From now on all our 8bit quantized models are running natively in ComfyUI, still with our Q8 patcher node you will get the best inference speed.<br>
-👉 [Download here](https://huggingface.co/Lightricks/LTX-Video/blob/main/ltxv-13b-0.9.7-dev-fp8.safetensors)<br>
-# ⭐ 06.05.2025 – LTXVideo 13B 0.9.7 Release ⭐
+* [`Text/image to video full/distilled model; single stage`](./example_workflows/2.3/LTX-2.3_T2V_I2V_Single_Stage_Distilled_Full.json)
+* [`Text/image to video distilled model; two stages (with upsampling)`](./example_workflows/2.3/LTX-2.3_T2V_I2V_Two_Stage_Distilled.json)
+* [`IC-LoRA distilled model depth + human pose + edges`](./example_workflows/2.3/LTX-2.3_ICLoRA_Union_Control_Distilled.json)
+* [`IC-LoRA distilled model I2V motion tracking`](./example_workflows/2.3/LTX-2.3_ICLoRA_Motion_Track_Distilled.json)
+* [`IC-LoRA distilled model HDR`](./example_workflows/2.3/LTX-2.3_ICLoRA_HDR_Distilled.json)
 
-### 🚀 What's New in LTXVideo 13B 0.9.7
+Older Workflows (LTX-2.0):
 
-1. **LTXV 13B 0.9.7**
-   Delivers cinematic-quality videos at unprecedented speed.<br>
-   👉 [Download here](https://huggingface.co/Lightricks/LTX-Video/blob/main/ltxv-13b-0.9.7-dev.safetensors)
+* [`Text to video full model`](./example_workflows/2.0/LTX-2_T2V_Full_wLora.json)
+* [`Text to video distilled model (Fast)`](./example_workflows/2.0/LTX-2_T2V_Distilled_wLora.json)
+* [`Image to video full model`](./example_workflows/2.0/LTX-2_I2V_Full_wLora.json)
+* [`Image to video distilled model (Fast)`](./example_workflows/2.0/LTX-2_I2V_Distilled_wLora.json)
+* [`Video to video detailer`](./example_workflows/2.0/LTX-2_V2V_Detailer.json)
+* [`IC-LoRA distilled model (depth + human pose + edges)`](./example_workflows/2.0/LTX-2_ICLoRA_All_Distilled.json)
+* [`IC-LoRA distilled model with downscaled reference latents`](./example_workflows/2.0/LTX-2_ICLoRA_All_Distilled_ref0.5.json)
 
-2. **LTXV 13B Quantized 0.9.7**
-   Offers reduced memory requirements and even faster inference speeds.
-   Ideal for consumer-grade GPUs (e.g., NVIDIA 4090, 5090).
-   Delivers outstanding quality with improved performance.<br>
-   ***Important:*** In order to run the quantized version please install [LTXVideo-Q8-Kernels](https://github.com/Lightricks/LTXVideo-Q8-Kernels) package and use dedicated flow below. Loading the model in Comfy with LoadCheckpoint node won't work. <br>
-   👉 [Download here](https://huggingface.co/Lightricks/LTX-Video/blob/main/ltxv-13b-0.9.7-dev-fp8.safetensors)<br>
-   🧩 Example ComfyUI flow available in the [Example Workflows](#example-workflows) section.
+## Union IC-LoRA Model
 
-3. **Latent Upscaling Models**
-   Enables inference across multiple scales by upscaling latent tensors without decoding/encoding.
-   Multiscale inference delivers high-quality results in a fraction of the time compared to similar models.<br>
-   ***Important:*** Make sure you put the models below in **models/upscale_models** folder.<br>
-   👉 Spatial upscaling: [Download here](https://huggingface.co/Lightricks/LTX-Video/blob/main/ltxv-spatial-upscaler-0.9.7.safetensors).<br>
-   👉 Temporal upscaling: [Download here](https://huggingface.co/Lightricks/LTX-Video/blob/main/ltxv-temporal-upscaler-0.9.7.safetensors).<br>
-   🧩 Example ComfyUI flow available in the [Example Workflows](#example-workflows) section.
+We introduce a new **Union IC-LoRA** model that combines depth and edge (canny) control conditions into a single unified LoRA.
+
+### Key Features
+
+- **Unified Control**: A single LoRA that supports multiple control conditions (depth or edges).
+- **Downsampled Latent Processing**: The union LoRA operates on a downsampled latent size, which reduces memory usage and significantly speeds up inference while maintaining quality.
+
+### How It Works
+
+The union LoRA is trained to understand and respond to both control signals (depth maps and edge maps) within a single model. The model learns to:
+
+1. **Parse multiple conditions**: Identify which control signals are present in the input
+2. **Process at reduced resolution**: Work on downsampled latents to improve efficiency
+
+## HDR IC-LoRA
+
+We provide an **HDR IC-LoRA** that generates linear HDR video encoded in ARRI LogC3, enabling workflows that output high-dynamic-range content suitable for grading and EXR export.
+
+### Key Features
+
+- **Linear HDR output**: The LoRA produces frames in LogC3-compressed space; the `LTXVHDRDecodePostprocess` node decodes these back to linear HDR values.
+- **SDR preview + raw HDR**: The node outputs both a Reinhard-tonemapped SDR preview and the raw linear HDR tensor for downstream use.
+- **EXR export**: Optionally writes the linear HDR frames as a 16/32-bit EXR image sequence. To enable EXR writing, set `OPENCV_IO_ENABLE_OPENEXR=1` in the environment before starting ComfyUI. The exported EXR sequence is best viewed in [DJV](https://github.com/grizzlypeak3d/DJV) (or [DJV for macOS](https://djv.en.uptodown.com/mac/download)).
+
+## Required Models
+
+Download the following models:
+
+**LTX-2.3 Model Checkpoint** - Choose and download one of the models to `COMFYUI_ROOT_FOLDER/models/checkpoints` folder.
+  * [`ltx-2.3-22b-dev.safetensors`](https://huggingface.co/Lightricks/LTX-2.3/blob/main/ltx-2.3-22b-dev.safetensors)
+  * [`ltx-2.3-22b-distilled-1.1.safetensors`](https://huggingface.co/Lightricks/LTX-2.3/blob/main/ltx-2.3-22b-distilled-1.1.safetensors)
+
+**Spatial Upscaler** - Required for current two-stage pipeline implementations in this repository. Download to `COMFYUI_ROOT_FOLDER/models/latent_upscale_models` folder.
+  * [`ltx-2.3-spatial-upscaler-x2-1.1.safetensors`](https://huggingface.co/Lightricks/LTX-2.3/blob/main/ltx-2.3-spatial-upscaler-x2-1.1.safetensors)
+  * [`ltx-2.3-spatial-upscaler-x1.5-1.0.safetensors`](https://huggingface.co/Lightricks/LTX-2.3/blob/main/ltx-2.3-spatial-upscaler-x1.5-1.0.safetensors)
+
+**Temporal Upscaler** - Required for current two-stage pipeline implementations in this repository. Download to `COMFYUI_ROOT_FOLDER/models/latent_upscale_models` folder.
+  * [`ltx-2.3-temporal-upscaler-x2-1.0.safetensors`](https://huggingface.co/Lightricks/LTX-2.3/blob/main/ltx-2.3-temporal-upscaler-x2-1.0.safetensors)
+
+**Distilled LoRA** - Required for current two-stage pipeline implementations in this repository (except DistilledPipeline and ICLoraPipeline). Download to `COMFYUI_ROOT_FOLDER/models/loras` folder.
+  * [`ltx-2.3-22b-distilled-lora-384-1.1.safetensors`](https://huggingface.co/Lightricks/LTX-2.3/blob/main/ltx-2.3-22b-distilled-lora-384-1.1.safetensors)
+
+**Gemma Text Encoder** Download all files from the repository to `COMFYUI_ROOT_FOLDER/models/text_encoders/gemma-3-12b-it-qat-q4_0-unquantized`.
+  * [`Gemma 3`](https://huggingface.co/google/gemma-3-12b-it-qat-q4_0-unquantized)
+
+**LoRAs** Choose and download to `COMFYUI_ROOT_FOLDER/models/loras` folder.
+  * [`ltx-2.3-22b-ic-lora-union-control-ref0.5.safetensors`](https://huggingface.co/Lightricks/LTX-2.3-22b-IC-LoRA-Union-Control/blob/main/ltx-2.3-22b-ic-lora-union-control-ref0.5.safetensors)
+  * [`ltx-2.3-22b-ic-lora-motion-track-control-ref0.5.safetensors`](https://huggingface.co/Lightricks/LTX-2.3-22b-IC-LoRA-Motion-Track-Control/blob/main/ltx-2.3-22b-ic-lora-motion-track-control-ref0.5.safetensors)
+  * [`ltx-2.3-22b-ic-lora-hdr-0.9.safetensors`](https://huggingface.co/Lightricks/LTX-2.3-22b-IC-LoRA-HDR)
+  * [`ltx-2-19b-ic-lora-detailer.safetensors`](https://huggingface.co/Lightricks/LTX-2-19b-IC-LoRA-Detailer/blob/main/ltx-2-19b-ic-lora-detailer.safetensors)
+  * [`ltx-2-19b-ic-lora-pose-control.safetensors`](https://huggingface.co/Lightricks/LTX-2-19b-IC-LoRA-Pose-Control/blob/main/ltx-2-19b-ic-lora-pose-control.safetensors)
+  * [`ltx-2-19b-lora-camera-control-dolly-in.safetensors`](https://huggingface.co/Lightricks/LTX-2-19b-LoRA-Camera-Control-Dolly-In/blob/main/ltx-2-19b-lora-camera-control-dolly-in.safetensors)
+  * [`ltx-2-19b-lora-camera-control-dolly-left.safetensors`](https://huggingface.co/Lightricks/LTX-2-19b-LoRA-Camera-Control-Dolly-Left/blob/main/ltx-2-19b-lora-camera-control-dolly-left.safetensors)
+  * [`ltx-2-19b-lora-camera-control-dolly-out.safetensors`](https://huggingface.co/Lightricks/LTX-2-19b-LoRA-Camera-Control-Dolly-Out/blob/main/ltx-2-19b-lora-camera-control-dolly-out.safetensors)
+  * [`ltx-2-19b-lora-camera-control-dolly-right.safetensors`](https://huggingface.co/Lightricks/LTX-2-19b-LoRA-Camera-Control-Dolly-Right/blob/main/ltx-2-19b-lora-camera-control-dolly-right.safetensors)
+  * [`ltx-2-19b-lora-camera-control-jib-down.safetensors`](https://huggingface.co/Lightricks/LTX-2-19b-LoRA-Camera-Control-Jib-Down/blob/main/ltx-2-19b-lora-camera-control-jib-down.safetensors)
+  * [`ltx-2-19b-lora-camera-control-jib-up.safetensors`](https://huggingface.co/Lightricks/LTX-2-19b-LoRA-Camera-Control-Jib-Up/blob/main/ltx-2-19b-lora-camera-control-jib-up.safetensors)
+  * [`ltx-2-19b-lora-camera-control-static.safetensors`](https://huggingface.co/Lightricks/LTX-2-19b-LoRA-Camera-Control-Static/blob/main/ltx-2-19b-lora-camera-control-static.safetensors)
 
 
-### Technical Updates
+## Advanced Techniques
 
-1. ***New simplified flows and nodes***<br>
-1.1. Simplified image to video: [Download here](example_workflows/ltxv-13b-i2v-base.json).<br>
-1.2. Simplified image to video with extension: [Download here](example_workflows/ltxv-13b-i2v-extend.json).<br>
-1.3. Simplified image to video with keyframes: [Download here](example_workflows/ltxv-13b-i2v-keyframes.json).<br>
-
-# 17.04.2025 ⭐ LTXVideo 0.9.6 Release ⭐
-
-### LTXVideo 0.9.6 introduces:
-
-1. LTXV 0.9.6 – higher quality, faster, great for final output. Download from [here](https://huggingface.co/Lightricks/LTX-Video/resolve/main/ltxv-2b-0.9.6-dev-04-25.safetensors).
-2. LTXV 0.9.6 Distilled – our fastest model yet (only 8 steps for generation), lighter, great for rapid iteration. Download from [here](https://huggingface.co/Lightricks/LTX-Video/resolve/main/ltxv-2b-0.9.6-distilled-04-25.safetensors).
-
-### Technical Updates
-
-We introduce the __STGGuiderAdvanced__ node, which applies different CFG and STG parameters at various diffusion steps. All flows have been updated to use this node and are designed to provide optimal parameters for the best quality.
-See the [Example Workflows](#example-workflows) section.
-
-# 5.03.2025 ⭐ LTXVideo 0.9.5 Release ⭐
-
-### LTXVideo 0.9.5 introduces:
-
-1. Improved quality with reduced artifacts.
-2. Support for higher resolution and longer sequences.
-3. Frame and sequence conditioning (beyond the first frame).
-4. Enhanced prompt understanding.
-5. Commercial license availability.
-
-### Technical Updates
-
-Since LTXVideo is now fully supported in the ComfyUI core, we have removed the custom model implementation. Instead, we provide updated workflows to showcase the new features:
-
-1. **Frame Conditioning** – Enables interpolation between given frames.
-2. **Sequence Conditioning** – Allows motion interpolation from a given frame sequence, enabling video extension from the beginning, end, or middle of the original video.
-3. **Prompt Enhancer** – A new node that helps generate prompts optimized for the best model performance.
-   See the [Example Workflows](#example-workflows) section for more details.
-
-### LTXTricks Update
-
-The LTXTricks code has been integrated into this repository (in the `/tricks` folder) and will be maintained here. The original [repo](https://github.com/logtd/ComfyUI-LTXTricks) is no longer maintained, but all existing workflows should continue to function as expected.
-
-## 22.12.2024
-
-Fixed a bug which caused the model to produce artifacts on short negative prompts when using a native CLIP Loader node.
-
-## 19.12.2024 ⭐ Update ⭐
-
-1. Improved model - removes "strobing texture" artifacts and generates better motion. Download from [here](https://huggingface.co/Lightricks/LTX-Video/resolve/main/ltx-video-2b-v0.9.1.safetensors).
-2. STG support
-3. Integrated image degradation system for improved motion generation.
-4. Additional initial latent optional input to chain latents for high res generation.
-5. Image captioning in image to video [flow](example_workflows/ltxvideo-i2v.json).
-
+### Low VRAM
+* For systems with low VRAM you can use the model loader nodes from [low_vram_loaders.py](./low_vram_loaders.py). Those nodes ensure the correct order of execution and perform the model offloading such that generation fits in 32 GB VRAM.
+* Use --reserve-vram ComfyUI parameter: `python -m main --reserve-vram 5` (or other number in GB).
+* For complete information about using LTX-2 models, workflows, and nodes in ComfyUI, please visit our [Open Source documentation](https://docs.ltx.video/open-source-model/integration-tools/comfy-ui).

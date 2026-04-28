@@ -13,7 +13,7 @@ def blur_internal(image, blur_radius):
         # relationship between sigma and kernel size 2*blur_radius + 1, however we want somewhat weaker
         # blurring, so we use 0.3 * blur_radius instead, reducing the sigma value by 0.5
         sigma = 0.3 * blur_radius
-        image = post_processing.Blur().blur(image, blur_radius, sigma)[0]
+        image = post_processing.Blur.execute(image, blur_radius, sigma)[0]
     return image
 
 
@@ -124,9 +124,9 @@ class LTXVAddGuideAdvanced:
             .movedim(1, -1)
             .clamp(0, 1)
         )
-        image = nodes_lt.LTXVPreprocess().preprocess(image, crf)[0]
+        image = nodes_lt.LTXVPreprocess().execute(image, crf)[0]
         image = blur_internal(image, blur_radius)
-        return nodes_lt.LTXVAddGuide().generate(
+        return nodes_lt.LTXVAddGuide().execute(
             positive=positive,
             negative=negative,
             vae=vae,
@@ -239,9 +239,9 @@ class LTXVImgToVideoAdvanced:
         image = comfy.utils.common_upscale(
             image.movedim(-1, 1), width, height, interpolation, crop=crop
         ).movedim(1, -1)
-        image = nodes_lt.LTXVPreprocess().preprocess(image, crf)[0]
+        image = nodes_lt.LTXVPreprocess().execute(image, crf)[0]
         image = blur_internal(image, blur_radius)
-        return nodes_lt.LTXVImgToVideo().generate(
+        return nodes_lt.LTXVImgToVideo().execute(
             positive=positive,
             negative=negative,
             vae=vae,
@@ -251,4 +251,206 @@ class LTXVImgToVideoAdvanced:
             length=length,
             batch_size=batch_size,
             strength=strength,
+        )
+
+
+@comfy_node(name="LTXVAddGuideAdvancedAttention")
+class LTXVAddGuideAdvancedAttention:
+    """Extended keyframe guide node with per-guide attention strength control.
+
+    Same preprocessing as LTXVAddGuideAdvanced (CRF, blur, interpolation, crop),
+    plus attention_strength and attention_mask inputs to control how strongly
+    this guide's conditioning influences generation via self-attention.
+    """
+
+    @classmethod
+    def INPUT_TYPES(s):
+        return {
+            "required": {
+                "positive": ("CONDITIONING",),
+                "negative": ("CONDITIONING",),
+                "vae": ("VAE",),
+                "latent": ("LATENT",),
+                "image": ("IMAGE",),
+                "frame_idx": (
+                    "INT",
+                    {
+                        "default": 0,
+                        "min": -9999,
+                        "max": 9999,
+                        "tooltip": (
+                            "Frame index to start the conditioning at. "
+                            "Negative values are counted from the end of the video."
+                        ),
+                    },
+                ),
+                "strength": (
+                    "FLOAT",
+                    {
+                        "default": 1.0,
+                        "min": 0.0,
+                        "max": 1.0,
+                        "tooltip": "Strength of the conditioning. Higher values make it more exact.",
+                    },
+                ),
+                "crf": (
+                    "INT",
+                    {
+                        "default": 29,
+                        "min": 0,
+                        "max": 51,
+                        "step": 1,
+                        "tooltip": "CRF value. Higher = more motion, lower = higher quality.",
+                    },
+                ),
+                "blur_radius": (
+                    "INT",
+                    {
+                        "default": 0,
+                        "min": 0,
+                        "max": 7,
+                        "step": 1,
+                        "tooltip": "Blur kernel radius. Higher = more motion.",
+                    },
+                ),
+                "interpolation": (
+                    [
+                        "lanczos",
+                        "bislerp",
+                        "nearest",
+                        "bilinear",
+                        "bicubic",
+                        "area",
+                        "nearest-exact",
+                    ],
+                    {"default": "lanczos"},
+                ),
+                "crop": (["center", "disabled"], {"default": "disabled"}),
+                "attention_strength": (
+                    "FLOAT",
+                    {
+                        "default": 1.0,
+                        "min": 0.0,
+                        "max": 1.0,
+                        "step": 0.01,
+                        "tooltip": (
+                            "Controls how strongly this guide influences generation via "
+                            "self-attention. 1.0 = full conditioning, 0.0 = ignore."
+                        ),
+                    },
+                ),
+            },
+            "optional": {
+                "attention_mask": (
+                    "MASK",
+                    {
+                        "tooltip": (
+                            "Optional pixel-space spatial mask. Shape (F, H, W) or (H, W). "
+                            "Values in [0, 1]. Controls per-region conditioning influence. "
+                            "Multiplied by attention_strength."
+                        ),
+                    },
+                ),
+            },
+        }
+
+    RETURN_TYPES = ("CONDITIONING", "CONDITIONING", "LATENT")
+    RETURN_NAMES = ("positive", "negative", "latent")
+
+    CATEGORY = "conditioning/video_models"
+    FUNCTION = "generate"
+
+    DESCRIPTION = (
+        "Adds a conditioning frame/video at a specific frame index with per-guide "
+        "attention strength control. Same preprocessing as LTXVAddGuideAdvanced, "
+        "plus attention_strength and optional spatial attention_mask."
+    )
+
+    def generate(
+        self,
+        positive,
+        negative,
+        vae,
+        latent,
+        image,
+        frame_idx,
+        strength,
+        crf,
+        blur_radius,
+        interpolation,
+        crop,
+        attention_strength=1.0,
+        attention_mask=None,
+    ):
+        from .iclora_attention import append_guide_attention_entry, normalize_mask
+
+        # Preprocessing: resize, CRF, blur (same as LTXVAddGuideAdvanced)
+        scale_factors = vae.downscale_index_formula
+        _, width_scale_factor, height_scale_factor = scale_factors
+        latent_image = latent["samples"]
+        noise_mask = nodes_lt.get_noise_mask(latent)
+        _, _, latent_length, latent_height, latent_width = latent_image.shape
+
+        width = latent_width * width_scale_factor
+        height = latent_height * height_scale_factor
+        image = (
+            comfy.utils.common_upscale(
+                image.movedim(-1, 1), width, height, interpolation, crop=crop
+            )
+            .movedim(1, -1)
+            .clamp(0, 1)
+        )
+        image = nodes_lt.LTXVPreprocess().execute(image, crf)[0]
+        image = blur_internal(image, blur_radius)
+
+        # Encode
+        _, t = nodes_lt.LTXVAddGuide.encode(
+            vae, latent_width, latent_height, image, scale_factors
+        )
+
+        # Compute latent index
+        frame_idx, latent_idx = nodes_lt.LTXVAddGuide.get_latent_index(
+            positive, latent_length, len(image), frame_idx, scale_factors
+        )
+        assert (
+            latent_idx + t.shape[2] <= latent_length
+        ), "Conditioning frames exceed the length of the latent sequence."
+
+        # Append keyframe
+        positive, negative, latent_image, noise_mask = (
+            nodes_lt.LTXVAddGuide.append_keyframe(
+                positive,
+                negative,
+                frame_idx,
+                latent_image,
+                noise_mask,
+                t,
+                strength,
+                scale_factors,
+            )
+        )
+
+        # Track with custom attention strength/mask
+        pre_filter_count = t.shape[2] * t.shape[3] * t.shape[4]
+        guide_latent_shape = list(t.shape[2:])
+        norm_mask = normalize_mask(attention_mask)
+        positive = append_guide_attention_entry(
+            positive,
+            pre_filter_count,
+            guide_latent_shape,
+            attention_strength=attention_strength,
+            attention_mask=norm_mask,
+        )
+        negative = append_guide_attention_entry(
+            negative,
+            pre_filter_count,
+            guide_latent_shape,
+            attention_strength=attention_strength,
+            attention_mask=norm_mask,
+        )
+
+        return (
+            positive,
+            negative,
+            {"samples": latent_image, "noise_mask": noise_mask},
         )

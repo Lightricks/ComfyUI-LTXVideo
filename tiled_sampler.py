@@ -205,7 +205,7 @@ class LTXVTiledSampler:
                             tile_positive,
                             tile_negative,
                             tile_latents,
-                        ) = LTXVAddGuide().generate(
+                        ) = LTXVAddGuide().execute(
                             positive=tile_positive,
                             negative=tile_negative,
                             vae=vae,
@@ -273,7 +273,11 @@ class LTXVTiledSampler:
 
                 # Clean up guides if image conditioning was used
                 if cond_images is not None:
-                    tile_positive, tile_negative, denoised_tile = LTXVCropGuides().crop(
+                    (
+                        tile_positive,
+                        tile_negative,
+                        denoised_tile,
+                    ) = LTXVCropGuides().execute(
                         positive=tile_positive,
                         negative=tile_negative,
                         latent=denoised_tile,

@@ -3,7 +3,7 @@ import json
 import math
 import os
 from dataclasses import dataclass
-from typing import List
+from typing import List, Optional, Union
 
 import comfy.ldm.modules.attention
 import comfy.samplers
@@ -30,6 +30,44 @@ def stg(
         factor = noise_pred_pos.std() / noise_pred.std()
         factor = rescale_scale * factor + (1 - rescale_scale)
         noise_pred = noise_pred * factor
+    return noise_pred
+
+
+class MomentumBuffer:
+    def __init__(self, momentum: float):
+        self.momentum = momentum
+        self.running_average = 0
+
+    def update(self, update_value: torch.Tensor):
+        new_average = self.momentum * self.running_average
+        self.running_average = update_value + new_average
+
+
+def project(v0: torch.Tensor, v1: torch.Tensor):
+    dtype = v0.dtype
+    v0, v1 = v0.double(), v1.double()
+    v1 = torch.nn.functional.normalize(v1, dim=[-1, -2, -3])
+    v0_parallel = (v0 * v1).sum(dim=[-1, -2, -3], keepdim=True) * v1
+    v0_orthogonal = v0 - v0_parallel
+    return v0_parallel.to(dtype), v0_orthogonal.to(dtype)
+
+
+def apg(
+    noise_pred_pos: torch.Tensor,
+    noise_pred_neg: torch.Tensor,
+    cfg_scale: float,
+    eta: float = 1.0,
+    norm_threshold: float = 0.0,
+):
+    diff = noise_pred_pos - noise_pred_neg
+    if norm_threshold > 0:
+        ones = torch.ones_like(diff)
+        diff_norm = diff.norm(p=2, dim=[-1, -2, -3], keepdim=True)
+        scale_factor = torch.minimum(ones, norm_threshold / diff_norm)
+        diff = diff * scale_factor
+    diff_parallel, diff_orthogonal = project(diff, noise_pred_pos)
+    normalized_update = diff_orthogonal + eta * diff_parallel
+    noise_pred = noise_pred_pos + (cfg_scale - 1) * normalized_update
     return noise_pred
 
 
@@ -83,15 +121,22 @@ class STGFlag:
 
 # context manager that replaces the attention function in a transformer block
 class PatchAttention(contextlib.AbstractContextManager):
-    def __init__(self, attn_idx=0):
+    def __init__(self, attn_idx: Optional[Union[int, List[int]]] = None):
+        self.current_idx = -1
+
+        if isinstance(attn_idx, int):
+            self.attn_idx = [attn_idx]
+        elif attn_idx is None:
+            self.attn_idx = [0]
+        else:
+            self.attn_idx = list(attn_idx)
+
+    def __enter__(self):
         self.original_attention = comfy.ldm.modules.attention.optimized_attention
         self.original_attention_masked = (
             comfy.ldm.modules.attention.optimized_attention_masked
         )
-        self.current_idx = -1
-        self.attn_idx = attn_idx
 
-    def __enter__(self):
         comfy.ldm.modules.attention.optimized_attention = self.stg_attention
         comfy.ldm.modules.attention.optimized_attention_masked = (
             self.stg_attention_masked
@@ -103,16 +148,19 @@ class PatchAttention(contextlib.AbstractContextManager):
             self.original_attention_masked
         )
 
+        self.original_attention = None
+        self.original_attention_masked = None
+
     def stg_attention(self, q, k, v, heads, *args, **kwargs):
         self.current_idx += 1
-        if self.current_idx == self.attn_idx:
+        if self.current_idx in self.attn_idx:
             return v
         else:
             return self.original_attention(q, k, v, heads, *args, **kwargs)
 
     def stg_attention_masked(self, q, k, v, heads, *args, **kwargs):
         self.current_idx += 1
-        if self.current_idx == self.attn_idx:
+        if self.current_idx in self.attn_idx:
             return v
         else:
             return self.original_attention_masked(q, k, v, heads, *args, **kwargs)
@@ -128,8 +176,10 @@ class STGBlockWrapper:
 
     def __call__(self, args, extra_args):
         context_manager = contextlib.nullcontext()
+
+        stg_indexes = args["transformer_options"].get("stg_indexes", [0])
         if self.flag.do_skip and self.idx in self.flag.skip_layers:
-            context_manager = PatchAttention(0)
+            context_manager = PatchAttention(stg_indexes)
 
         with context_manager:
             hidden_state = extra_args["original_block"](args)
@@ -278,6 +328,10 @@ class STGGuiderAdvanced(comfy.samplers.CFGGuider):
         stg_layers_indices_list,
         skip_steps_sigma_threshold,
         cfg_star_rescale,
+        apply_apg,
+        apg_cfg_scale,
+        eta,
+        norm_threshold,
     ):
         model = model.clone()
         super().__init__(model)
@@ -296,6 +350,10 @@ class STGGuiderAdvanced(comfy.samplers.CFGGuider):
         self.stg_layers_indices_list = stg_layers_indices_list
         self.skip_steps_sigma_threshold = skip_steps_sigma_threshold
         self.cfg_star_rescale = cfg_star_rescale
+        self.apply_apg = apply_apg
+        self.apg_cfg_scale = apg_cfg_scale
+        self.eta = eta
+        self.norm_threshold = norm_threshold
         STGGuider.patch_model(model, self.stg_flag)
 
     def sigma_to_params_mapping(self, sigma):
@@ -351,7 +409,9 @@ class STGGuiderAdvanced(comfy.samplers.CFGGuider):
         noise_pred_neg = 0
         noise_pred_perturbed = 0
 
-        if not math.isclose(cfg_value, 1.0):
+        if not math.isclose(cfg_value, 1.0) or (
+            self.apply_apg and not math.isclose(self.apg_cfg_scale, 1.0)
+        ):
             noise_pred_neg = comfy.samplers.calc_cond_batch(
                 self.inner_model,
                 [negative_cond],
@@ -395,6 +455,16 @@ class STGGuiderAdvanced(comfy.samplers.CFGGuider):
             stg_scale,
             stg_rescale,
         )
+
+        if self.apply_apg:
+            stg_result = apg(
+                stg_result,
+                noise_pred_neg,
+                cfg_scale=self.apg_cfg_scale,
+                momentum_buffer=None,
+                eta=self.eta,
+                norm_threshold=self.norm_threshold,
+            )
 
         # normally this would be done in cfg_function, but we skipped
         # that for efficiency: we can compute the noise predictions in
@@ -553,6 +623,25 @@ class STGGuiderAdvancedNode:
                         "tooltip": "Preset resolution and frame count. Custom allows manual input.",
                     },
                 ),
+                "apply_apg": (
+                    "BOOLEAN",
+                    {
+                        "default": False,
+                        "tooltip": "If true, applies the APG (Adaptive Projections Guidance) to the STG.",
+                    },
+                ),
+                "apg_cfg_scale": (
+                    "FLOAT",
+                    {"default": 1.0, "min": 0.0, "max": 100.0, "step": 0.01},
+                ),
+                "eta": (
+                    "FLOAT",
+                    {"default": 1.0, "min": 0.0, "max": 100.0, "step": 0.01},
+                ),
+                "norm_threshold": (
+                    "FLOAT",
+                    {"default": 0.0, "min": 0.0, "max": 100.0, "step": 0.01},
+                ),
             },
         }
 
@@ -626,6 +715,10 @@ class STGGuiderAdvancedNode:
         stg_rescale_values,
         stg_layers_indices,
         preset=None,
+        apply_apg=False,
+        apg_cfg_scale=1.0,
+        eta=1.0,
+        norm_threshold=0.0,
     ):
         if preset and preset != "Custom":
             preset_data = next(
@@ -666,6 +759,10 @@ class STGGuiderAdvancedNode:
             stg_layers_indices_list,
             skip_steps_sigma_threshold,
             cfg_star_rescale,
+            apply_apg,
+            apg_cfg_scale=apg_cfg_scale,
+            eta=eta,
+            norm_threshold=norm_threshold,
         )
         guider.set_conds(positive, negative)
         guider.raw_conds = (positive, negative)
@@ -695,3 +792,153 @@ class STGAdvancedPresetsNode:
 
     def get_preset(self, preset=None):
         return (preset,)
+
+
+class APGGuider(comfy.samplers.CFGGuider):
+    def __init__(
+        self,
+        model: ModelPatcher,
+        cfg_scale,
+        eta,
+        norm_threshold,
+        momentum_coefficient: float = -0.9,
+    ):
+        self.model = model.clone()
+        super().__init__(self.model)
+        self.momentum_coefficient = momentum_coefficient
+        self.momentum_buffer = MomentumBuffer(self.momentum_coefficient)
+        self.eta = eta
+        self.norm_threshold = norm_threshold
+        self.cfg_scale = cfg_scale
+        self.previous_timestep = None
+
+    def set_conds(self, positive, negative):
+        self.inner_set_conds({"positive": positive, "negative": negative})
+
+    def predict_noise(
+        self,
+        x: torch.Tensor,
+        timestep: torch.Tensor,
+        model_options: dict = {},
+        seed=None,
+    ):
+        # CFG zero init - skipping steps with timestep bigger than given threshold.
+
+        # in CFGGuider.predict_noise, we call sampling_function(), which uses cfg_function() to compute pos & neg
+        # but we'd rather do a single batch of sampling pos, neg, and perturbed, so we call calc_cond_batch([perturbed,pos,neg]) directly
+        positive_cond = self.conds.get("positive", None)
+        negative_cond = self.conds.get("negative", None)
+
+        noise_pred_pos = comfy.samplers.calc_cond_batch(
+            self.inner_model,
+            [positive_cond],
+            x,
+            timestep,
+            model_options,
+        )[0]
+
+        if (
+            self.previous_timestep is not None
+            and timestep.item() > self.previous_timestep
+        ):
+            print("Resetting momentum buffer")
+            self.momentum_buffer = MomentumBuffer(self.momentum_coefficient)
+
+        noise_pred_neg = 0
+        if not math.isclose(self.cfg_scale, 1.0):
+            noise_pred_neg = comfy.samplers.calc_cond_batch(
+                self.inner_model,
+                [negative_cond],
+                x,
+                timestep,
+                model_options,
+            )[0]
+
+        apg_result = apg(
+            noise_pred_pos,
+            noise_pred_neg,
+            self.cfg_scale,
+            self.eta,
+            self.norm_threshold,
+        )
+
+        # normally this would be done in cfg_function, but we skipped
+        # that for efficiency: we can compute the noise predictions in
+        # a single call to calc_cond_batch() (rather than two)
+        # so we replicate the hook here
+        for fn in model_options.get("sampler_post_cfg_function", []):
+            args = {
+                "denoised": apg_result,
+                "cond": positive_cond,
+                "uncond": negative_cond,
+                "model": self.inner_model,
+                "uncond_denoised": noise_pred_neg,
+                "cond_denoised": noise_pred_pos,
+                "sigma": timestep,
+                "model_options": model_options,
+                "input": x,
+            }
+            apg_result = fn(args)
+
+        self.previous_timestep = timestep.item()
+        return apg_result
+
+
+@comfy_node(name="APGGuider")
+class APGGuiderNode:
+    @classmethod
+    def INPUT_TYPES(s):
+        return {
+            "required": {
+                "model": ("MODEL",),
+                "positive": ("CONDITIONING",),
+                "negative": ("CONDITIONING",),
+                "cfg_scale": (
+                    "FLOAT",
+                    {"default": 1.0, "min": 0.0, "max": 100.0, "step": 0.01},
+                ),
+                "eta": (
+                    "FLOAT",
+                    {"default": 1.0, "min": 0.0, "max": 100.0, "step": 0.01},
+                ),
+                "norm_threshold": (
+                    "FLOAT",
+                    {"default": 0.0, "min": 0.0, "max": 100.0, "step": 0.01},
+                ),
+                "momentum_coefficient": (
+                    "FLOAT",
+                    {"default": -0.9, "min": -3.0, "max": 3.0, "step": 0.01},
+                ),
+            },
+        }
+
+    RETURN_TYPES = ("GUIDER",)
+
+    FUNCTION = "get_guider"
+    CATEGORY = "lightricks/LTXV"
+
+    DESCRIPTION = """
+    The APG Guider implements Adaptive Projected Guidance (APG).
+    Reference: https://arxiv.org/abs/2410.02416.
+    """
+
+    def get_guider(
+        self,
+        model,
+        positive,
+        negative,
+        cfg_scale,
+        eta,
+        norm_threshold,
+        momentum_coefficient,
+    ):
+        guider = APGGuider(
+            model,
+            cfg_scale,
+            eta,
+            norm_threshold,
+            momentum_coefficient,
+        )
+        guider.set_conds(positive, negative)
+        guider.raw_conds = (positive, negative)
+        return (guider,)

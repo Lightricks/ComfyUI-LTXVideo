@@ -1,4 +1,5 @@
 import re
+from functools import wraps
 from typing import Callable, Optional, Type
 
 NODE_CLASS_MAPPINGS = {}
@@ -34,6 +35,29 @@ def register_node(node_class: Type, name: str, description: str) -> None:
 
     NODE_CLASS_MAPPINGS[name] = node_class
     NODE_DISPLAY_NAME_MAPPINGS[name] = description
+
+
+def _is_v3_node(node_class: Type) -> bool:
+    """Check if the node class is a v3 node (has define_schema method)."""
+    return hasattr(node_class, "define_schema") and callable(
+        getattr(node_class, "define_schema")
+    )
+
+
+def _wrap_define_schema(node_class: Type, display_name: str) -> None:
+    """Wrap the define_schema method to inject the display_name into the schema."""
+    original_define_schema = node_class.define_schema
+
+    @classmethod
+    @wraps(original_define_schema.__func__)
+    def wrapped_define_schema(cls):
+        schema = original_define_schema.__func__(cls)
+        # Only set display_name if not already set in the schema
+        if schema.display_name is None:
+            schema.display_name = display_name
+        return schema
+
+    node_class.define_schema = wrapped_define_schema
 
 
 def comfy_node(
@@ -81,6 +105,10 @@ def comfy_node(
                 name = name[:-4]
 
         description = _format_description(description, name, experimental, deprecated)
+
+        # For v3 nodes, wrap define_schema to inject the display_name
+        if _is_v3_node(node_class):
+            _wrap_define_schema(node_class, description)
 
         register_node(node_class, name, description)
         return node_class

@@ -1,2 +1,10 @@
 **/*.png filter=lfs diff=lfs merge=lfs -text
 **/*.mp4 filter=lfs diff=lfs merge=lfs -text
+**/*.jpg filter=lfs diff=lfs merge=lfs -text
+
+example_workflows/low_level/end.jpg -filter -diff -merge -text
+example_workflows/low_level/fox.jpg -filter -diff -merge -text
+example_workflows/low_level/shrek2.jpg -filter -diff -merge -text
+example_workflows/low_level/start.jpg -filter -diff -merge -text
+example_workflows/tricks/shrek2.jpg -filter -diff -merge -text
+example_workflows/tricks/shrek3.jpg -filter -diff -merge -text
