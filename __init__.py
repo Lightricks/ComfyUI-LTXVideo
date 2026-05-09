@@ -1,3 +1,6 @@
+# Monkey-patch model detection for LTXAV checkpoint compatibility
+from . import model_detection_patch  # noqa: F401
+
 from .decoder_noise import DecoderNoise
 from .easy_samplers import (
     LinearOverlapLatentTransition,
