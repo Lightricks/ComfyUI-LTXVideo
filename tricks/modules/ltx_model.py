@@ -7,7 +7,6 @@ from comfy.ldm.lightricks.model import (
     BasicTransformerBlock,
     LTXVModel,
     apply_rotary_emb,
-    precompute_freqs_cis,
 )
 from comfy.ldm.lightricks.symmetric_patchifier import latent_to_pixel_coords
 from torch import nn
@@ -167,7 +166,7 @@ class LTXVModelModified(LTXVModel):
                 (attention_mask.shape[0], 1, -1, attention_mask.shape[-1])
             ) * torch.finfo(x.dtype).max
 
-        pe = precompute_freqs_cis(
+        pe = self._precompute_freqs_cis(
             fractional_coords, dim=self.inner_dim, out_dtype=x.dtype
         )
 
