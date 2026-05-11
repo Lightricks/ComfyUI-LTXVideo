@@ -1,3 +1,6 @@
+    from . import internal  # noqa: F401
+except ImportError:
+    pass
 from .conditioning_loader import LTXVLoadConditioning
 from .conditioning_saver import LTXVSaveConditioning
 from .decoder_noise import DecoderNoise
@@ -18,6 +21,7 @@ from .iclora import (
     LTXAddVideoICLoRAGuide,
     LTXAddVideoICLoRAGuideAdvanced,
     LTXICLoRALoaderModelOnly,
+    LTXVSetAudioRefTokens,
 )
 from .latent_norm import (
     LTXVAdainLatent,
@@ -107,6 +111,7 @@ NODE_CLASS_MAPPINGS = {
     "LTXAddVideoICLoRAGuide": LTXAddVideoICLoRAGuide,
     "LTXAddVideoICLoRAGuideAdvanced": LTXAddVideoICLoRAGuideAdvanced,
     "LTXICLoRALoaderModelOnly": LTXICLoRALoaderModelOnly,
+    "LTXVSetAudioRefTokens": LTXVSetAudioRefTokens,
     "LTXVLoadConditioning": LTXVLoadConditioning,
     "LTXVSaveConditioning": LTXVSaveConditioning,
     "LTXVDrawTracks": LTXVDrawTracks,
