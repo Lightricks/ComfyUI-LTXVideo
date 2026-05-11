@@ -1,6 +1,4 @@
-    from . import internal  # noqa: F401
-except ImportError:
-    pass
+from . import internal  # noqa: F401
 from .conditioning_loader import LTXVLoadConditioning
 from .conditioning_saver import LTXVSaveConditioning
 from .decoder_noise import DecoderNoise
