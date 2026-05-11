@@ -1486,8 +1486,31 @@
       ]
     },
     {
+      "id": 5121,
+      "type": "Note",
+      "pos": [
+        -504.4601702780707,
+        2965.4285923622097
+      ],
+      "size": [
+        210,
+        88
+      ],
+      "flags": {},
+      "order": 10,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "in case of OOM use tile_size of 768\ntemporal size 16"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
       "id": 4851,
-      "type": "VAEDecode",
+      "type": "VAEDecodeTiled",
       "pos": [
         -518.1273243034602,
         3125.1032336912526
@@ -1511,6 +1534,42 @@
           "name": "vae",
           "type": "VAE",
           "link": 13619
+        },
+        {
+          "localized_name": "tile_size",
+          "name": "tile_size",
+          "type": "INT",
+          "widget": {
+            "name": "tile_size"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "overlap",
+          "name": "overlap",
+          "type": "INT",
+          "widget": {
+            "name": "overlap"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "temporal_size",
+          "name": "temporal_size",
+          "type": "INT",
+          "widget": {
+            "name": "temporal_size"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "temporal_overlap",
+          "name": "temporal_overlap",
+          "type": "INT",
+          "widget": {
+            "name": "temporal_overlap"
+          },
+          "link": null
         }
       ],
       "outputs": [
@@ -1526,8 +1585,14 @@
       "properties": {
         "cnr_id": "comfy-core",
         "ver": "0.14.1",
-        "Node name for S&R": "VAEDecode"
-      }
+        "Node name for S&R": "VAEDecodeTiled"
+      },
+      "widgets_values": [
+        768,
+        256,
+        8,
+        4
+      ]
     },
     {
       "id": 5120,
@@ -2814,6 +2879,10 @@
       },
       "4851": {
         "inputs": {
+          "tile_size": 768,
+          "overlap": 256,
+          "temporal_size": 8,
+          "temporal_overlap": 4,
           "samples": [
             "5013",
             2
@@ -2823,9 +2892,9 @@
             2
           ]
         },
-        "class_type": "VAEDecode",
+        "class_type": "VAEDecodeTiled",
         "_meta": {
-          "title": "VAE Decode"
+          "title": "VAE Decode (Tiled)"
         }
       },
       "5011": {
