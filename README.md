@@ -53,6 +53,8 @@ LTX-2.3 Workflows:
 * [`Text/image to video distilled model; two stages (with upsampling)`](./example_workflows/2.3/LTX-2.3_T2V_I2V_Two_Stage_Distilled.json)
 * [`IC-LoRA distilled model depth + human pose + edges`](./example_workflows/2.3/LTX-2.3_ICLoRA_Union_Control_Distilled.json)
 * [`IC-LoRA distilled model I2V motion tracking`](./example_workflows/2.3/LTX-2.3_ICLoRA_Motion_Track_Distilled.json)
+* [`IC-LoRA distilled model HDR`](./example_workflows/2.3/LTX-2.3_ICLoRA_HDR_Distilled.json)
+* [`IC-LoRA distilled model Lipdub; two stages (with upsampling)`](./example_workflows/2.3/LTX-2.3_ICLoRA_Lipdub_Two_Stage_Distilled.json)
 
 Older Workflows (LTX-2.0):
 
@@ -80,6 +82,27 @@ The union LoRA is trained to understand and respond to both control signals (dep
 1. **Parse multiple conditions**: Identify which control signals are present in the input
 2. **Process at reduced resolution**: Work on downsampled latents to improve efficiency
 
+## HDR IC-LoRA
+
+We provide an **HDR IC-LoRA** that generates linear HDR video encoded in ARRI LogC3, enabling workflows that output high-dynamic-range content suitable for grading and EXR export.
+
+### Key Features
+
+- **Linear HDR output**: The LoRA produces frames in LogC3-compressed space; the `LTXVHDRDecodePostprocess` node decodes these back to linear HDR values.
+- **SDR preview + raw HDR**: The node outputs both a Reinhard-tonemapped SDR preview and the raw linear HDR tensor for downstream use.
+- **EXR export**: Optionally writes the linear HDR frames as a 16/32-bit EXR image sequence. To enable EXR writing, set `OPENCV_IO_ENABLE_OPENEXR=1` in the environment before starting ComfyUI. The exported EXR sequence is best viewed in [DJV](https://github.com/grizzlypeak3d/DJV) (or [DJV for macOS](https://djv.en.uptodown.com/mac/download)).
+
+## Lipdub IC-LoRA
+
+We provide a **Lipdub IC-LoRA** that dubs or rephrases speech in video. Given a source video and a text prompt containing the desired dialogue, it generates new lip movements and audio that match the target text while preserving the speaker's identity.
+
+### Key Features
+
+- **Multilingual dubbing**: Translate speech into another language - the model regenerates lips and audio to match.
+- **Same-language rephrasing**: Change what the speaker says while keeping the original language.
+- **Two-stage pipeline**: Stage 1 generates the video and audio at base resolution; Stage 2 upscales while freezing the audio.
+- **Speaker identity preservation**: Reference audio tokens provide speaker context so the generated voice stays consistent.
+
 ## Required Models
 
 Download the following models:
@@ -104,6 +127,8 @@ Download the following models:
 **LoRAs** Choose and download to `COMFYUI_ROOT_FOLDER/models/loras` folder.
   * [`ltx-2.3-22b-ic-lora-union-control-ref0.5.safetensors`](https://huggingface.co/Lightricks/LTX-2.3-22b-IC-LoRA-Union-Control/blob/main/ltx-2.3-22b-ic-lora-union-control-ref0.5.safetensors)
   * [`ltx-2.3-22b-ic-lora-motion-track-control-ref0.5.safetensors`](https://huggingface.co/Lightricks/LTX-2.3-22b-IC-LoRA-Motion-Track-Control/blob/main/ltx-2.3-22b-ic-lora-motion-track-control-ref0.5.safetensors)
+  * [`ltx-2.3-22b-ic-lora-hdr-0.9.safetensors`](https://huggingface.co/Lightricks/LTX-2.3-22b-IC-LoRA-HDR)
+  * [`ltx-2.3-22b-ic-lora-lipdub-0.9.safetensors`](https://huggingface.co/Lightricks/LTX-2.3-22b-IC-LoRA-LipDub)
   * [`ltx-2-19b-ic-lora-detailer.safetensors`](https://huggingface.co/Lightricks/LTX-2-19b-IC-LoRA-Detailer/blob/main/ltx-2-19b-ic-lora-detailer.safetensors)
   * [`ltx-2-19b-ic-lora-pose-control.safetensors`](https://huggingface.co/Lightricks/LTX-2-19b-IC-LoRA-Pose-Control/blob/main/ltx-2-19b-ic-lora-pose-control.safetensors)
   * [`ltx-2-19b-lora-camera-control-dolly-in.safetensors`](https://huggingface.co/Lightricks/LTX-2-19b-LoRA-Camera-Control-Dolly-In/blob/main/ltx-2-19b-lora-camera-control-dolly-in.safetensors)

@@ -1,9 +1,12 @@
 import logging
 
 import comfy
+import comfy.samplers
 import comfy.sd
+import comfy.utils
 import comfy_extras.nodes_lt as nodes_lt
 import folder_paths
+import node_helpers
 import torch
 from comfy_api.latest import io
 
@@ -518,3 +521,83 @@ class LTXICLoRALoaderModelOnly(io.ComfyNode):
             model, None, lora, strength_model, 0
         )
         return io.NodeOutput(model_lora, latent_downscale_factor)
+
+
+def _patchify_audio_latent(latent):
+    """Reshape audio latent (b, c, t, f) → ref_audio token dict (b, t, c*f)."""
+    b, c, t, f = latent.shape
+    ref_tokens = latent.permute(0, 2, 1, 3).reshape(b, t, c * f)
+    return {"tokens": ref_tokens}
+
+
+@comfy_node(name="LTXVSetAudioRefTokens")
+class LTXVSetAudioRefTokens(io.ComfyNode):
+    """Provide speaker identity context for audio generation.
+
+    Patchifies the audio latent and attaches it as reference tokens on both
+    positive and negative conditioning. The model prepends these tokens with
+    negative temporal positions so they serve as identity context without
+    being part of the generated output.
+
+    Also outputs a frozen copy of the audio latent (noise_mask=0) for
+    direct use in stage 2 without re-encoding.
+    """
+
+    @classmethod
+    def define_schema(cls):
+        return io.Schema(
+            node_id="LTXVSetAudioRefTokens",
+            display_name=NODES_DISPLAY_NAME_PREFIX + " Set Audio Ref Tokens",
+            category="Lightricks/IC-LoRA",
+            description=(
+                "Provides speaker identity context for audio generation by attaching "
+                "reference audio tokens to the conditioning. The tokens are prepended "
+                "with negative temporal positions so the model treats them as context "
+                "rather than generation targets."
+            ),
+            inputs=[
+                io.Conditioning.Input(
+                    "positive",
+                    tooltip="Positive conditioning to attach the reference audio tokens to.",
+                ),
+                io.Conditioning.Input(
+                    "negative",
+                    tooltip="Negative conditioning to attach the reference audio tokens to.",
+                ),
+                io.Latent.Input(
+                    "audio_latent",
+                    tooltip="Encoded audio latent from LTXV Audio VAE Encode.",
+                ),
+            ],
+            outputs=[
+                io.Conditioning.Output(
+                    display_name="positive",
+                    tooltip="Positive conditioning with reference audio tokens attached.",
+                ),
+                io.Conditioning.Output(
+                    display_name="negative",
+                    tooltip="Negative conditioning with reference audio tokens attached.",
+                ),
+                io.Latent.Output(
+                    display_name="frozen_audio",
+                    tooltip="Audio latent with noise_mask=0, fully frozen during denoising.",
+                ),
+            ],
+        )
+
+    @classmethod
+    def execute(cls, positive, negative, audio_latent) -> io.NodeOutput:
+        latent = audio_latent["samples"]
+        ref_audio = _patchify_audio_latent(latent)
+        positive = node_helpers.conditioning_set_values(
+            positive, {"ref_audio": ref_audio}
+        )
+        negative = node_helpers.conditioning_set_values(
+            negative, {"ref_audio": ref_audio}
+        )
+
+        frozen = audio_latent.copy()
+        b, c, t, f = latent.shape
+        frozen["noise_mask"] = torch.zeros((b, 1, t, 1), dtype=torch.float32)
+
+        return io.NodeOutput(positive, negative, frozen)
