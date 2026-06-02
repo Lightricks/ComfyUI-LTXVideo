@@ -241,6 +241,13 @@ class LTXVLoopingSampler:
                         "tooltip": "The strength of the negative-index latent conditioning. Lower values reduce the influence of the reference image(s) provided via optional_negative_index_latents.",
                     },
                 ),
+                "save_checkpoints": (
+                    "BOOLEAN",
+                    {
+                        "default": False,
+                        "tooltip": "If enabled, writes the accumulated latent to output/ltxv_looping_ckpt_v{v}_h{h}.safetensors after each temporal tile, so a mid-run crash leaves a decodable partial result on disk for salvage. The file is overwritten each tile (the latent is cumulative).",
+                    },
+                ),
             },
         }
 
@@ -330,6 +337,7 @@ class LTXVLoopingSampler:
         sampling_config: SamplingConfig,
         model_config: ModelConfig,
         audio_info: Optional[dict] = None,
+        save_checkpoints: bool = False,
     ):
         """Process all temporal chunks for a single spatial tile."""
         chunk_index = 0
@@ -626,6 +634,11 @@ class LTXVLoopingSampler:
                 # Update accumulated audio from extend tile
                 accumulated_audio = tile_out_latents.pop("_audio", accumulated_audio)
 
+            if save_checkpoints:
+                self._save_chunk_checkpoint(
+                    tile_out_latents, accumulated_audio, tile_config, chunk_index
+                )
+
             chunk_index += 1
 
         # Store accumulated audio in the output for the caller
@@ -633,6 +646,59 @@ class LTXVLoopingSampler:
             tile_out_latents["_audio"] = accumulated_audio
 
         return tile_out_latents
+
+    def _save_chunk_checkpoint(
+        self, tile_out_latents, accumulated_audio, tile_config, chunk_index
+    ):
+        """Salvage checkpoint: persist the accumulated latent after each temporal
+        chunk so a mid-run crash leaves a decodable partial result on disk.
+
+        The latent is cumulative, so each write supersedes the previous one; we
+        overwrite a single per-spatial-tile file and rename atomically to avoid a
+        corrupt file if the process dies mid-write. Best-effort — a checkpoint
+        failure must never abort generation. To recover, load the .safetensors
+        ("video"/"audio" tensors) and VAE-decode whatever finished.
+        """
+        try:
+            import os
+
+            import comfy.utils
+            import folder_paths
+
+            samples = tile_out_latents["samples"]
+            if isinstance(samples, NestedTensor) and len(samples.tensors) == 2:
+                video, audio = samples.tensors[0], samples.tensors[1]
+            else:
+                video, audio = samples, accumulated_audio
+
+            sd = {"video": video.detach().cpu().contiguous()}
+            metadata = {
+                "chunk_index": str(chunk_index),
+                "spatial_v": str(tile_config.v),
+                "spatial_h": str(tile_config.h),
+                "video_shape": str(list(video.shape)),
+            }
+            if audio is not None:
+                sd["audio"] = audio.detach().cpu().contiguous()
+                metadata["audio_shape"] = str(list(audio.shape))
+
+            path = os.path.join(
+                folder_paths.get_output_directory(),
+                f"ltxv_looping_ckpt_v{tile_config.v}_h{tile_config.h}.safetensors",
+            )
+            tmp_path = path + ".tmp"
+            comfy.utils.save_torch_file(sd, tmp_path, metadata=metadata)
+            os.replace(tmp_path, path)
+            print(
+                f"[LoopingSampler] Saved salvage checkpoint (chunk {chunk_index}, "
+                f"video={list(video.shape)}"
+                + (f", audio={list(audio.shape)}" if audio is not None else "")
+                + f") -> {path}"
+            )
+        except Exception as e:
+            print(
+                f"[LoopingSampler] WARNING: failed to write salvage checkpoint: {e}"
+            )
 
     def _create_spatial_weights(
         self,
@@ -835,6 +901,7 @@ class LTXVLoopingSampler:
         guiding_end_step=1000,
         optional_cond_image_indices="0",
         optional_normalizing_latents=None,
+        save_checkpoints=False,
         per_tile_seed_offsets="0",  # hidden interface
     ):
         # Get dimensions and prepare for spatial tiling
@@ -1039,6 +1106,7 @@ class LTXVLoopingSampler:
                     sampling_config,
                     model_config,
                     audio_info=tile_audio_info,
+                    save_checkpoints=save_checkpoints,
                 )
 
                 # Extract accumulated audio from first spatial tile

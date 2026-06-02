@@ -1,3 +1,7 @@
+import math
+
+import torch
+
 from .nodes_registry import comfy_node
 
 # Internal keys used to store AV merge metadata inside model options
@@ -65,3 +69,123 @@ class ImageToCPU:
 
     def run(self, image):
         return (image.cpu(),)
+
+
+@comfy_node(description="Looping Reference Schedule")
+class LTXVLoopingReferenceSchedule:
+    TIME_SCALE = 8
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "reference_images": ("IMAGE",),
+                "frame_rate": (
+                    "FLOAT",
+                    {"default": 24.0, "min": 0.01, "max": 240.0, "step": 0.01},
+                ),
+                "total_duration": (
+                    "FLOAT",
+                    {"default": 30.0, "min": 0.1, "max": 3600.0, "step": 0.1},
+                ),
+                "tile_duration": (
+                    "FLOAT",
+                    {"default": 10.0, "min": 0.1, "max": 3600.0, "step": 0.1},
+                ),
+                "overlap_duration": (
+                    "FLOAT",
+                    {"default": 80 / 24, "min": 0.1, "max": 3600.0, "step": 0.1},
+                ),
+                "reference_offset": (
+                    "FLOAT",
+                    {
+                        "default": 16 / 24,
+                        "min": 0.1,
+                        "max": 3600.0,
+                        "step": 0.1,
+                        "tooltip": "Reference position as seconds before the end of each tile.",
+                    },
+                ),
+            },
+        }
+
+    RETURN_TYPES = ("IMAGE", "INT", "INT", "INT", "STRING", "INT")
+    RETURN_NAMES = (
+        "reference_images",
+        "frame_count",
+        "temporal_tile_size",
+        "temporal_overlap",
+        "reference_indices",
+        "tile_count",
+    )
+    FUNCTION = "build"
+    CATEGORY = "utility"
+
+    @classmethod
+    def _aligned_frames(cls, seconds, frame_rate, minimum):
+        frames = round(seconds * frame_rate / cls.TIME_SCALE) * cls.TIME_SCALE
+        return max(minimum, frames)
+
+    def build(
+        self,
+        reference_images,
+        frame_rate,
+        total_duration,
+        tile_duration,
+        overlap_duration,
+        reference_offset,
+    ):
+        frame_count = max(
+            self.TIME_SCALE + 1,
+            math.floor((total_duration * frame_rate - 1) / self.TIME_SCALE)
+            * self.TIME_SCALE
+            + 1,
+        )
+        tile_size = min(self._aligned_frames(tile_duration, frame_rate, 24), 1000)
+        overlap = self._aligned_frames(overlap_duration, frame_rate, 16)
+        overlap = min(overlap, 80, tile_size - self.TIME_SCALE)
+        reference_margin = self._aligned_frames(
+            reference_offset, frame_rate, self.TIME_SCALE
+        )
+        reference_margin = min(reference_margin, tile_size - self.TIME_SCALE)
+
+        latent_frames = ((frame_count - 1) // self.TIME_SCALE) + 1
+        latent_tile_size = tile_size // self.TIME_SCALE
+        latent_overlap = overlap // self.TIME_SCALE
+        latent_stride = latent_tile_size - latent_overlap
+        tile_count = max(
+            1, math.ceil((latent_frames - latent_overlap) / latent_stride)
+        )
+
+        final_index = ((frame_count - 1) // self.TIME_SCALE) * self.TIME_SCALE
+        tile_stride = tile_size - overlap
+        reference_indices = [0]
+        for tile_index in range(tile_count):
+            reference_index = min(
+                tile_index * tile_stride + tile_size - reference_margin,
+                final_index,
+            )
+            reference_index -= reference_index % self.TIME_SCALE
+            if reference_index not in reference_indices:
+                reference_indices.append(reference_index)
+
+        target_count = len(reference_indices)
+        source_count = reference_images.shape[0]
+        if source_count < 1:
+            raise ValueError("reference_images must contain at least one image")
+        if source_count >= target_count:
+            scheduled_images = reference_images[:target_count]
+        else:
+            repeated_last = reference_images[-1:].repeat(
+                target_count - source_count, 1, 1, 1
+            )
+            scheduled_images = torch.cat((reference_images, repeated_last), dim=0)
+
+        return (
+            scheduled_images,
+            frame_count,
+            tile_size,
+            overlap,
+            ", ".join(str(index) for index in reference_indices),
+            tile_count,
+        )
