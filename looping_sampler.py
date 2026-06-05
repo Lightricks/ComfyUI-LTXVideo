@@ -245,7 +245,7 @@ class LTXVLoopingSampler:
                     "BOOLEAN",
                     {
                         "default": False,
-                        "tooltip": "If enabled, writes the accumulated latent to output/ltxv_looping_ckpt_v{v}_h{h}.safetensors after each temporal tile, so a mid-run crash leaves a decodable partial result on disk for salvage. The file is overwritten each tile (the latent is cumulative).",
+                        "tooltip": "If enabled, after each temporal tile writes the accumulated latent as ComfyUI .latent files into the input folder (ltxv_looping_ckpt_v{v}_h{h}_video.latent, and _audio.latent for AV), so a mid-run crash leaves a decodable partial result. Reload with the stock LoadLatent node (+ LTXVConcatAVLatent for AV). Overwritten each tile (the latent is cumulative).",
                     },
                 ),
             },
@@ -653,11 +653,17 @@ class LTXVLoopingSampler:
         """Salvage checkpoint: persist the accumulated latent after each temporal
         chunk so a mid-run crash leaves a decodable partial result on disk.
 
+        Writes ComfyUI-native ``.latent`` files (one for video, one for audio if
+        present) into the ``input`` directory, so recovery needs no custom node:
+        reload with the stock ``LoadLatent`` node(s) and, for AV, recombine with
+        ``LTXVConcatAVLatent``. The files carry the ``latent_format_version_0``
+        marker, so ``LoadLatent`` round-trips them with multiplier 1.0.
+
         The latent is cumulative, so each write supersedes the previous one; we
-        overwrite a single per-spatial-tile file and rename atomically to avoid a
-        corrupt file if the process dies mid-write. Best-effort — a checkpoint
-        failure must never abort generation. To recover, load the .safetensors
-        ("video"/"audio" tensors) and VAE-decode whatever finished.
+        overwrite a single per-spatial-tile file per stream and rename atomically
+        (.tmp -> final) to avoid a corrupt file if the process dies mid-write.
+        Best-effort — a checkpoint failure must never abort generation. See
+        CLAUDE.md ("save_checkpoints salvage toggle") for the recovery workflow.
         """
         try:
             import os
@@ -671,29 +677,31 @@ class LTXVLoopingSampler:
             else:
                 video, audio = samples, accumulated_audio
 
-            sd = {"video": video.detach().cpu().contiguous()}
-            metadata = {
-                "chunk_index": str(chunk_index),
-                "spatial_v": str(tile_config.v),
-                "spatial_h": str(tile_config.h),
-                "video_shape": str(list(video.shape)),
-            }
-            if audio is not None:
-                sd["audio"] = audio.detach().cpu().contiguous()
-                metadata["audio_shape"] = str(list(audio.shape))
+            in_dir = folder_paths.get_input_directory()
+            base = f"ltxv_looping_ckpt_v{tile_config.v}_h{tile_config.h}"
 
-            path = os.path.join(
-                folder_paths.get_output_directory(),
-                f"ltxv_looping_ckpt_v{tile_config.v}_h{tile_config.h}.safetensors",
-            )
-            tmp_path = path + ".tmp"
-            comfy.utils.save_torch_file(sd, tmp_path, metadata=metadata)
-            os.replace(tmp_path, path)
+            def _write_latent(tensor, suffix):
+                # ComfyUI .latent format: LoadLatent reads "latent_tensor" and,
+                # when "latent_format_version_0" is present, uses multiplier 1.0.
+                payload = {
+                    "latent_tensor": tensor.detach().to("cpu", torch.float32).contiguous(),
+                    "latent_format_version_0": torch.tensor([]),
+                }
+                path = os.path.join(in_dir, f"{base}_{suffix}.latent")
+                tmp = path + ".tmp"
+                comfy.utils.save_torch_file(payload, tmp)
+                os.replace(tmp, path)
+                return os.path.basename(path)
+
+            written = [_write_latent(video, "video")]
+            if audio is not None:
+                written.append(_write_latent(audio, "audio"))
+
             print(
                 f"[LoopingSampler] Saved salvage checkpoint (chunk {chunk_index}, "
                 f"video={list(video.shape)}"
                 + (f", audio={list(audio.shape)}" if audio is not None else "")
-                + f") -> {path}"
+                + f") -> {', '.join(written)} in input/"
             )
         except Exception as e:
             print(
