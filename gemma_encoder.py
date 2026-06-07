@@ -270,7 +270,9 @@ class LTXVGemmaCLIPModelLoader:
             if comfy.model_management.get_torch_device().type == "mps":
                 clip_dtype = torch.float16
         except Exception as e:
-            logger.debug(f"Could not detect device type for dtype selection: {e}")
+            logger.debug(
+                f"Could not detect device type for dtype selection: {e}", exc_info=True
+            )
 
         ltxv_full_path = folder_paths.get_full_path("checkpoints", ltxv_path)
         clip_target = comfy.supported_models_base.ClipTarget(
