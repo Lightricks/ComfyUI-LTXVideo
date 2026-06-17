@@ -23,7 +23,7 @@ class LTXVDilateVideoMask(io.ComfyNode):
                     "spatial_radius",
                     default=1,
                     min=0,
-                    max=30,
+                    max=300,
                     tooltip="Half-size of the spatial dilation kernel. Kernel = 2*radius+1.",
                 ),
                 io.Int.Input(
