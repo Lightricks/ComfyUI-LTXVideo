@@ -1,3 +1,4 @@
+from .audio_only import LTXVAudioOnlyEmptyVideoLatent, LTXVAudioOnlyModel
 from .conditioning_loader import LTXVLoadConditioning
 from .conditioning_saver import LTXVSaveConditioning
 from .decoder_noise import DecoderNoise
@@ -117,6 +118,8 @@ NODE_CLASS_MAPPINGS = {
     "LTXVInpaintPreprocess": LTXVInpaintPreprocess,
     "LTXVLaplacianPyramidBlend": LTXVLaplacianPyramidBlend,
     "LTXVHDRDecodePostprocess": LTXVHDRDecodePostprocess,
+    "LTXVAudioOnlyModel": LTXVAudioOnlyModel,
+    "LTXVAudioOnlyEmptyVideoLatent": LTXVAudioOnlyEmptyVideoLatent,
 }
 
 # Consistent display names between static and dynamic node mappings in nodes_registry.py,

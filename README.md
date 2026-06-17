@@ -55,6 +55,7 @@ LTX-2.3 Workflows:
 * [`IC-LoRA distilled model I2V motion tracking`](./example_workflows/2.3/LTX-2.3_ICLoRA_Motion_Track_Distilled.json)
 * [`IC-LoRA distilled model HDR`](./example_workflows/2.3/LTX-2.3_ICLoRA_HDR_Distilled.json)
 * [`IC-LoRA distilled model Lipdub; two stages (with upsampling)`](./example_workflows/2.3/LTX-2.3_ICLoRA_Lipdub_Two_Stage_Distilled.json)
+* [`Text to audio distilled model; single stage`](./example_workflows/2.3/LTX-2.3_T2A_Single_Stage_Distilled.json)
 
 Older Workflows (LTX-2.0):
 
@@ -103,6 +104,16 @@ We provide a **Lipdub IC-LoRA** that dubs or rephrases speech in video. Given a 
 - **Two-stage pipeline**: Stage 1 generates the video and audio at base resolution; Stage 2 upscales while freezing the audio.
 - **Speaker identity preservation**: Reference audio tokens provide speaker context so the generated voice stays consistent.
 
+## Text-to-Audio (T2A)
+
+LTX-2 is a single joint audio/video transformer, but it can generate audio on its own. The `LTXVAudioOnlyModel` node puts the model into audio-only mode for text-to-audio, with no video output.
+
+### Key Features
+
+- **Audio-only sampling**: The node sets the model's `run_vx`, `a2v_cross_attn` and `v2a_cross_attn` flags off, so the audio is denoised with no dependence on the video latent and the video stream is skipped. This matches the reference single-stage T2A pipeline's `video=None` behavior.
+- **Minimal dummy video latent**: The model splits its input positionally into `[video, audio]`, so the sampler still needs a video latent at index 0. Use the `LTXVAudioOnlyEmptyVideoLatent` node (a fixed 64x64 single-frame placeholder, no params to tweak) joined with the audio latent via `LTXVConcatAVLatent`; with `LTXVAudioOnlyModel` active it is never attended to and adds negligible cost.
+- **Audio decode**: `LTXVAudioVAEDecode` extracts the audio directly from the joint latent, then save it with a standard built-in audio node (for example `Save Audio (FLAC)`).
+
 ## Required Models
 
 Download the following models:
@@ -138,6 +149,15 @@ Download the following models:
   * [`ltx-2-19b-lora-camera-control-jib-down.safetensors`](https://huggingface.co/Lightricks/LTX-2-19b-LoRA-Camera-Control-Jib-Down/blob/main/ltx-2-19b-lora-camera-control-jib-down.safetensors)
   * [`ltx-2-19b-lora-camera-control-jib-up.safetensors`](https://huggingface.co/Lightricks/LTX-2-19b-LoRA-Camera-Control-Jib-Up/blob/main/ltx-2-19b-lora-camera-control-jib-up.safetensors)
   * [`ltx-2-19b-lora-camera-control-static.safetensors`](https://huggingface.co/Lightricks/LTX-2-19b-LoRA-Camera-Control-Static/blob/main/ltx-2-19b-lora-camera-control-static.safetensors)
+  * [`ltx-2.3-22b-ic-lora-instant-shave-0.9.safetensors`](https://huggingface.co/Lightricks/LTX-2.3-22b-IC-LoRA-Instant-Shave/blob/main/ltx-2.3-22b-ic-lora-instant-shave-0.9.safetensors)
+  * [`ltx-2.3-22b-ic-lora-colorization-0.9.safetensors`](https://huggingface.co/Lightricks/LTX-2.3-22b-IC-LoRA-Colorization/blob/main/ltx-2.3-22b-ic-lora-colorization-0.9.safetensors)
+  * [`ltx-2.3-22b-ic-lora-cross-eyed-0.9.safetensors`](https://huggingface.co/Lightricks/LTX-2.3-22b-IC-LoRA-Cross-Eyed/blob/main/ltx-2.3-22b-ic-lora-cross-eyed-0.9.safetensors)
+  * [`ltx-2.3-22b-ic-lora-day-to-night-0.9.safetensors`](https://huggingface.co/Lightricks/LTX-2.3-22b-IC-LoRA-Day-To-Night/blob/main/ltx-2.3-22b-ic-lora-day-to-night-0.9.safetensors)
+  * [`ltx-2.3-22b-ic-lora-deblur-0.9.safetensors`](https://huggingface.co/Lightricks/LTX-2.3-22b-IC-LoRA-Deblur/blob/main/ltx-2.3-22b-ic-lora-deblur-0.9.safetensors)
+  * [`ltx-2.3-22b-ic-lora-decompression-0.9.safetensors`](https://huggingface.co/Lightricks/LTX-2.3-22b-IC-LoRA-Decompression/blob/main/ltx-2.3-22b-ic-lora-decompression-0.9.safetensors)
+  * [`ltx-2.3-22b-ic-lora-in-outpainting-0.9.safetensors`](https://huggingface.co/Lightricks/LTX-2.3-22b-IC-LoRA-In-Outpainting/blob/main/ltx-2.3-22b-ic-lora-in-outpainting-0.9.safetensors)
+  * [`ltx-2.3-22b-ic-lora-water-simulation-0.9.safetensors`](https://huggingface.co/Lightricks/LTX-2.3-22b-IC-LoRA-Water-Simulation/blob/main/ltx-2.3-22b-ic-lora-water-simulation-0.9.safetensors)
+  * [`ltx-2.3-22b-ic-lora-ingredients-0.9.safetensors`](https://huggingface.co/Lightricks/LTX-2.3-22b-IC-LoRA-Ingredients/blob/main/ltx-2.3-22b-ic-lora-ingredients-0.9.safetensors)
 
 
 ## Advanced Techniques
