@@ -95,7 +95,7 @@ class GemmaAPITextEncode:
     RETURN_TYPES = ("CONDITIONING",)
     RETURN_NAMES = ("conditioning",)
     FUNCTION = "encode"
-    CATEGORY = "api node/text/Lightricks"
+    CATEGORY = "Lightricks/LTXV/Conditioning"
 
     def encode(
         self, api_key: str, prompt: str, ckpt_name: str, enhance_prompt: bool = False

@@ -88,7 +88,7 @@ class LTXVAddGuideAdvanced:
     RETURN_TYPES = ("CONDITIONING", "CONDITIONING", "LATENT")
     RETURN_NAMES = ("positive", "negative", "latent")
 
-    CATEGORY = "conditioning/video_models"
+    CATEGORY = "Lightricks/LTXV/Conditioning"
     FUNCTION = "generate"
 
     DESCRIPTION = (
@@ -210,7 +210,7 @@ class LTXVImgToVideoAdvanced:
     RETURN_TYPES = ("CONDITIONING", "CONDITIONING", "LATENT")
     RETURN_NAMES = ("positive", "negative", "latent")
 
-    CATEGORY = "conditioning/video_models"
+    CATEGORY = "Lightricks/LTXV/Conditioning"
     FUNCTION = "generate"
 
     DESCRIPTION = (

@@ -16,7 +16,7 @@ class LTXVSaveConditioning(io.ComfyNode):
         return io.Schema(
             node_id="LTXVSaveConditioning",
             display_name="🅛🅣🅧 LTXV Save Conditioning",
-            category="lightricks/LTXV",
+            category="Lightricks/LTXV/Conditioning",
             inputs=[
                 io.Conditioning.Input("conditioning"),
                 io.String.Input("filename", default="conditioning"),

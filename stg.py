@@ -94,7 +94,7 @@ class LTXVApplySTG:
     FUNCTION = "apply_stg"
     RETURN_TYPES = ("MODEL",)
     RETURN_NAMES = ("model",)
-    CATEGORY = "lightricks/LTXV"
+    CATEGORY = "Lightricks/LTXV/Model Patches"
 
     DESCRIPTION = "Defines the blocks to apply the STG to."
 
@@ -523,7 +523,7 @@ class STGGuiderNode:
     RETURN_TYPES = ("GUIDER",)
 
     FUNCTION = "get_guider"
-    CATEGORY = "lightricks/LTXV"
+    CATEGORY = "Lightricks/LTXV/Guidance"
 
     DESCRIPTION = (
         "Implements Spatiotemporal Skip Guidance (STG), a training-free method enhancing transformer-based "
@@ -648,7 +648,7 @@ class STGGuiderAdvancedNode:
     RETURN_TYPES = ("GUIDER",)
 
     FUNCTION = "get_guider"
-    CATEGORY = "lightricks/LTXV"
+    CATEGORY = "Lightricks/LTXV/Guidance"
     DESCRIPTION = """
     The Advanced STG Guider implements sophisticated techniques for controlling the denoising process:
 
@@ -788,7 +788,7 @@ class STGAdvancedPresetsNode:
     RETURN_TYPES = ("STG_ADVANCED_PRESET",)
 
     FUNCTION = "get_preset"
-    CATEGORY = "lightricks/LTXV"
+    CATEGORY = "Lightricks/LTXV/Guidance"
 
     def get_preset(self, preset=None):
         return (preset,)
@@ -915,7 +915,7 @@ class APGGuiderNode:
     RETURN_TYPES = ("GUIDER",)
 
     FUNCTION = "get_guider"
-    CATEGORY = "lightricks/LTXV"
+    CATEGORY = "Lightricks/LTXV/Guidance"
 
     DESCRIPTION = """
     The APG Guider implements Adaptive Projected Guidance (APG).

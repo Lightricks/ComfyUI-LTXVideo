@@ -40,7 +40,7 @@ class LTXVSelectLatents:
 
     RETURN_TYPES = ("LATENT",)
     FUNCTION = "select_latents"
-    CATEGORY = "latent/video"
+    CATEGORY = "Lightricks/LTXV/Latent"
     DESCRIPTION = (
         "Selects a range of frames from the video latent. "
         "start_index and end_index define a closed interval (inclusive of both endpoints)."
@@ -113,7 +113,7 @@ class LTXVAddLatents:
 
     RETURN_TYPES = ("LATENT",)
     FUNCTION = "add_latents"
-    CATEGORY = "latent/video"
+    CATEGORY = "Lightricks/LTXV/Latent"
     DESCRIPTION = (
         "Concatenates two video latents along the frames dimension. "
         "latents1 and latents2 must have the same dimensions except for the frames dimension."
@@ -233,7 +233,7 @@ class LTXVSetVideoLatentNoiseMasks:
 
     RETURN_TYPES = ("LATENT",)
     FUNCTION = "set_mask"
-    CATEGORY = "latent/video"
+    CATEGORY = "Lightricks/LTXV/Latent"
     DESCRIPTION = (
         "Applies multiple masks to a video latent. "
         "masks can be 2D, 3D, or 4D tensors. "
@@ -351,7 +351,7 @@ class LTXVDilateLatent:
 
     RETURN_TYPES = ("LATENT",)
     FUNCTION = "dilate_latent"
-    CATEGORY = "latent/video"
+    CATEGORY = "Lightricks/LTXV/Latent"
     DESCRIPTION = "Dilates a latent by a grid size."
 
     def dilate_latent(
@@ -426,7 +426,7 @@ class LTXVAddLatentGuide:
     RETURN_TYPES = ("CONDITIONING", "CONDITIONING", "LATENT")
     RETURN_NAMES = ("positive", "negative", "latent")
 
-    CATEGORY = "ltxtricks"
+    CATEGORY = "Lightricks/LTXV/Guidance"
     FUNCTION = "generate"
 
     DESCRIPTION = "Adds a keyframe or a video segment at a specific frame index."
@@ -526,7 +526,7 @@ class LTXVImgToVideoConditionOnly:
 
     RETURN_TYPES = ("LATENT",)
     RETURN_NAMES = ("latent",)
-    CATEGORY = "conditioning/video_models"
+    CATEGORY = "Lightricks/LTXV/Conditioning"
     FUNCTION = "generate"
     DESCRIPTION = (
         "Applies image conditioning to the first frames of an existing latent. "
@@ -680,7 +680,7 @@ class LTXVSetAudioVideoMaskByTime:
     )
 
     FUNCTION = "run"
-    CATEGORY = "utility"
+    CATEGORY = "Lightricks/LTXV/Masking"
     DESCRIPTION = "Sets the audio and video mask by time."
 
     def run(
