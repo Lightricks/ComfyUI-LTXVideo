@@ -6,10 +6,15 @@ Provides the 3-block Gemma text encoder pipeline:
   3. Embeddings Processor (Video / AV) -- wraps Embeddings1DConnector(s)
 """
 
+import glob
+import importlib.util
 import json
+import logging
 import math
+import os
 from pathlib import Path
 
+import folder_paths
 import torch
 from comfy.utils import load_torch_file
 from einops import rearrange
@@ -20,6 +25,8 @@ from .embeddings_connector import (
     load_audio_embeddings_connector,
     load_video_embeddings_connector,
 )
+
+logger = logging.getLogger(__name__)
 
 _PREFIX_BASE = "model.diffusion_model."
 _PREFIX_TEXT_PROJ = "text_embedding_projection."
@@ -313,6 +320,38 @@ def _load_single_aggregate_embed_from_file(path, dtype):
 # ---------------------------------------------------------------------------
 
 
+
+def _load_gguf_connector_sd(gguf_path):
+    """Load connector + projection tensors from GGUF for LTXVGemmaCLIPModelLoader."""
+    import gguf as _gguf
+    import numpy as np
+    reader = _gguf.GGUFReader(str(gguf_path))
+    sd = {}
+    prefixes = ('video_embeddings_connector', 'audio_embeddings_connector', 'text_embedding_projection', 'audio_adaln_single')
+    for t in reader.tensors:
+        if not any(t.name.startswith(p) for p in prefixes):
+            continue
+        try:
+            ttype = t.tensor_type.name
+            shape = list(reversed(t.shape))
+            raw = bytes(t.data)
+            if ttype == 'F32':
+                sd[f"model.diffusion_model.{t.name}"] = torch.from_numpy(np.frombuffer(raw, dtype=np.float32).copy()).reshape(shape)
+            elif ttype == 'F16':
+                sd[f"model.diffusion_model.{t.name}"] = torch.from_numpy(np.frombuffer(raw, dtype=np.float16).copy()).reshape(shape)
+            elif ttype == 'BF16':
+                sd[f"model.diffusion_model.{t.name}"] = torch.frombuffer(bytearray(raw), dtype=torch.bfloat16).reshape(shape).contiguous()
+            else:
+                dq = os.path.join(os.path.dirname(__file__), '..', 'ComfyUI-GGUF', 'dequant.py')
+                if os.path.exists(dq):
+                    spec = importlib.util.spec_from_file_location("dequant", dq)
+                    m = importlib.util.module_from_spec(spec); spec.loader.exec_module(m)
+                    sd[f"model.diffusion_model.{t.name}"] = torch.tensor(m.dequantize(t.data, t.tensor_type), dtype=torch.float32).reshape(shape)
+        except Exception as e:
+            logger.warning("Skipping GGUF tensor %s: %s", t.name, e)
+    logger.info("GGUF connector: loaded %d tensors", len(sd))
+    return sd
+
 def load_text_embeddings_pipeline(
     ltxv_path, dtype=torch.bfloat16, fallback_proj_path=None
 ):
@@ -330,9 +369,42 @@ def load_text_embeddings_pipeline(
     Returns:
         (feature_extractor, embeddings_processor)
     """
-    sd, metadata = load_torch_file(str(ltxv_path), return_metadata=True)
-    config = json.loads(metadata.get("config", "{}"))
-    transformer_config = config.get("transformer", {})
+    if ltxv_path and str(ltxv_path).endswith('.gguf'):
+        sd = _load_gguf_connector_sd(ltxv_path)
+        transformer_config = {
+            "caption_projection_first_linear": False,
+            "caption_proj_input_norm": False,
+            "caption_projection_second_linear": False,
+            "caption_proj_before_connector": True,
+            "text_encoder_norm_type": "per_token_rms",
+            "prompt_embedding_dim": 3840,
+            "connector_num_layers": 8,
+            "connector_num_attention_heads": 32,
+            "connector_attention_head_dim": 128,
+            "connector_apply_gated_attention": True,
+            "connector_positional_embedding_max_pos": [4096],
+            "audio_connector_attention_head_dim": 64,
+        }
+        # Merge text_embedding_projection keys from proj_linear.safetensors
+        _proj_candidates = [
+            f for d in folder_paths.get_folder_paths("text_encoders")
+            for f in glob.glob(os.path.join(d, "*/proj_linear.safetensors"))
+        ]
+        _proj_path = fallback_proj_path or (_proj_candidates[0] if _proj_candidates else None)
+        if _proj_path is not None:
+            try:
+                from comfy.utils import load_torch_file as _ltf2
+                proj_sd = _ltf2(str(_proj_path))
+                sd.update(proj_sd)
+                logger.info("Merged %d proj_linear keys from %s", len(proj_sd), _proj_path)
+            except Exception as e:
+                logger.warning("Could not merge proj_linear keys: %s", e)
+        else:
+            logger.warning("proj_linear.safetensors not found; text projection may be missing")
+    else:
+        sd, metadata = load_torch_file(str(ltxv_path), return_metadata=True)
+        config = json.loads(metadata.get("config", "{}"))
+        transformer_config = config.get("transformer", {})
 
     is_av = f"{_PREFIX_BASE}audio_adaln_single.linear.weight" in sd
     has_dual_aggregate = f"{_PREFIX_TEXT_PROJ}video_aggregate_embed.weight" in sd
