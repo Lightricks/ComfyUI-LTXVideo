@@ -55,6 +55,7 @@ LTX-2.3 Workflows:
 * [`IC-LoRA distilled model I2V motion tracking`](./example_workflows/2.3/LTX-2.3_ICLoRA_Motion_Track_Distilled.json)
 * [`IC-LoRA distilled model HDR`](./example_workflows/2.3/LTX-2.3_ICLoRA_HDR_Distilled.json)
 * [`IC-LoRA distilled model Lipdub; two stages (with upsampling)`](./example_workflows/2.3/LTX-2.3_ICLoRA_Lipdub_Two_Stage_Distilled.json)
+* [`IC-LoRA distilled model pixel spatial upscaling`](./example_workflows/2.3/LTX-2.3_ICLoRA_Pixel_Spatial_Upscaler_Distilled.json)
 * [`Text to audio distilled model; single stage`](./example_workflows/2.3/LTX-2.3_T2A_Single_Stage_Distilled.json)
 
 Older Workflows (LTX-2.0):
@@ -103,6 +104,17 @@ We provide a **Lipdub IC-LoRA** that dubs or rephrases speech in video. Given a 
 - **Same-language rephrasing**: Change what the speaker says while keeping the original language.
 - **Two-stage pipeline**: Stage 1 generates the video and audio at base resolution; Stage 2 upscales while freezing the audio.
 - **Speaker identity preservation**: Reference audio tokens provide speaker context so the generated voice stays consistent.
+
+## Pixel Spatial Upscaler IC-LoRA
+
+We provide **Pixel Spatial Upscaler** IC-LoRAs that creatively upscale low-resolution video by synthesizing fine detail rather than simply interpolating pixels. Given a low-resolution reference clip, the model re-renders it at 2× or 4× resolution with generative spatial detail — making it a creative upsampler, not a pixel-accurate refiner.
+
+### Key Features
+
+- **2× and 4× variants**: Choose the 2× upscaler for moderate upscaling or the 4× upscaler for larger resolution jumps.
+- **Generative detail synthesis**: The model synthesizes texture and structure from the reference rather than faithfully preserving every pixel.
+- **Draft-then-upscale workflow**: Generate at a low base resolution (e.g. ~280p) to lock in composition and motion, then run the upscaler for the final high-resolution output.
+- **Tunable fidelity**: LoRA strength, guidance, and step count control how closely the output follows the reference — lower values stay closer to the source; higher values allow more creative detail.
 
 ## Text-to-Audio (T2A)
 
@@ -158,6 +170,8 @@ Download the following models:
   * [`ltx-2.3-22b-ic-lora-in-outpainting-0.9.safetensors`](https://huggingface.co/Lightricks/LTX-2.3-22b-IC-LoRA-In-Outpainting/blob/main/ltx-2.3-22b-ic-lora-in-outpainting-0.9.safetensors)
   * [`ltx-2.3-22b-ic-lora-water-simulation-0.9.safetensors`](https://huggingface.co/Lightricks/LTX-2.3-22b-IC-LoRA-Water-Simulation/blob/main/ltx-2.3-22b-ic-lora-water-simulation-0.9.safetensors)
   * [`ltx-2.3-22b-ic-lora-ingredients-0.9.safetensors`](https://huggingface.co/Lightricks/LTX-2.3-22b-IC-LoRA-Ingredients/blob/main/ltx-2.3-22b-ic-lora-ingredients-0.9.safetensors)
+  * [`ltx-2.3-22b-ic-lora-pixel-spatial-upscaler-x4-0.9.safetensors`](https://huggingface.co/Lightricks/LTX-2.3-22b-IC-LoRA-Pixel-Spatial-Upscaler/blob/main/ltx-2.3-22b-ic-lora-pixel-spatial-upscaler-x4-0.9.safetensors)
+  * [`ltx-2.3-22b-ic-lora-pixel-spatial-upscaler-x2-0.9.safetensors`](https://huggingface.co/Lightricks/LTX-2.3-22b-IC-LoRA-Pixel-Spatial-Upscaler/blob/main/ltx-2.3-22b-ic-lora-pixel-spatial-upscaler-x2-0.9.safetensors)
 
 
 ## Advanced Techniques
