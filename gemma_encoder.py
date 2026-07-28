@@ -1,4 +1,5 @@
 import logging
+import os
 from glob import glob
 from pathlib import Path
 from typing import List, Optional, Tuple
@@ -10,6 +11,7 @@ import folder_paths
 import torch
 from PIL import Image
 from transformers import (
+    AutoModelForCausalLM,
     AutoImageProcessor,
     AutoTokenizer,
     Gemma3Config,
@@ -51,7 +53,7 @@ def tensor_to_pil(tensor: torch.Tensor) -> Image.Image:
 class LTXVGemmaTokenizer:
     def __init__(self, tokenizer_path: str, max_length: int = 1024):
         self.tokenizer = AutoTokenizer.from_pretrained(
-            tokenizer_path, local_files_only=True, model_max_length=max_length
+            tokenizer_path, local_files_only=True, ignore_mismatched_sizes=True, model_max_length=max_length
         )
         # Gemma expects left padding for chat-style prompts; for plain text it doesn't matter much.
         self.tokenizer.padding_side = "left"
@@ -156,7 +158,7 @@ class LTXVGemmaTextEncoderModel(torch.nn.Module):
         return self.model.load_state_dict(sd, strict=False)
 
     def memory_required(self, input_shape):
-        # Return a conservative estimate in bytesed(input_shape)
+        # Return a conservative estimate in bytes
         return self._model_memory_required
 
 
@@ -168,14 +170,17 @@ def ltxv_gemma_tokenizer(tokenizer_path, max_length=256):
     return _LTXVGemmaTokenizer
 
 
-def ltxv_gemma_clip(encoder_path, ltxv_path, processor=None, dtype=None):
+def ltxv_gemma_clip(encoder_path, ltxv_path, processor=None, dtype=None, gguf_file=None):
     class _LTXVGemmaTextEncoderModel(LTXVGemmaTextEncoderModel):
         def __init__(self, device="cpu", dtype=dtype, model_options={}):
             dtype = torch.bfloat16  # TODO: make this configurable
 
-            gemma_model = Gemma3ForConditionalGeneration.from_pretrained(
+            _kw = {"local_files_only": True}
+            if gguf_file: _kw["gguf_file"] = gguf_file
+            gemma_model = AutoModelForCausalLM.from_pretrained(
                 encoder_path,
-                local_files_only=True,
+                dtype=dtype,
+                **_kw,
                 torch_dtype=dtype,
             )
 
@@ -224,7 +229,8 @@ class LTXVGemmaCLIPModelLoader:
                     {"tooltip": "The name of the text encoder model to load."},
                 ),
                 "ltxv_path": (
-                    folder_paths.get_filename_list("checkpoints"),
+                    [""] + folder_paths.get_filename_list("checkpoints"),
+                    {"default": ""},
                     {"tooltip": "The name of the ltxv model to load."},
                 ),
                 "max_length": (
@@ -245,7 +251,17 @@ class LTXVGemmaCLIPModelLoader:
         path = Path(folder_paths.get_full_path("text_encoders", gemma_path))
         model_root = path.parents[1]
         tokenizer_path = Path(find_matching_dir(model_root, "tokenizer.model"))
-        gemma_model_path = Path(find_matching_dir(model_root, "model*.safetensors"))
+        gguf_filename = None
+        try:
+            gemma_model_path = Path(find_matching_dir(model_root, "model*.safetensors"))
+        except Exception:
+            gguf_dir = Path(find_matching_dir(model_root, "*.gguf"))
+            gguf_files = sorted(gguf_dir.glob("*.gguf"))
+            if not gguf_files:
+                raise ValueError(f"No GGUF found in {gguf_dir}")
+            gemma_model_path = gguf_dir
+            gguf_filename = gguf_files[0].name
+            logger.info(f"Using GGUF: {gguf_dir / gguf_filename}")
         processor_path = Path(find_matching_dir(model_root, "preprocessor_config.json"))
         tokenizer_class = ltxv_gemma_tokenizer(tokenizer_path, max_length=max_length)
 
@@ -253,7 +269,7 @@ class LTXVGemmaCLIPModelLoader:
         try:
             image_processor = AutoImageProcessor.from_pretrained(
                 str(processor_path),
-                local_files_only=True,
+                local_files_only=True, ignore_mismatched_sizes=True,
             )
             processor = Gemma3Processor(
                 image_processor=image_processor,
@@ -264,11 +280,17 @@ class LTXVGemmaCLIPModelLoader:
             logger.warning(f"Could not load processor from {model_root}: {e}")
 
         clip_dtype = torch.bfloat16
-        ltxv_full_path = folder_paths.get_full_path("checkpoints", ltxv_path)
+        if ltxv_path:
+            ltxv_full_path = folder_paths.get_full_path("checkpoints", ltxv_path)
+        else:
+            _unet_dirs = folder_paths.get_folder_paths("unet")
+            _ggufs = [g for d in _unet_dirs for g in glob(os.path.join(d, "*.gguf"))]
+            ltxv_full_path = _ggufs[0] if _ggufs else str(gemma_model_path / "proj_linear.safetensors")
+            logger.info(f"GGUF connector path: {ltxv_full_path}")
         clip_target = comfy.supported_models_base.ClipTarget(
             tokenizer=tokenizer_class,
             clip=ltxv_gemma_clip(
-                gemma_model_path, ltxv_full_path, processor=processor, dtype=clip_dtype
+                gemma_model_path, ltxv_full_path, processor=processor, dtype=clip_dtype, gguf_file=gguf_filename
             ),
         )
 
@@ -662,7 +684,7 @@ def transformers_gemma3_from_encoder(encoder):
     tokenizer_class = ltxv_gemma_tokenizer(jsons_path, max_length=1024)
     image_processor = AutoImageProcessor.from_pretrained(
         str(jsons_path),
-        local_files_only=True,
+        local_files_only=True, ignore_mismatched_sizes=True,
     )
     processor = Gemma3Processor(
         image_processor=image_processor,
