@@ -47,6 +47,13 @@ def _filter_sd(sd: dict, prefix: str) -> dict:
     return {k[len(prefix) :]: v for k, v in sd.items() if k.startswith(prefix)}
 
 
+def _config_value_matches(actual, expected_val) -> bool:
+    """Compare string config values case-insensitively while keeping other types strict."""
+    if isinstance(actual, str) and isinstance(expected_val, str):
+        return actual.casefold() == expected_val.casefold()
+    return actual == expected_val
+
+
 def _load_aggregate_embed(sd: dict, modality: str, dtype) -> nn.Linear:
     """Load an aggregate_embed Linear from the state dict.
 
@@ -359,7 +366,7 @@ def load_text_embeddings_pipeline(
         }
         for key, expected_val in _expected.items():
             actual = transformer_config.get(key)
-            assert actual == expected_val, (
+            assert _config_value_matches(actual, expected_val), (
                 f"Unexpected config for dual-aggregate model: "
                 f"{key}={actual!r}, expected {expected_val!r}"
             )
