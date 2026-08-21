@@ -158,6 +158,12 @@ class MultimodalGuider(comfy.samplers.CFGGuider):
         a_noise_pred_perturbed, v_noise_pred_perturbed = 0, 0
         a_noise_pred_modality, v_noise_pred_modality = 0, 0
 
+        # Initialize to noise_pred_pos as fallback for sampler_post_cfg_function hooks,
+        # which reference these unconditionally even when the conditional blocks below
+        # are skipped (e.g. cfg=1.0 distilled mode skips do_uncond, no STG skips do_perturbed).
+        noise_pred_neg = noise_pred_pos
+        noise_pred_perturbed = noise_pred_pos
+
         if any(params.do_uncond() for params in [audio_params, video_params]):
             try:
                 model_options["transformer_options"]["run_vx"] = run_vx
