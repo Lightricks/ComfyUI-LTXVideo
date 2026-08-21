@@ -172,7 +172,7 @@ class FlowEditForwardSamplerNode:
     RETURN_TYPES = ("SAMPLER", "ATTN_INJ")
     FUNCTION = "build"
 
-    CATEGORY = "fluxtapoz"
+    CATEGORY = "Lightricks/LTXV/Sampling"
 
     def build(
         self,
@@ -307,7 +307,7 @@ class FlowEdit2ReverseSamplerNode:
     RETURN_TYPES = ("SAMPLER",)
     FUNCTION = "build"
 
-    CATEGORY = "ltxtricks"
+    CATEGORY = "Lightricks/LTXV/Sampling"
 
     def build(
         self,
@@ -335,7 +335,7 @@ class PrepareAttnBankNode:
     RETURN_TYPES = ("LATENT", "ATTN_INJ")
     FUNCTION = "prepare"
 
-    CATEGORY = "ltxtricks"
+    CATEGORY = "Lightricks/LTXV/Model Patches"
 
     def prepare(self, latent, attn_inj):
         # Hack to force order of operations in ComfyUI graph
@@ -353,7 +353,7 @@ class RFSingleBlocksOverrideNode:
     RETURN_TYPES = ("SINGLE_LAYERS",)
     FUNCTION = "build"
 
-    CATEGORY = "ltxtricks"
+    CATEGORY = "Lightricks/LTXV/Model Patches"
 
     def build(self, *args, **kwargs):
         return (kwargs,)
@@ -370,7 +370,7 @@ class RFDoubleBlocksOverrideNode:
     RETURN_TYPES = ("DOUBLE_LAYERS",)
     FUNCTION = "build"
 
-    CATEGORY = "ltxtricks"
+    CATEGORY = "Lightricks/LTXV/Model Patches"
 
     def build(self, *args, **kwargs):
         return (kwargs,)

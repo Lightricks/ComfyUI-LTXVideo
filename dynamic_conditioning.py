@@ -17,7 +17,7 @@ class DynamicConditioning:
 
     RETURN_TYPES = ("MODEL",)
     FUNCTION = "apply"
-    CATEGORY = "lightricks/LTXV"
+    CATEGORY = "Lightricks/LTXV/Conditioning"
     INIT = False
 
     def apply(self, model, power, only_first_frame):

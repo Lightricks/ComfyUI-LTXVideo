@@ -17,7 +17,7 @@ class AddLatentGuideNode(nodes_lt.LTXVAddGuide):
     RETURN_TYPES = ("MODEL", "LATENT")
     RETURN_NAMES = ("model", "latent")
 
-    CATEGORY = "ltxtricks"
+    CATEGORY = "Lightricks/LTXV/Guidance"
     FUNCTION = "generate"
 
     def generate(self, model, latent, image_latent, index, strength):

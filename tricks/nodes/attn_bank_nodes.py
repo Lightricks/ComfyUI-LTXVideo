@@ -14,7 +14,7 @@ class LTXAttentionBankNode:
     RETURN_TYPES = ("ATTN_BANK",)
     FUNCTION = "build"
 
-    CATEGORY = "ltxtricks"
+    CATEGORY = "Lightricks/LTXV/Model Patches"
 
     def build(self, save_steps, blocks=""):
         block_map = {}
@@ -48,7 +48,7 @@ class LTXPrepareAttnInjectionsNode:
     RETURN_TYPES = ("LATENT", "ATTN_INJ")
     FUNCTION = "prepare"
 
-    CATEGORY = "fluxtapoz"
+    CATEGORY = "Lightricks/LTXV/Model Patches"
 
     def prepare(self, latent, attn_bank, query, key, value, inject_steps, blocks=None):
         if inject_steps > attn_bank["save_steps"]:
@@ -82,7 +82,7 @@ class LTXAttentioOverrideNode:
     RETURN_TYPES = ("LTX_BLOCKS",)
     FUNCTION = "build"
 
-    CATEGORY = "ltxtricks"
+    CATEGORY = "Lightricks/LTXV/Model Patches"
 
     def build(self, blocks=""):
         block_set = set(list(int(block) for block in blocks.split(",")))

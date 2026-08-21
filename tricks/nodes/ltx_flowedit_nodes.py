@@ -55,7 +55,7 @@ class LTXFlowEditCFGGuiderNode:
     RETURN_TYPES = ("GUIDER",)
 
     FUNCTION = "get_guider"
-    CATEGORY = "ltxtricks"
+    CATEGORY = "Lightricks/LTXV/Guidance"
 
     def get_guider(
         self,
@@ -173,7 +173,7 @@ class LTXFlowEditSamplerNode:
     RETURN_TYPES = ("SAMPLER",)
     FUNCTION = "build"
 
-    CATEGORY = "ltxtricks"
+    CATEGORY = "Lightricks/LTXV/Sampling"
 
     def build(self, skip_steps, refine_steps, seed):
         sampler = KSAMPLER(get_flowedit_sample(skip_steps, refine_steps, seed))

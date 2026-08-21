@@ -18,7 +18,7 @@ class LTXAttnOverrideNode:
     RETURN_TYPES = ("ATTN_OVERRIDE",)
     FUNCTION = "build"
 
-    CATEGORY = "ltxtricks/attn"
+    CATEGORY = "Lightricks/LTXV/Model Patches"
 
     def build(self, layers):
         layers_map = set([])

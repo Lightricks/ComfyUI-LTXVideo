@@ -37,7 +37,7 @@ class LTXVAdainLatent:
     RETURN_TYPES = ("LATENT",)
     FUNCTION = "batch_normalize"
 
-    CATEGORY = "Lightricks/latents"
+    CATEGORY = "Lightricks/LTXV/Latent"
 
     def batch_normalize(self, latents, reference, factor, per_frame=False):
         latents_copy = copy.deepcopy(latents)
@@ -129,7 +129,7 @@ class LTXVStatNormLatent:
     RETURN_TYPES = ("LATENT",)
     FUNCTION = "statistical_normalize"
 
-    CATEGORY = "Lightricks/latents"
+    CATEGORY = "Lightricks/LTXV/Latent"
 
     def statistical_normalize(
         self, latents, target_mean, target_std, percentile, factor, clip_outliers
@@ -262,7 +262,7 @@ class LTXVPerStepAdainPatcher(PerStepNormPatcher):
     RETURN_TYPES = ("MODEL",)
     FUNCTION = "patch_model"
 
-    CATEGORY = "Lightricks/latents"
+    CATEGORY = "Lightricks/LTXV/Model Patches"
 
     def patch_model(self, model, factors, reference, per_frame=False):
         def cfg_adain(latent, factor):
@@ -318,7 +318,7 @@ class LTXVPerStepStatNormPatcher(PerStepNormPatcher):
     RETURN_TYPES = ("MODEL",)
     FUNCTION = "patch_model"
 
-    CATEGORY = "Lightricks/latents"
+    CATEGORY = "Lightricks/LTXV/Model Patches"
 
     def patch_model(
         self, model, factors, target_mean, target_std, percentile, clip_outliers

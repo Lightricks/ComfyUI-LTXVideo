@@ -23,7 +23,7 @@ class LTXAddVideoICLoRAGuide(io.ComfyNode):
         return io.Schema(
             node_id="LTXAddVideoICLoRAGuide",
             display_name=NODES_DISPLAY_NAME_PREFIX + " Add Video IC-LoRA Guide",
-            category="Lightricks/IC-LoRA",
+            category="Lightricks/LTXV/Guidance",
             description=(
                 "Adds one or more conditioning frames starting at the specified frame index. "
                 "Supports both single images and multi-frame videos. "
@@ -473,7 +473,7 @@ class LTXICLoRALoaderModelOnly(io.ComfyNode):
         return io.Schema(
             node_id="LTXICLoRALoaderModelOnly",
             display_name=NODES_DISPLAY_NAME_PREFIX + " IC-LoRA Loader Model Only",
-            category="Lightricks/IC-LoRA",
+            category="Lightricks/LTXV/Loaders",
             description="Loads a LoRA model and extracts the latent_downscale_factor from the safetensors metadata.",
             inputs=[
                 io.Model.Input("model"),

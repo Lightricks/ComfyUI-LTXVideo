@@ -96,7 +96,7 @@ class LTXVPreprocessMasks:
 
     RETURN_TYPES = ("MASK",)
     FUNCTION = "preprocess_masks"
-    CATEGORY = "Lightricks/mask_operations"
+    CATEGORY = "Lightricks/LTXV/Masking"
     DESCRIPTION = (
         "Preprocess masks to be used for masking latents in the LTXVideo model."
     )

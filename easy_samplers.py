@@ -123,7 +123,7 @@ class LTXVBaseSampler:
     RETURN_TYPES = ("LATENT", "CONDITIONING", "CONDITIONING")
     RETURN_NAMES = ("denoised", "positive", "negative")
     FUNCTION = "sample"
-    CATEGORY = "sampling"
+    CATEGORY = "Lightricks/LTXV/Sampling"
 
     def sample(
         self,
@@ -371,7 +371,7 @@ class LTXVExtendSampler:
     RETURN_TYPES = ("LATENT", "CONDITIONING", "CONDITIONING")
     RETURN_NAMES = ("denoised_video", "positive", "negative")
     FUNCTION = "sample"
-    CATEGORY = "sampling"
+    CATEGORY = "Lightricks/LTXV/Sampling"
 
     def sample(
         self,
@@ -671,7 +671,7 @@ class LTXVInContextSampler:
     RETURN_TYPES = ("LATENT", "CONDITIONING", "CONDITIONING")
     RETURN_NAMES = ("denoised_video", "positive", "negative")
     FUNCTION = "sample"
-    CATEGORY = "sampling"
+    CATEGORY = "Lightricks/LTXV/Sampling"
 
     def sample(
         self,
@@ -861,7 +861,7 @@ class LinearOverlapLatentTransition:
     RETURN_TYPES = ("LATENT",)
     FUNCTION = "process"
 
-    CATEGORY = "Lightricks/latent"
+    CATEGORY = "Lightricks/LTXV/Utility"
 
     def get_subbatch(self, samples):
         s = samples.copy()
@@ -918,7 +918,7 @@ class LTXVNormalizingSampler(io.ComfyNode):
     def define_schema(cls):
         return io.Schema(
             node_id="LTXVNormalizingSampler",
-            category="utility",
+            category="Lightricks/LTXV/Sampling",
             inputs=[
                 io.Noise.Input("noise"),
                 io.Guider.Input("guider"),

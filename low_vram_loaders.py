@@ -40,7 +40,7 @@ class LowVRAMCheckpointLoader(nodes.CheckpointLoaderSimple):
         }
         return base_types
 
-    CATEGORY = "LTXV/loaders"
+    CATEGORY = "Lightricks/LTXV/Loaders"
     DESCRIPTION = (
         "Loads a diffusion model checkpoint with dependency support. "
         "Connect 'dependencies' to a previous loader's output to ensure sequential loading and reduce peak VRAM usage."
@@ -79,7 +79,7 @@ class LowVRAMAudioVAELoader:
 
     RETURN_TYPES = ("VAE",)
     RETURN_NAMES = ("audio_vae",)
-    CATEGORY = "LTXV/loaders"
+    CATEGORY = "Lightricks/LTXV/Loaders"
     DESCRIPTION = (
         "Loads an LTXV Audio VAE checkpoint with dependency support. "
         "Connect 'dependencies' to a previous loader's output to ensure sequential loading and reduce peak VRAM usage."
@@ -105,7 +105,7 @@ class LowVRAMLatentUpscaleModelLoader(LatentUpscaleModelLoader):
         return io.Schema(
             node_id="LowVRAMLatentUpscaleModelLoader",
             display_name="Low VRAMLoad Latent Upscale Model",
-            category="LTXV/loaders",
+            category="Lightricks/LTXV/Loaders",
             inputs=[
                 io.Combo.Input(
                     "model_name",
