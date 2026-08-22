@@ -559,7 +559,7 @@ class LTXVImgToVideoConditionOnly:
         if bypass:
             return (latent,)
 
-        samples = latent["samples"]
+        samples = latent["samples"].clone()
         t = self.encode_image(image, samples.shape, vae)
         # Apply encoded image to first frames
         samples[:, :, : t.shape[2]] = t
