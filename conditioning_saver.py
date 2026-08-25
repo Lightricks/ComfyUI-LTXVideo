@@ -1,3 +1,4 @@
+import json
 from datetime import datetime
 from pathlib import Path
 
@@ -44,19 +45,31 @@ class LTXVSaveConditioning(io.ComfyNode):
         target_dtype = torch.bfloat16 if dtype == "bfloat16" else torch.float16
 
         tensors_to_save: dict[str, torch.Tensor] = {}
+        # Non-tensor options decide how the model treats the embeddings, so they
+        # have to survive the round-trip alongside the tensors.
+        non_tensor_options: dict[str, object] = {}
 
         for idx, (cond_tensor, cond_options) in enumerate(conditioning):
             tensor_converted = cond_tensor.to(dtype=target_dtype).contiguous()
             tensors_to_save[f"conditioning_data_{idx}"] = tensor_converted
 
-            if "attention_mask" in cond_options:
-                mask = cond_options["attention_mask"].contiguous()
-                tensors_to_save[f"attention_mask_{idx}"] = mask
+            for key, value in cond_options.items():
+                if key == "attention_mask":
+                    tensors_to_save[f"attention_mask_{idx}"] = value.contiguous()
+                elif torch.is_tensor(value):
+                    tensors_to_save[f"option_{idx}_{key}"] = value.contiguous()
+                else:
+                    try:
+                        json.dumps(value)
+                    except (TypeError, ValueError):
+                        continue
+                    non_tensor_options[f"{idx}:{key}"] = value
 
         metadata = {
             "num_conditionings": str(len(conditioning)),
             "dtype": dtype,
             "created_at": str(datetime.now()),
+            "non_tensor_options": json.dumps(non_tensor_options),
         }
 
         comfy.utils.save_torch_file(
