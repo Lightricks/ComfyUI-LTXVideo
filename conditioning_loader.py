@@ -69,7 +69,7 @@ class LTXVLoadConditioning(io.ComfyNode):
                 option_prefix = f"option_{idx}_"
                 for key in all_keys:
                     if key.startswith(option_prefix):
-                        options[key[len(option_prefix):]] = f.get_tensor(key)
+                        options[key[len(option_prefix) :]] = f.get_tensor(key)
 
                 for meta_key, meta_value in non_tensor_options.items():
                     meta_idx, _, option_name = meta_key.partition(":")
