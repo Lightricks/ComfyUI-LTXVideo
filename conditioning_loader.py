@@ -1,4 +1,5 @@
 import hashlib
+import json
 from pathlib import Path
 from typing import Any
 
@@ -46,6 +47,15 @@ class LTXVLoadConditioning(io.ComfyNode):
             file_path, framework="pt", device=target_device
         ) as f:
             tensor_keys = [k for k in f.keys() if k.startswith("conditioning_data_")]
+            all_keys = list(f.keys())
+
+            file_metadata = f.metadata() or {}
+            try:
+                non_tensor_options = json.loads(
+                    file_metadata.get("non_tensor_options", "{}")
+                )
+            except (TypeError, ValueError):
+                non_tensor_options = {}
 
             for tensor_key in sorted(tensor_keys):
                 idx = tensor_key.replace("conditioning_data_", "")
@@ -53,8 +63,18 @@ class LTXVLoadConditioning(io.ComfyNode):
 
                 options: dict[str, Any] = {}
                 mask_key = f"attention_mask_{idx}"
-                if mask_key in f.keys():
+                if mask_key in all_keys:
                     options["attention_mask"] = f.get_tensor(mask_key)
+
+                option_prefix = f"option_{idx}_"
+                for key in all_keys:
+                    if key.startswith(option_prefix):
+                        options[key[len(option_prefix) :]] = f.get_tensor(key)
+
+                for meta_key, meta_value in non_tensor_options.items():
+                    meta_idx, _, option_name = meta_key.partition(":")
+                    if meta_idx == idx:
+                        options[option_name] = meta_value
 
                 conditioning.append([tensor, options])
 
