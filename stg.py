@@ -461,7 +461,6 @@ class STGGuiderAdvanced(comfy.samplers.CFGGuider):
                 stg_result,
                 noise_pred_neg,
                 cfg_scale=self.apg_cfg_scale,
-                momentum_buffer=None,
                 eta=self.eta,
                 norm_threshold=self.norm_threshold,
             )
