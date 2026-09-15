@@ -40,6 +40,7 @@ from .low_vram_loaders import (
     LowVRAMLatentUpscaleModelLoader,
 )
 from .masks import LTXVPreprocessMasks
+from .matte_refine import LTXRefineAlphaMatte
 from .nodes_registry import NODE_CLASS_MAPPINGS as RUNTIME_NODE_CLASS_MAPPINGS
 from .nodes_registry import (
     NODE_DISPLAY_NAME_MAPPINGS as RUNTIME_NODE_DISPLAY_NAME_MAPPINGS,
@@ -120,6 +121,7 @@ NODE_CLASS_MAPPINGS = {
     "LTXVHDRDecodePostprocess": LTXVHDRDecodePostprocess,
     "LTXVAudioOnlyModel": LTXVAudioOnlyModel,
     "LTXVAudioOnlyEmptyVideoLatent": LTXVAudioOnlyEmptyVideoLatent,
+    "LTXRefineAlphaMatte": LTXRefineAlphaMatte,
 }
 
 # Consistent display names between static and dynamic node mappings in nodes_registry.py,
