@@ -66,7 +66,7 @@ from .tiled_sampler import LTXVTiledSampler
 from .tiled_vae_decode import LTXVTiledVAEDecode
 from .tricks import NODE_CLASS_MAPPINGS as TRICKS_NODE_CLASS_MAPPINGS
 from .tricks import NODE_DISPLAY_NAME_MAPPINGS as TRICKS_NODE_DISPLAY_NAME_MAPPINGS
-from .utiltily_nodes import FloatToInt, ImageToCPU
+from .utiltily_nodes import FloatToInt, ImageToCPU, LTXVLoopingReferenceSchedule
 from .vae_patcher import LTXVPatcherVAE
 from .vanish_nodes import LTXVDilateVideoMask, LTXVInpaintPreprocess
 
@@ -105,6 +105,7 @@ NODE_CLASS_MAPPINGS = {
     "LTXVMultiPromptProvider": MultiPromptProvider,
     "ImageToCPU": ImageToCPU,
     "LTXFloatToInt": FloatToInt,
+    "LTXVLoopingReferenceSchedule": LTXVLoopingReferenceSchedule,
     "LTXVStatNormLatent": LTXVStatNormLatent,
     "LTXVPerStepStatNormPatcher": LTXVPerStepStatNormPatcher,
     "LTXVGemmaCLIPModelLoader": LTXVGemmaCLIPModelLoader,
