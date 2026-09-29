@@ -42,13 +42,10 @@ These keep the distilled 2.5 backbone and add an IC-LoRA so a guide (video, imag
 | -------- | ------------ |
 | [LTX-2.5_ICLoRA_Union_Control_Distilled.json](./LTX-2.5_ICLoRA_Union_Control_Distilled.json) | Video-to-video from a **depth / canny / pose** annotator on a reference clip. Depth is wired by default; switch the annotator inside the graph. |
 | [LTX-2.5_V2V_ICLoRA_Single_Stage_Distilled.json](./LTX-2.5_V2V_ICLoRA_Single_Stage_Distilled.json) | Video-to-video using the source frames as IC-LoRA guides. Ships with the Instant Shave LoRA as the example; swap the LoRA for other identity/edit LoRAs. Original audio is frozen through. |
-| [LTX-2.5_ICLoRA_HDR_Distilled.json](./LTX-2.5_ICLoRA_HDR_Distilled.json) | **SDR→HDR**: SDR MP4 → ACEScct IDT → HDR IC-LoRA → EXR + HLG. |
 | [LTX-2.5_ICLoRA_Ingredients_Single_Stage_Distilled.json](./LTX-2.5_ICLoRA_Ingredients_Single_Stage_Distilled.json) | Generate from a **reference sheet** (characters, props, wardrobe, location laid out in one image). Describe each element in the prompt by its place on the sheet. |
 | [LTX-2.5_ICLoRA_Motion_Track_Distilled.json](./LTX-2.5_ICLoRA_Motion_Track_Distilled.json) | Image-to-video with **sparse motion tracks** you draw on the first frame. Optional still as the opening frame. |
 | [LTX-2.5_ICLoRA_Inpaint_Two_Stage_Distilled.json](./LTX-2.5_ICLoRA_Inpaint_Two_Stage_Distilled.json) | Fill masked regions of a reference video (two-stage). Source audio can stay frozen. |
-| [LTX-2.5_ICLoRA_Inpaint_Native_HDR_Two_Stage_Distilled.json](./LTX-2.5_ICLoRA_Inpaint_Native_HDR_Two_Stage_Distilled.json) | Same inpaint, but **HDR→HDR**: EXR sequence + mask video → EXR + HLG out. |
 | [LTX-2.5_ICLoRA_Outpaint_Two_Stage_Distilled.json](./LTX-2.5_ICLoRA_Outpaint_Two_Stage_Distilled.json) | Extend the canvas of a reference video (two-stage). Same in/outpaint LoRA as inpaint. |
-| [LTX-2.5_ICLoRA_Outpaint_Native_HDR_Two_Stage_Distilled.json](./LTX-2.5_ICLoRA_Outpaint_Native_HDR_Two_Stage_Distilled.json) | Same outpaint, but **HDR→HDR**: EXR sequence + target size → EXR + HLG out. |
 
 ## Which workflow should I use?
 
@@ -66,14 +63,10 @@ Do you have an existing video to edit or follow?
 │  │    → LTX-2.5_ICLoRA_Union_Control_Distilled.json
 │  ├─ Keep the footage, change appearance (identity / style LoRA)
 │  │    → LTX-2.5_V2V_ICLoRA_Single_Stage_Distilled.json
-│  ├─ Upgrade SDR footage to HDR (ACEScct IC-LoRA)
-│  │    → LTX-2.5_ICLoRA_HDR_Distilled.json
 │  ├─ Fill a masked region
-│  │    → LTX-2.5_ICLoRA_Inpaint_Two_Stage_Distilled.json (SDR)
-│  │    → LTX-2.5_ICLoRA_Inpaint_Native_HDR_Two_Stage_Distilled.json (HDR EXR)
+│  │    → LTX-2.5_ICLoRA_Inpaint_Two_Stage_Distilled.json
 │  └─ Grow the frame / canvas
-│       → LTX-2.5_ICLoRA_Outpaint_Two_Stage_Distilled.json (SDR)
-│       → LTX-2.5_ICLoRA_Outpaint_Native_HDR_Two_Stage_Distilled.json (HDR EXR)
+│       → LTX-2.5_ICLoRA_Outpaint_Two_Stage_Distilled.json
 │
 Do you have stills rather than a video?
 ├─ YES → A sheet of characters / props / locations?
@@ -102,19 +95,9 @@ Two-stage is the better default when you care about spatial detail. Single-stage
 | T2A single-stage | 1 | — | Text | Audio-only clips |
 | Union Control | 1 | — | Reference video (depth / canny / pose) | Structure-following v2v |
 | V2V IC-LoRA | 1 | — | Source video (+ frozen audio) | Appearance edits on existing footage |
-| [SDR→HDR IC-LoRA](./LTX-2.5_ICLoRA_HDR_Distilled.json) | 1 | — | SDR video (+ frozen audio) | SDR→ACEScct HDR; EXR + HLG out |
 | Ingredients | 1 | — | Reference sheet | Cast / props / location from one image |
 | Motion Track | 1 | — | Image + drawn tracks | Directed motion from a still |
 | Inpaint two-stage | 2 | 2× spatial | Video + mask (+ frozen audio) | Replacing a region |
 | Outpaint two-stage | 2 | 2× spatial | Video + target size (+ frozen audio) | Extending the frame |
-| [Outpaint Native HDR two-stage](./LTX-2.5_ICLoRA_Outpaint_Native_HDR_Two_Stage_Distilled.json) | 2 | 2× spatial | EXR sequence + target size | HDR outpaint; EXR + HLG out |
-| [I2V Native HDR two-stage](./LTX-2.5_I2V_Native_HDR_Two_Stage_Distilled.json) | 2 | 2× spatial | EXR still (ACEScct) | HDR still → HDR video; EXR + HLG out |
-| [Inpaint Native HDR two-stage](./LTX-2.5_ICLoRA_Inpaint_Native_HDR_Two_Stage_Distilled.json) | 2 | 2× spatial | EXR sequence + mask video | HDR inpaint; EXR + HLG out |
-
-Native HDR I/O: `LTXVLoadEXRSequence` → float32 VAE → `LTXVHDRDecodePostprocess` (`transfer=acescct`, optional EXR) → `LTXVSaveHLG` from `hdr_linear`. Same idea as pipelines `--hdr` on Distilled / IC-LoRA.
-
-SDR→HDR IC-LoRA (separate from native EXR HDR): [LTX-2.5_ICLoRA_HDR_Distilled.json](./LTX-2.5_ICLoRA_HDR_Distilled.json) — `LoadVideo` → `LTXVSDRToHDRWorkingSpace` (`srgb_gamma`) → `Resize Image/Mask` (scale to multiple 32) → **fixed scene embeddings** (`LTXVLoadConditioning`, not a free-text prompt) → HDR IC-LoRA guide → float32 VAE decode → `LTXVHDRDecodePostprocess` (`transfer=acescct`, EXR=`acescct`) → HLG. Sampler **euler**; original audio frozen/muxed. Same idea as pipelines `hdr_ic_lora --text-embeddings`.
-
-For native HDR, set **`img_compression = 0`** (Python `--hdr` EXR conditioning skips JPEG/CRF; CRF on ACEScct darkens highlights). Turn **prompt enhancer off** when matching goldens. I2V stage-2 distilled sigmas should be `0.909375, 0.725, 0.421875, 0.0` (not `0.85, …`). Inpaint keeps its own 2-step stage-2 schedule.
 
 Python / pipeline equivalents of these ideas live in [pipeline-selection.md](https://github.com/Lightricks/LTX-2/blob/main/packages/ltx-pipelines/docs/pipeline-selection.md) in the LTX-2 repo.

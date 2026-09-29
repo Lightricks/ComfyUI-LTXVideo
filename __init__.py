@@ -60,6 +60,8 @@ from .stg import (
     STGGuiderAdvancedNode,
     STGGuiderNode,
 )
+from .tiled_fusion_sampler import LTXVTiledFusionSampler
+from .tiled_fusion_sizes import LTXVGetTilingSizes
 from .tiled_sampler import LTXVTiledSampler
 from .tiled_vae_decode import LTXVTiledVAEDecode
 from .tricks import NODE_CLASS_MAPPINGS as TRICKS_NODE_CLASS_MAPPINGS
@@ -91,6 +93,8 @@ NODE_CLASS_MAPPINGS = {
     "LTXVSelectLatents": LTXVSelectLatents,
     "LTXVSetVideoLatentNoiseMasks": LTXVSetVideoLatentNoiseMasks,
     "LTXVTiledSampler": LTXVTiledSampler,
+    "LTXVTiledFusionSampler": LTXVTiledFusionSampler,
+    "LTXVGetTilingSizes": LTXVGetTilingSizes,
     "LTXVLoopingSampler": LTXVLoopingSampler,
     "LTXVTiledVAEDecode": LTXVTiledVAEDecode,
     "MultimodalGuider": MultimodalGuiderNode,
