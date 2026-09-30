@@ -272,12 +272,12 @@ class LTXVHDRDecodePostprocess:
                 "exr_color_space": (
                     _EXR_COLOR_SPACE_CHOICES,
                     {
-                        "default": "acescct",
+                        "default": "acescg",
                         "tooltip": (
                             "EXR contents when save_exr is on. "
-                            "Default 'acescct' matches pipelines hdr_ic_lora "
-                            "ACEScct log masters. 'acescg' / 'srgb_linear' are "
-                            "tagged linear; 'linear' is legacy raw decompress "
+                            "Default 'acescg' is tagged ACEScg scene-linear. "
+                            "'acescct' is ACEScct log; 'srgb_linear' is tagged "
+                            "Rec.709 linear; 'linear' is legacy raw decompress "
                             "(untagged). All paths use OpenImageIO."
                         ),
                     },
@@ -326,7 +326,7 @@ class LTXVHDRDecodePostprocess:
         transfer: str = "acescct",
         exposure: float = 0.0,
         save_exr: bool = False,
-        exr_color_space: str = "acescct",
+        exr_color_space: str = "acescg",
         output_dir: str = "output/hdr_exr",
         filename_prefix: str = "frame",
         half_precision: bool = True,

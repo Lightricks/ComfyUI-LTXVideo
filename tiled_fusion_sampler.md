@@ -71,6 +71,7 @@ Under [`example_workflows/2.5/`](./example_workflows/2.5/):
 | ----- | ------------- |
 | [`LTX-2.5_V2V_TiledFusion_Upscale.json`](./example_workflows/2.5/LTX-2.5_V2V_TiledFusion_Upscale.json) | Detail-refine IC-LoRA; `output_size` FullHD / 4K / 8K, HD tiles |
 | [`LTX-2.5_V2V_TiledFusion_Native_4K_8K.json`](./example_workflows/2.5/LTX-2.5_V2V_TiledFusion_Native_4K_8K.json) | Stage-1 FullHD composition, then 4K or 8K refine |
+| [`LTX-2.5_V2V_TiledFusion_SDR_to_HDR.json`](./example_workflows/2.5/LTX-2.5_V2V_TiledFusion_SDR_to_HDR.json) | Same ladder with the HDR IC-LoRA + `LTXVHDRDecodePostprocess` |
 
 All of them take `SAMPLER` from `KSamplerSelect` (`euler`) and sigmas from
 `Manual Sigmas` (descending, ending at 0). Size combos live on **Preprocess**
