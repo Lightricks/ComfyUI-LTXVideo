@@ -4,6 +4,7 @@ Replaces the CLIP encoding step entirely using an external API.
 """
 
 import io
+import json
 import logging
 import pickle
 
@@ -23,20 +24,85 @@ UPDATE_MESSAGE = (
 INVALID_API_KEY_MESSAGE = (
     "Invalid API key. Please generate a new API key at: https://console.ltx.video/"
 )
-MISSING_MODEL_ID_MESSAGE = "Model ID cannot be identified from the provided model file"
+MISSING_MODEL_SELECTOR_MESSAGE = (
+    "Cannot identify the text encoder from the provided model file."
+)
+MODEL_ID_METADATA_KEY = "encrypted_wandb_properties"
+GEMMA_SOURCE_CHECKPOINT_METADATA_KEY = "gemma_source_checkpoint"
 
 
-def extract_model_id(ckpt_name: str) -> str:
-    model_id_key = "encrypted_wandb_properties"
+MODEL_FOLDERS = ("checkpoints", "diffusion_models")
+
+
+def model_filename_list() -> list[str]:
+    """Every model the node can read a text-encoder selector from, de-duplicated.
+
+    A name present in both folders is listed once; resolve_model_path resolves
+    it the same way round, so the entry always refers to the same file the
+    combo offered.
+    """
+    names = []
+    for folder in MODEL_FOLDERS:
+        for name in folder_paths.get_filename_list(folder):
+            if name not in names:
+                names.append(name)
+    return names
+
+
+def resolve_model_path(ckpt_name: str) -> str:
+    """Full path of ckpt_name, looked up in the folder order the combo used."""
+    for folder in MODEL_FOLDERS:
+        path = folder_paths.get_full_path(folder, ckpt_name)
+        if path is not None:
+            return path
+    raise ValueError(
+        f"Model file '{ckpt_name}' was not found in any of: {', '.join(MODEL_FOLDERS)}."
+    )
+
+
+def parse_gemma_source_checkpoint(raw: str) -> dict[str, str]:
+    """Parse the ``gemma_source_checkpoint`` safetensors metadata JSON string."""
+    try:
+        obj = json.loads(raw)
+    except json.JSONDecodeError as exc:
+        raise ValueError(MISSING_MODEL_SELECTOR_MESSAGE) from exc
+    if not isinstance(obj, dict):
+        raise ValueError(MISSING_MODEL_SELECTOR_MESSAGE)
+    ltx_version, gemma_version = obj.get("ltx_version"), obj.get("gemma_version")
+    if not ltx_version or not gemma_version:
+        raise ValueError(MISSING_MODEL_SELECTOR_MESSAGE)
+    return {"ltx_version": str(ltx_version), "gemma_version": str(gemma_version)}
+
+
+def prompt_embedding_selector_from_metadata(
+    metadata: dict[str, str] | None,
+) -> dict[str, str | dict[str, str]]:
+    """Build the XOR selector for ``/v1/prompt-embedding``.
+
+    LTX-2.5+ checkpoints identify the text encoder via ``gemma_source_checkpoint``
+    (``ltx_version`` + ``gemma_version``). Pre-2.5 checkpoints use
+    ``encrypted_wandb_properties`` as ``model_id``. Prefer the 2.5+ selector when
+    both are present: OS 2.5 files may still carry an unusable ``model_id``.
+    """
+    if metadata:
+        raw_gemma = metadata.get(GEMMA_SOURCE_CHECKPOINT_METADATA_KEY)
+        if raw_gemma:
+            return {"model": parse_gemma_source_checkpoint(raw_gemma)}
+        model_id = metadata.get(MODEL_ID_METADATA_KEY)
+        if model_id:
+            return {"model_id": model_id}
+    raise ValueError(MISSING_MODEL_SELECTOR_MESSAGE)
+
+
+def extract_prompt_embedding_selector(
+    ckpt_name: str,
+) -> dict[str, str | dict[str, str]]:
     with safe_open(
-        folder_paths.get_full_path_or_raise("checkpoints", ckpt_name),
+        resolve_model_path(ckpt_name),
         framework="pt",
         device="cpu",
     ) as f:
-        metadata = f.metadata()
-        if not metadata or model_id_key not in metadata:
-            raise ValueError(MISSING_MODEL_ID_MESSAGE)
-        return metadata[model_id_key]
+        return prompt_embedding_selector_from_metadata(f.metadata())
 
 
 @comfy_node(name="GemmaAPITextEncode")
@@ -45,8 +111,8 @@ class GemmaAPITextEncode:
     Encodes text prompts using the LTX Video API, returning CONDITIONING for LTX-2 models.
 
     This node replaces the local CLIP encoding step by sending the prompt to an external API
-    for processing. It requires an API key and automatically extracts the model ID from the
-    checkpoint file metadata.
+    for processing. It requires an API key and selects the text encoder from checkpoint
+    metadata: ``model`` (LTX-2.5+) or ``model_id`` (LTX-2.3).
 
     Inputs:
         - api_key: Authentication key for the LTX Video API
@@ -86,8 +152,11 @@ class GemmaAPITextEncode:
                     },
                 ),
                 "ckpt_name": (
-                    folder_paths.get_filename_list("checkpoints"),
-                    {"tooltip": "The name of the checkpoint (model) to load."},
+                    model_filename_list(),
+                    {
+                        "tooltip": "The model to read the API text-encoder selector from. "
+                        "Either a checkpoint or a diffusion model."
+                    },
                 ),
             },
         }
@@ -109,14 +178,18 @@ class GemmaAPITextEncode:
         if not ckpt_name or not ckpt_name.strip():
             raise ValueError("Model path is required")
 
-        model_id = extract_model_id(ckpt_name)
+        selector = extract_prompt_embedding_selector(ckpt_name)
         payload = {
             "prompt": prompt,
-            "model_id": model_id,
             "enhance_prompt": enhance_prompt,
+            **selector,
         }
+        if "model_id" in selector:
+            selector_desc = f"model_id: {str(selector['model_id'])[:50]}..."
+        else:
+            selector_desc = f"model: {selector['model']}"
         logger.info(
-            f"Calling API to encode prompt: {prompt[:50]}... with model_id: {model_id[:50]}..."
+            f"Calling API to encode prompt: {prompt[:50]}... with {selector_desc}"
         )
         try:
             response = requests.post(

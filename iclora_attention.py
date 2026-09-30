@@ -53,6 +53,19 @@ def append_guide_attention_entry(
     return _set_guide_attention_entries(conditioning, entries)
 
 
+def set_last_guide_attention_strength(conditioning, strength):
+    """Override the attention strength of the most recently appended guide entry.
+
+    Separate from a guide's denoise strength: one says how clean the reference is
+    kept, the other how strongly the rest of the sequence may attend to it.
+    """
+    entries = _get_guide_attention_entries(conditioning)
+    if not entries:
+        return conditioning
+    updated = [*entries[:-1], {**entries[-1], "strength": strength}]
+    return _set_guide_attention_entries(conditioning, updated)
+
+
 def normalize_mask(mask):
     """Normalize a ComfyUI MASK to (1, 1, F, H, W) for downstream processing.
 

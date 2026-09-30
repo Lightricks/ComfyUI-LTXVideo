@@ -14,12 +14,15 @@ from comfy.ldm.lightricks.model import (
 from torch import nn
 
 try:
-    # New core (since ComfyUI PR #15056) replaced interleaved_freqs_cis/split_freqs_cis with a single freqs_cis_matrix helper
+    # New core (since ComfyUI PR #15056) replaced interleaved_freqs_cis/split_freqs_cis
+    # with a single freqs_cis_matrix helper.
     from comfy.ldm.lightricks.model import freqs_cis_matrix
+
     _USE_FREQS_CIS_MATRIX = True
 except ImportError:
     # Legacy core: cos/sin freqs consumed as a (cos, sin, split) tuple.
-    from comfy.ldm.lightricks.model import interleaved_freqs_cis, split_freqs_cis
+    from .rope_utils import interleaved_freqs_cis, split_freqs_cis
+
     _USE_FREQS_CIS_MATRIX = False
 
 from .pos_embedding_exp_values import POS_EMBEDDING_EXP_VALUES
@@ -262,6 +265,8 @@ class Embeddings1DConnector(nn.Module):
             pad_size = dim % n_elem
 
         if _USE_FREQS_CIS_MATRIX:
+            # New core takes (rotation_matrix, split_pe); let it build the matrix so
+            # this cannot drift from the transformer again.
             return freqs_cis_matrix(
                 freqs, pad_size, self.split_rope, self.num_attention_heads, self.dtype
             )

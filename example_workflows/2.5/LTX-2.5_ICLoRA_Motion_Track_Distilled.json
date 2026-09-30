@@ -1,0 +1,7652 @@
+{
+  "id": "9a4f7d20-6c18-4b53-8e91-2d70fa365c84",
+  "revision": 0,
+  "last_node_id": 9014,
+  "last_link_id": 13807,
+  "nodes": [
+    {
+      "id": 5509,
+      "type": "PrimitiveStringMultiline",
+      "pos": [
+        -3238.491355928488,
+        3503.1146191439493
+      ],
+      "size": [
+        343.59614112612917,
+        109.43487405985934
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "STRING",
+          "type": "STRING",
+          "links": [
+            13631
+          ]
+        }
+      ],
+      "title": "Prompt (negative)",
+      "properties": {
+        "Node name for S&R": "PrimitiveStringMultiline",
+        "cnr_id": "comfy-core",
+        "ver": "0.25.0"
+      },
+      "widgets_values": [
+        ""
+      ],
+      "color": "#322",
+      "bgcolor": "#533"
+    },
+    {
+      "id": 5532,
+      "type": "MarkdownNote",
+      "pos": [
+        -415.9963693316099,
+        3073
+      ],
+      "size": [
+        523.0556530433919,
+        88
+      ],
+      "flags": {
+        "collapsed": false
+      },
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "title": "Save video",
+      "properties": {},
+      "widgets_values": [
+        "## Save video\n\nThis is your output preview \ud83c\udf89\ud83e\udd73"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 5527,
+      "type": "MarkdownNote",
+      "pos": [
+        -3264.491355928488,
+        2810
+      ],
+      "size": [
+        1197.4913559284878,
+        330
+      ],
+      "flags": {
+        "collapsed": false
+      },
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "title": "Inputs",
+      "properties": {},
+      "widgets_values": [
+        "## Inputs\n\nEverything here is optional.\n\n### Prompt\n\nEnter a positive prompt. To rewrite it into a fuller description first, enable\n**enhance positive prompt** on the Input Parameters node below. The negative\nprompt is used as written and is never enhanced.\n\nSupplying an **LTX API key** encodes and enhances the prompt through the API\ninstead of locally, which saves memory. The workflow switches over on its own\nwhenever a key is present - there is nothing to un-bypass.\n\nSee the [prompting guide](https://docs.ltx.io/open-source-model/usage-guides/prompting-guide).\n\n### Image input\n\nCondition the video to open on a still by loading an image and enabling\n**use image input** on the Input Parameters node.\n\n### Frame rate and duration\n\nSet both below. The frame count has to be 1 + a multiple of 8, so the duration\nactually used is worked out from the fps and the duration you ask for, and may\ncome out slightly different.\n\n### Motion tracks\n\nDrag points on the **LTX Sparse Track Editor** to sketch how things should move.\nIt draws on the resized input image, and the number of points it samples follows\nthe frame count, so every frame gets a position.\n\nThe tracks are rendered into a guide video in **Preprocess** and fed to the\nmotion-track **IC-LoRA**; a preview of that guide is saved alongside the result."
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 5544,
+      "type": "PreviewAny",
+      "pos": [
+        -2759,
+        3989.441800056156
+      ],
+      "size": [
+        366,
+        152.8261854221696
+      ],
+      "flags": {},
+      "order": 13,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "source",
+          "type": "*",
+          "link": 13778
+        }
+      ],
+      "outputs": [
+        {
+          "name": "STRING",
+          "type": "STRING",
+          "links": []
+        }
+      ],
+      "title": "Effective positive prompt (enhanced if enabled)",
+      "properties": {
+        "Node name for S&R": "PreviewAny"
+      },
+      "widgets_values": [],
+      "color": "#232",
+      "bgcolor": "#353"
+    },
+    {
+      "id": 5526,
+      "type": "MarkdownNote",
+      "pos": [
+        -4027.492001622839,
+        2635
+      ],
+      "size": [
+        600,
+        505
+      ],
+      "flags": {
+        "collapsed": false
+      },
+      "order": 3,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "title": "Model Links",
+      "properties": {},
+      "widgets_values": [
+        "## Model Links\n\n**LTX-2.5 Model Weights**\n\nMake sure to click the \"Agree and Access\" button the first time you download.\n\n- [ Distilled model - ltx-2.5-22b-distilled-transformer-bf16.safetensors ](https://huggingface.co/Lightricks/LTX-2.5/blob/main/diffusion_models/ltx-2.5-22b-distilled-transformer-bf16.safetensors)\n\n- [ IC-LoRA Motion Track Control - ltx-2.3-22b-ic-lora-motion-track-control-ref0.5.safetensors ](https://huggingface.co/Lightricks/LTX-2.3-22b-IC-LoRA-Motion-Track-Control)\n\n- [ Audio VAE - ltx-2.5-audio-vae-bf16.safetensors ](https://huggingface.co/Lightricks/LTX-2.5/blob/main/vae/ltx-2.5-audio-vae-bf16.safetensors)\n\n- Video VAE - one of these:\n  - [ Diffusion decoder ltx-2.5-video-vae-bf16.safetensors ](https://huggingface.co/Lightricks/LTX-2.5/blob/main/vae/ltx-2.5-video-vae-bf16.safetensors) - Best quality\n  - [ Convolutional decoder - ltx-2.5-video-vae-conv-bf16.safetensors ](https://huggingface.co/Lightricks/LTX-2.5/blob/main/vae/ltx-2.5-video-vae-conv-bf16.safetensors) - Lower memory & faster\n\n\n**Text Encoder - finetuned for LTX-2.5**\n- [gemma4-12b-with-proj-ltx-2.5-bf16.safetensors](https://huggingface.co/Lightricks/LTX-2.5/blob/main/text_encoders/gemma4-12b-with-proj-ltx-2.5-bf16.safetensors)\n\n**Text Enhancer**\n- [Google Gemma 4 E2B IT](https://huggingface.co/Comfy-Org/gemma-4/blob/main/text_encoders/gemma4_e2b_it_bf16.safetensors)\n\n\n**Model Storage Location**\n\n```\n\ud83d\udcc2 ComfyUI/\n\u251c\u2500\u2500 \ud83d\udcc2 models/\n\u2502   \u251c\u2500\u2500 \ud83d\udcc2 text_encoders/\n\u2502   \u2502      \u251c\u2500\u2500 gemma4-12b-with-proj-ltx-2.5-bf16.safetensors\n\u2502   \u2502      \u2514\u2500\u2500 gemma4_e2b_it_bf16.safetensors\n\u2502   \u251c\u2500\u2500 \ud83d\udcc2 loras/\n\u2502   \u2502      \u2514\u2500\u2500 ltx-2.3-22b-ic-lora-motion-track-control-ref0.5.safetensors\n\u2502   \u251c\u2500\u2500 \ud83d\udcc2 diffusion_models/\n\u2502   \u2502      \u2514\u2500\u2500 ltx-2.5-22b-distilled-transformer-bf16.safetensors\n\u2502   \u251c\u2500\u2500 \ud83d\udcc2 vae/\n\u2502   \u2502      \u2514\u2500\u2500 ltx-2.5-audio-vae-bf16.safetensors\n\u2502   \u2502      \u2514\u2500\u2500 ltx-2.5-video-vae-conv-bf16.safetensors / ltx-2.5-video-vae-bf16.safetensors\n```\n\n## Report Issues\nTo report any issues when running this workflow, [go to GitHub](https://github.com/Lightricks/ComfyUI-LTXVideo/issues)\n"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 5529,
+      "type": "MarkdownNote",
+      "pos": [
+        -1381.2211820415482,
+        3006
+      ],
+      "size": [
+        305.4220901853274,
+        134
+      ],
+      "flags": {
+        "collapsed": false
+      },
+      "order": 4,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "title": "Generate",
+      "properties": {},
+      "widgets_values": [
+        "## Generate\n\n**Sampler - Distilled (8 steps)**\n\nRuns the distilled ltx-2.5 model with the motion-track IC-LoRA applied, in 8\nsteps. You can change the noise seed, the guider cfg (used for both video and\naudio) and the sampler. The guide frames are cropped out afterwards\n(`LTXVCropGuides`) so only the generated video is decoded."
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 4852,
+      "type": "SaveVideo",
+      "pos": [
+        -415.9963693316099,
+        3230
+      ],
+      "size": [
+        523.0556530433919,
+        106
+      ],
+      "flags": {},
+      "order": 19,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "link": 13675
+        }
+      ],
+      "outputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "links": []
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.14.1"
+      },
+      "widgets_values": [
+        "output",
+        "auto",
+        "auto"
+      ]
+    },
+    {
+      "id": 9003,
+      "type": "MarkdownNote",
+      "pos": [
+        -1854,
+        2936
+      ],
+      "size": [
+        300,
+        204
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "title": "Preprocess",
+      "properties": {},
+      "widgets_values": [
+        "## Preprocess\n\nDraws the sparse tracks into a guide video (`LTXVDrawTracks`) at the size of the\nresized input image, and injects it via the IC-LoRA (`LTXAddVideoICLoRAGuide`).\n\nIt also builds the empty audio-video latent at that same size and the requested\nframe count, and conditions on the input image as the opening frame.\n\nThe guide frames are cropped out during sampling (`LTXVCropGuides`) so only the\ngenerated video is decoded. `tracks_preview` is the drawn guide, saved next to\nthe output so you can check the motion before committing to a long run."
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 9006,
+      "type": "SaveVideo",
+      "pos": [
+        -1854,
+        3680
+      ],
+      "size": [
+        300,
+        106
+      ],
+      "flags": {},
+      "order": 17,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "link": 13792
+        }
+      ],
+      "outputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "links": []
+        }
+      ],
+      "title": "Save tracks preview",
+      "properties": {
+        "Node name for S&R": "SaveVideo"
+      },
+      "widgets_values": [
+        "tracks",
+        "auto",
+        "auto"
+      ]
+    },
+    {
+      "id": 9007,
+      "type": "PrimitiveFloat",
+      "pos": [
+        -3238.491355928488,
+        4090.5494932038087
+      ],
+      "size": [
+        343.59614112612917,
+        58
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "FLOAT",
+          "type": "FLOAT",
+          "links": [
+            13793
+          ]
+        }
+      ],
+      "title": "fps (frames per second)",
+      "properties": {
+        "Node name for S&R": "PrimitiveFloat"
+      },
+      "widgets_values": [
+        24
+      ],
+      "color": "#2a363b",
+      "bgcolor": "#3f5159"
+    },
+    {
+      "id": 9008,
+      "type": "PrimitiveFloat",
+      "pos": [
+        -3238.491355928488,
+        4224.549493203809
+      ],
+      "size": [
+        343.59614112612917,
+        58
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "FLOAT",
+          "type": "FLOAT",
+          "links": [
+            13794
+          ]
+        }
+      ],
+      "title": "duration in seconds (determines frames #)",
+      "properties": {
+        "Node name for S&R": "PrimitiveFloat"
+      },
+      "widgets_values": [
+        5
+      ],
+      "color": "#2a363b",
+      "bgcolor": "#3f5159"
+    },
+    {
+      "id": 5516,
+      "type": "f9337bd7-ca7a-4a59-99f1-65b664bed7e7",
+      "pos": [
+        -1381.2211820415482,
+        3230
+      ],
+      "size": [
+        305.4220901853274,
+        261.0261211902389
+      ],
+      "flags": {},
+      "order": 16,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 13653
+        },
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "link": 13773
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "link": 13774
+        },
+        {
+          "name": "latent_image",
+          "type": "LATENT",
+          "link": 13775
+        },
+        {
+          "label": "noise seed",
+          "name": "noise_seed",
+          "type": "INT",
+          "widget": {
+            "name": "noise_seed"
+          },
+          "link": null
+        },
+        {
+          "label": "guider cfg",
+          "name": "cfg",
+          "type": "FLOAT",
+          "widget": {
+            "name": "cfg"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "label": "video_latent",
+          "name": "video_latent",
+          "type": "LATENT",
+          "links": [
+            13785
+          ]
+        },
+        {
+          "label": "audio_latent",
+          "name": "audio_latent",
+          "type": "LATENT",
+          "links": [
+            13783
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.25.0",
+        "previewExposures": []
+      },
+      "widgets_values": [
+        42,
+        1,
+        "euler_ancestral"
+      ]
+    },
+    {
+      "id": 5508,
+      "type": "PrimitiveStringMultiline",
+      "pos": [
+        -3238.491355928488,
+        3230
+      ],
+      "size": [
+        343.59614112612917,
+        197.1146191439493
+      ],
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "STRING",
+          "type": "STRING",
+          "links": [
+            13630
+          ]
+        }
+      ],
+      "title": "Prompt (positive)",
+      "properties": {
+        "Node name for S&R": "PrimitiveStringMultiline",
+        "cnr_id": "comfy-core",
+        "ver": "0.25.0"
+      },
+      "widgets_values": [
+        ""
+      ],
+      "color": "#232",
+      "bgcolor": "#353"
+    },
+    {
+      "id": 2004,
+      "type": "LoadImage",
+      "pos": [
+        -3238.491355928488,
+        3688.5494932038087
+      ],
+      "size": [
+        343.59614112612917,
+        326
+      ],
+      "flags": {},
+      "order": 9,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            13468
+          ]
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": []
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LoadImage",
+        "cnr_id": "comfy-core",
+        "ver": "0.3.56"
+      },
+      "widgets_values": [
+        "",
+        "image"
+      ],
+      "color": "#232",
+      "bgcolor": "#353"
+    },
+    {
+      "id": 9002,
+      "type": "a86c2f15-90d4-4e73-b1c8-3f57ea9d621e",
+      "pos": [
+        -1854,
+        3230
+      ],
+      "size": [
+        300,
+        360
+      ],
+      "flags": {},
+      "order": 15,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "positive",
+          "name": "positive",
+          "type": "CONDITIONING",
+          "link": 13760
+        },
+        {
+          "label": "negative",
+          "name": "negative",
+          "type": "CONDITIONING",
+          "link": 13761
+        },
+        {
+          "label": "vae",
+          "name": "vae",
+          "type": "VAE",
+          "link": 13762
+        },
+        {
+          "label": "audio_vae",
+          "name": "audio_vae",
+          "type": "VAE",
+          "link": 13763
+        },
+        {
+          "label": "image",
+          "name": "image",
+          "type": "IMAGE",
+          "link": 13764
+        },
+        {
+          "label": "bypass",
+          "name": "bypass",
+          "type": "BOOLEAN",
+          "widget": {
+            "name": "bypass"
+          },
+          "link": 13765
+        },
+        {
+          "label": "latent_downscale_factor",
+          "name": "latent_downscale_factor",
+          "type": "FLOAT",
+          "widget": {
+            "name": "latent_downscale_factor"
+          },
+          "link": 13766
+        },
+        {
+          "label": "length",
+          "name": "length",
+          "type": "INT",
+          "widget": {
+            "name": "length"
+          },
+          "link": 13789
+        },
+        {
+          "label": "fps",
+          "name": "fps",
+          "type": "FLOAT",
+          "widget": {
+            "name": "fps"
+          },
+          "link": 13790
+        },
+        {
+          "label": "tracks",
+          "name": "tracks",
+          "type": "STRING",
+          "widget": {
+            "name": "tracks"
+          },
+          "link": 13788
+        }
+      ],
+      "outputs": [
+        {
+          "label": "positive",
+          "name": "positive",
+          "type": "CONDITIONING",
+          "links": [
+            13773
+          ]
+        },
+        {
+          "label": "negative",
+          "name": "negative",
+          "type": "CONDITIONING",
+          "links": [
+            13774
+          ]
+        },
+        {
+          "label": "latent",
+          "name": "latent",
+          "type": "LATENT",
+          "links": [
+            13775
+          ]
+        },
+        {
+          "label": "tracks_preview",
+          "name": "tracks_preview",
+          "type": "VIDEO",
+          "links": [
+            13792
+          ]
+        }
+      ],
+      "properties": {
+        "previewExposures": []
+      },
+      "widgets_values": [
+        false,
+        1,
+        0.7,
+        "",
+        ""
+      ]
+    },
+    {
+      "id": 5531,
+      "type": "MarkdownNote",
+      "pos": [
+        -862.7990918562209,
+        2887
+      ],
+      "size": [
+        334.24168518303316,
+        269.5610711718318
+      ],
+      "flags": {
+        "collapsed": false
+      },
+      "order": 10,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "title": "Decode",
+      "properties": {},
+      "widgets_values": [
+        "## Decode\n\nMake sure to adjust the number of tiles and overlap to fit your hardware.\n(fewer tiles will result in faster execution, but will require more memory).\n\n### Recommended settings\n\n| node settings (pixels)                     | resolved latent geometry        |\n| ------------------------------------------ | ------------------------------- |\n| `512 / 64 / 128 / 32`                      | 16x16, ov 2 - 16f ov 4 |\n| `768 / 192 / 128 / 32`                     | 24x24, ov 6 - 16f ov 4 |\n| `1024 / 256 / 128 / 48`                    | 32x32, ov 8 - 16f, ov 6         |\n| `1536 / 384 / 192 / 48`                    | 48x48, ov 12 - 24f, ov 6        |\n| `768 / 192 / spatial-only`                 | 24x24, ov 6 - no temporal split |"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 5518,
+      "type": "bee43e38-9234-4e41-86ff-63874164f482",
+      "pos": [
+        -857.1364163749556,
+        3223.715688805756
+      ],
+      "size": [
+        337.46147972981237,
+        248.50453873146398
+      ],
+      "flags": {},
+      "order": 18,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 13670
+        },
+        {
+          "label": "video_latent",
+          "name": "latents",
+          "type": "LATENT",
+          "link": 13785
+        },
+        {
+          "label": "audio_latent",
+          "name": "samples",
+          "type": "LATENT",
+          "link": 13783
+        },
+        {
+          "name": "audio_vae",
+          "type": "VAE",
+          "link": 13673
+        },
+        {
+          "name": "fps",
+          "type": "FLOAT",
+          "widget": {
+            "name": "fps"
+          },
+          "link": 13795
+        }
+      ],
+      "outputs": [
+        {
+          "label": "VIDEO",
+          "name": "VIDEO",
+          "type": "VIDEO",
+          "links": [
+            13675
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.25.0",
+        "previewExposures": []
+      },
+      "widgets_values": [
+        30,
+        8,
+        512,
+        64,
+        128,
+        32
+      ]
+    },
+    {
+      "id": 5014,
+      "type": "e51d7a94-38c6-4b02-9f7a-4d6013e28c5b",
+      "pos": [
+        -2759,
+        3230
+      ],
+      "size": [
+        366,
+        683.441800056156
+      ],
+      "flags": {},
+      "order": 12,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "text encoder clip",
+          "name": "clip",
+          "type": "CLIP",
+          "link": 13466
+        },
+        {
+          "label": "text enhancer clip",
+          "name": "clip_1",
+          "type": "CLIP",
+          "link": 13784
+        },
+        {
+          "label": "image",
+          "name": "input",
+          "type": "IMAGE,MASK",
+          "link": 13468
+        },
+        {
+          "label": "use image input",
+          "name": "value_3",
+          "type": "BOOLEAN",
+          "widget": {
+            "name": "value_3"
+          },
+          "link": null
+        },
+        {
+          "label": "Positive prompt",
+          "name": "value_2",
+          "type": "STRING",
+          "widget": {
+            "name": "value_2"
+          },
+          "link": 13630
+        },
+        {
+          "label": "Enhance positive prompt",
+          "name": "cond",
+          "type": "BOOLEAN",
+          "widget": {
+            "name": "cond"
+          },
+          "link": null
+        },
+        {
+          "label": "Negative prompt",
+          "name": "text",
+          "type": "STRING",
+          "widget": {
+            "name": "text"
+          },
+          "link": 13631
+        },
+        {
+          "label": "fps",
+          "name": "value",
+          "type": "FLOAT",
+          "widget": {
+            "name": "value"
+          },
+          "link": 13793
+        },
+        {
+          "label": "duration in seconds",
+          "name": "value_5",
+          "shape": 7,
+          "type": "FLOAT",
+          "link": 13794
+        },
+        {
+          "label": "enhancer_seed",
+          "name": "seed",
+          "type": "INT",
+          "widget": {
+            "name": "seed"
+          },
+          "link": null
+        },
+        {
+          "label": "LTX API key",
+          "name": "value_4",
+          "type": "STRING",
+          "widget": {
+            "name": "value_4"
+          },
+          "link": null
+        },
+        {
+          "label": "ltx model ckpt path",
+          "name": "ckpt_name",
+          "type": "COMBO",
+          "widget": {
+            "name": "ckpt_name"
+          },
+          "link": 13780
+        },
+        {
+          "label": "latent_downscale_factor",
+          "name": "value_6",
+          "type": "FLOAT",
+          "link": 13791
+        }
+      ],
+      "outputs": [
+        {
+          "label": "bypass_i2v",
+          "name": "BOOLEAN",
+          "type": "BOOLEAN",
+          "links": [
+            13765
+          ]
+        },
+        {
+          "label": "resized image",
+          "name": "resized",
+          "type": "IMAGE",
+          "links": [
+            13764,
+            13786
+          ]
+        },
+        {
+          "label": "effective_positive_prompt",
+          "name": "enhanced_prompt",
+          "type": "STRING",
+          "links": [
+            13778
+          ]
+        },
+        {
+          "label": "positive_encoded",
+          "name": "positive",
+          "type": "CONDITIONING",
+          "links": [
+            13760
+          ]
+        },
+        {
+          "label": "negative_encoded",
+          "name": "negative",
+          "type": "CONDITIONING",
+          "links": [
+            13761
+          ]
+        },
+        {
+          "label": "fps",
+          "name": "FLOAT",
+          "type": "FLOAT",
+          "links": [
+            13790,
+            13795
+          ]
+        },
+        {
+          "label": "number of frames",
+          "name": "INT",
+          "type": "INT",
+          "links": [
+            13787,
+            13789
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.25.0",
+        "previewExposures": []
+      },
+      "widgets_values": [
+        true,
+        "",
+        true,
+        "",
+        24,
+        457289196,
+        "",
+        "ltx-2.3-22b-dev.safetensors"
+      ]
+    },
+    {
+      "id": 5004,
+      "type": "b7c1e94a-3f52-4d08-9a61-2e7c5d4f8a13",
+      "pos": [
+        -4027.492001622839,
+        3226.8212377387586
+      ],
+      "size": [
+        575.5086440715122,
+        322
+      ],
+      "flags": {
+        "collapsed": false
+      },
+      "order": 11,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "audio_vae",
+          "name": "audio_vae",
+          "type": "COMBO",
+          "widget": {
+            "name": "audio_vae"
+          },
+          "link": null
+        },
+        {
+          "label": "video_vae",
+          "name": "video_vae",
+          "type": "COMBO",
+          "widget": {
+            "name": "video_vae"
+          },
+          "link": null
+        },
+        {
+          "label": "ltx_2.5_model_checkpoint",
+          "name": "ltx_2.5_model_checkpoint",
+          "type": "COMBO",
+          "widget": {
+            "name": "ltx_2.5_model_checkpoint"
+          },
+          "link": null
+        },
+        {
+          "label": "gemma4_e2b_enhancer",
+          "name": "gemma4_e2b_enhancer",
+          "type": "COMBO",
+          "widget": {
+            "name": "gemma4_e2b_enhancer"
+          },
+          "link": null
+        },
+        {
+          "label": "gemma4_12b_encoder",
+          "name": "gemma4_12b_encoder",
+          "type": "COMBO",
+          "widget": {
+            "name": "gemma4_12b_encoder"
+          },
+          "link": null
+        },
+        {
+          "label": "ic_lora",
+          "name": "ic_lora",
+          "type": "COMBO",
+          "widget": {
+            "name": "ic_lora"
+          },
+          "link": null
+        },
+        {
+          "label": "lora strength",
+          "name": "lora strength",
+          "type": "FLOAT",
+          "widget": {
+            "name": "lora strength"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "label": "Audio VAE",
+          "name": "Audio VAE",
+          "type": "VAE",
+          "links": [
+            13673,
+            13763
+          ]
+        },
+        {
+          "label": "VAE",
+          "name": "VAE",
+          "type": "VAE",
+          "links": [
+            13670,
+            13762
+          ]
+        },
+        {
+          "label": "MODEL",
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            13653
+          ]
+        },
+        {
+          "label": "text enhancer",
+          "name": "text enhancer",
+          "type": "CLIP",
+          "links": [
+            13784
+          ]
+        },
+        {
+          "label": "text_encoder",
+          "name": "text_encoder",
+          "type": "CLIP",
+          "links": [
+            13466
+          ]
+        },
+        {
+          "label": "ltx_2.5_model_checkpoint_path",
+          "name": "ltx_2.5_model_checkpoint_path",
+          "type": "*",
+          "links": [
+            13780
+          ]
+        },
+        {
+          "label": "latent_downscale_factor",
+          "name": "latent_downscale_factor",
+          "type": "FLOAT",
+          "links": [
+            13766,
+            13791
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.25.0",
+        "previewExposures": [],
+        "models": [
+          {
+            "name": "ltx-2.5-audio-vae-bf16.safetensors",
+            "url": "https://huggingface.co/Lightricks/LTX-2.5/resolve/main/vae/ltx-2.5-audio-vae-bf16.safetensors",
+            "directory": "vae"
+          },
+          {
+            "name": "ltx-2.5-video-vae-bf16.safetensors",
+            "url": "https://huggingface.co/Lightricks/LTX-2.5/resolve/main/vae/ltx-2.5-video-vae-bf16.safetensors",
+            "directory": "vae"
+          },
+          {
+            "name": "ltx-2.5-22b-distilled-transformer-bf16.safetensors",
+            "url": "https://huggingface.co/Lightricks/LTX-2.5/resolve/main/diffusion_models/ltx-2.5-22b-distilled-transformer-bf16.safetensors",
+            "directory": "diffusion_models"
+          },
+          {
+            "name": "gemma4_e2b_it_bf16.safetensors",
+            "url": "https://huggingface.co/Comfy-Org/gemma-4/resolve/main/text_encoders/gemma4_e2b_it_bf16.safetensors",
+            "directory": "text_encoders"
+          },
+          {
+            "name": "gemma4-12b-with-proj-ltx-2.5-bf16.safetensors",
+            "url": "https://huggingface.co/Lightricks/LTX-2.5/resolve/main/text_encoders/gemma4-12b-with-proj-ltx-2.5-bf16.safetensors",
+            "directory": "text_encoders"
+          },
+          {
+            "name": "ltx-2.3-22b-ic-lora-motion-track-control-ref0.5.safetensors",
+            "url": "https://huggingface.co/Lightricks/LTX-2.3-22b-IC-LoRA-Motion-Track-Control/resolve/main/ltx-2.3-22b-ic-lora-motion-track-control-ref0.5.safetensors",
+            "directory": "loras"
+          }
+        ]
+      },
+      "widgets_values": [
+        "ltx-2.5-audio-vae-bf16.safetensors",
+        "ltx-2.5-video-vae-bf16.safetensors",
+        "ltx-2.5-22b-distilled-transformer-bf16.safetensors",
+        "gemma4_e2b_it_bf16.safetensors",
+        "gemma4-12b-with-proj-ltx-2.5-bf16.safetensors",
+        "ltx-2.3-22b-ic-lora-motion-track-control-ref0.5.safetensors",
+        1
+      ]
+    },
+    {
+      "id": 9004,
+      "type": "LTXVSparseTrackEditor",
+      "pos": [
+        -2344.228781718489,
+        3238.0534985130926
+      ],
+      "size": [
+        371.15625322642313,
+        282.8782377061607
+      ],
+      "flags": {},
+      "order": 14,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 13786
+        },
+        {
+          "name": "points_to_sample",
+          "type": "INT",
+          "widget": {
+            "name": "points_to_sample"
+          },
+          "link": 13787
+        }
+      ],
+      "outputs": [
+        {
+          "name": "tracks",
+          "type": "STRING",
+          "links": [
+            13788
+          ]
+        }
+      ],
+      "title": "LTX Sparse Track Editor",
+      "properties": {
+        "Node name for S&R": "LTXVSparseTrackEditor"
+      },
+      "widgets_values": [
+        "[[{\"x\":397.96607597464185,\"y\":279.13972495685704},{\"x\":233.02792574070966,\"y\":358.1291889974934},{\"x\":105.93395079936288,\"y\":464.3010213111499},{\"x\":18.275242213983294,\"y\":569.9226634573546}],[{\"x\":599.6628907756747,\"y\":301.2811616956574},{\"x\":891.6652759310774,\"y\":492.0484497561475}]]",
+        "[[{\"x\":398,\"y\":279},{\"x\":396,\"y\":280},{\"x\":393,\"y\":281},{\"x\":391,\"y\":282},{\"x\":388,\"y\":284},{\"x\":385,\"y\":285},{\"x\":382,\"y\":286},{\"x\":378,\"y\":288},{\"x\":375,\"y\":289},{\"x\":371,\"y\":291},{\"x\":367,\"y\":293},{\"x\":363,\"y\":294},{\"x\":359,\"y\":296},{\"x\":355,\"y\":298},{\"x\":351,\"y\":300},{\"x\":347,\"y\":302},{\"x\":342,\"y\":304},{\"x\":337,\"y\":306},{\"x\":333,\"y\":308},{\"x\":328,\"y\":310},{\"x\":323,\"y\":312},{\"x\":319,\"y\":314},{\"x\":314,\"y\":316},{\"x\":309,\"y\":319},{\"x\":304,\"y\":321},{\"x\":299,\"y\":323},{\"x\":295,\"y\":325},{\"x\":290,\"y\":328},{\"x\":285,\"y\":330},{\"x\":280,\"y\":332},{\"x\":275,\"y\":335},{\"x\":271,\"y\":337},{\"x\":266,\"y\":339},{\"x\":262,\"y\":342},{\"x\":257,\"y\":344},{\"x\":253,\"y\":346},{\"x\":249,\"y\":349},{\"x\":245,\"y\":351},{\"x\":241,\"y\":353},{\"x\":237,\"y\":356},{\"x\":233,\"y\":358},{\"x\":229,\"y\":360},{\"x\":226,\"y\":363},{\"x\":222,\"y\":365},{\"x\":219,\"y\":368},{\"x\":215,\"y\":370},{\"x\":212,\"y\":373},{\"x\":208,\"y\":375},{\"x\":205,\"y\":378},{\"x\":201,\"y\":380},{\"x\":198,\"y\":383},{\"x\":194,\"y\":385},{\"x\":191,\"y\":388},{\"x\":188,\"y\":391},{\"x\":184,\"y\":393},{\"x\":181,\"y\":396},{\"x\":178,\"y\":399},{\"x\":174,\"y\":401},{\"x\":171,\"y\":404},{\"x\":168,\"y\":407},{\"x\":165,\"y\":410},{\"x\":161,\"y\":412},{\"x\":158,\"y\":415},{\"x\":155,\"y\":418},{\"x\":152,\"y\":421},{\"x\":149,\"y\":423},{\"x\":146,\"y\":426},{\"x\":143,\"y\":429},{\"x\":140,\"y\":432},{\"x\":137,\"y\":434},{\"x\":134,\"y\":437},{\"x\":131,\"y\":440},{\"x\":128,\"y\":443},{\"x\":125,\"y\":445},{\"x\":122,\"y\":448},{\"x\":120,\"y\":451},{\"x\":117,\"y\":454},{\"x\":114,\"y\":456},{\"x\":111,\"y\":459},{\"x\":109,\"y\":462},{\"x\":106,\"y\":464},{\"x\":103,\"y\":467},{\"x\":101,\"y\":470},{\"x\":98,\"y\":473},{\"x\":95,\"y\":475},{\"x\":92,\"y\":478},{\"x\":90,\"y\":481},{\"x\":87,\"y\":484},{\"x\":84,\"y\":487},{\"x\":82,\"y\":490},{\"x\":79,\"y\":493},{\"x\":77,\"y\":496},{\"x\":74,\"y\":499},{\"x\":71,\"y\":502},{\"x\":69,\"y\":506},{\"x\":66,\"y\":509},{\"x\":64,\"y\":512},{\"x\":61,\"y\":515},{\"x\":59,\"y\":518},{\"x\":57,\"y\":521},{\"x\":54,\"y\":524},{\"x\":52,\"y\":527},{\"x\":50,\"y\":530},{\"x\":47,\"y\":532},{\"x\":45,\"y\":535},{\"x\":43,\"y\":538},{\"x\":41,\"y\":541},{\"x\":39,\"y\":543},{\"x\":37,\"y\":546},{\"x\":35,\"y\":549},{\"x\":33,\"y\":551},{\"x\":31,\"y\":553},{\"x\":30,\"y\":556},{\"x\":28,\"y\":558},{\"x\":26,\"y\":560},{\"x\":25,\"y\":562},{\"x\":23,\"y\":564},{\"x\":22,\"y\":565},{\"x\":21,\"y\":567},{\"x\":19,\"y\":569},{\"x\":18,\"y\":570}],[{\"x\":600,\"y\":301},{\"x\":602,\"y\":303},{\"x\":605,\"y\":304},{\"x\":607,\"y\":306},{\"x\":609,\"y\":308},{\"x\":612,\"y\":309},{\"x\":614,\"y\":311},{\"x\":617,\"y\":312},{\"x\":619,\"y\":314},{\"x\":622,\"y\":316},{\"x\":624,\"y\":317},{\"x\":626,\"y\":319},{\"x\":629,\"y\":320},{\"x\":631,\"y\":322},{\"x\":634,\"y\":324},{\"x\":636,\"y\":325},{\"x\":639,\"y\":327},{\"x\":641,\"y\":328},{\"x\":643,\"y\":330},{\"x\":646,\"y\":331},{\"x\":648,\"y\":333},{\"x\":651,\"y\":335},{\"x\":653,\"y\":336},{\"x\":656,\"y\":338},{\"x\":658,\"y\":339},{\"x\":660,\"y\":341},{\"x\":663,\"y\":343},{\"x\":665,\"y\":344},{\"x\":668,\"y\":346},{\"x\":670,\"y\":347},{\"x\":673,\"y\":349},{\"x\":675,\"y\":351},{\"x\":678,\"y\":352},{\"x\":680,\"y\":354},{\"x\":682,\"y\":355},{\"x\":685,\"y\":357},{\"x\":687,\"y\":359},{\"x\":690,\"y\":360},{\"x\":692,\"y\":362},{\"x\":695,\"y\":363},{\"x\":697,\"y\":365},{\"x\":699,\"y\":366},{\"x\":702,\"y\":368},{\"x\":704,\"y\":370},{\"x\":707,\"y\":371},{\"x\":709,\"y\":373},{\"x\":712,\"y\":374},{\"x\":714,\"y\":376},{\"x\":716,\"y\":378},{\"x\":719,\"y\":379},{\"x\":721,\"y\":381},{\"x\":724,\"y\":382},{\"x\":726,\"y\":384},{\"x\":729,\"y\":386},{\"x\":731,\"y\":387},{\"x\":733,\"y\":389},{\"x\":736,\"y\":390},{\"x\":738,\"y\":392},{\"x\":741,\"y\":393},{\"x\":743,\"y\":395},{\"x\":746,\"y\":397},{\"x\":748,\"y\":398},{\"x\":751,\"y\":400},{\"x\":753,\"y\":401},{\"x\":755,\"y\":403},{\"x\":758,\"y\":405},{\"x\":760,\"y\":406},{\"x\":763,\"y\":408},{\"x\":765,\"y\":409},{\"x\":768,\"y\":411},{\"x\":770,\"y\":413},{\"x\":772,\"y\":414},{\"x\":775,\"y\":416},{\"x\":777,\"y\":417},{\"x\":780,\"y\":419},{\"x\":782,\"y\":421},{\"x\":785,\"y\":422},{\"x\":787,\"y\":424},{\"x\":789,\"y\":425},{\"x\":792,\"y\":427},{\"x\":794,\"y\":428},{\"x\":797,\"y\":430},{\"x\":799,\"y\":432},{\"x\":802,\"y\":433},{\"x\":804,\"y\":435},{\"x\":806,\"y\":436},{\"x\":809,\"y\":438},{\"x\":811,\"y\":440},{\"x\":814,\"y\":441},{\"x\":816,\"y\":443},{\"x\":819,\"y\":444},{\"x\":821,\"y\":446},{\"x\":824,\"y\":448},{\"x\":826,\"y\":449},{\"x\":828,\"y\":451},{\"x\":831,\"y\":452},{\"x\":833,\"y\":454},{\"x\":836,\"y\":455},{\"x\":838,\"y\":457},{\"x\":841,\"y\":459},{\"x\":843,\"y\":460},{\"x\":845,\"y\":462},{\"x\":848,\"y\":463},{\"x\":850,\"y\":465},{\"x\":853,\"y\":467},{\"x\":855,\"y\":468},{\"x\":858,\"y\":470},{\"x\":860,\"y\":471},{\"x\":862,\"y\":473},{\"x\":865,\"y\":475},{\"x\":867,\"y\":476},{\"x\":870,\"y\":478},{\"x\":872,\"y\":479},{\"x\":875,\"y\":481},{\"x\":877,\"y\":483},{\"x\":879,\"y\":484},{\"x\":882,\"y\":486},{\"x\":884,\"y\":487},{\"x\":887,\"y\":489},{\"x\":889,\"y\":490},{\"x\":892,\"y\":492}]]",
+        121,
+        ""
+      ]
+    }
+  ],
+  "links": [
+    [
+      13466,
+      5004,
+      4,
+      5014,
+      0,
+      "CLIP"
+    ],
+    [
+      13468,
+      2004,
+      0,
+      5014,
+      2,
+      "IMAGE"
+    ],
+    [
+      13630,
+      5508,
+      0,
+      5014,
+      4,
+      "STRING"
+    ],
+    [
+      13631,
+      5509,
+      0,
+      5014,
+      6,
+      "STRING"
+    ],
+    [
+      13653,
+      5004,
+      2,
+      5516,
+      0,
+      "MODEL"
+    ],
+    [
+      13670,
+      5004,
+      1,
+      5518,
+      0,
+      "VAE"
+    ],
+    [
+      13673,
+      5004,
+      0,
+      5518,
+      3,
+      "VAE"
+    ],
+    [
+      13675,
+      5518,
+      0,
+      4852,
+      0,
+      "VIDEO"
+    ],
+    [
+      13760,
+      5014,
+      3,
+      9002,
+      0,
+      "CONDITIONING"
+    ],
+    [
+      13761,
+      5014,
+      4,
+      9002,
+      1,
+      "CONDITIONING"
+    ],
+    [
+      13762,
+      5004,
+      1,
+      9002,
+      2,
+      "VAE"
+    ],
+    [
+      13763,
+      5004,
+      0,
+      9002,
+      3,
+      "VAE"
+    ],
+    [
+      13764,
+      5014,
+      1,
+      9002,
+      4,
+      "IMAGE"
+    ],
+    [
+      13765,
+      5014,
+      0,
+      9002,
+      5,
+      "BOOLEAN"
+    ],
+    [
+      13766,
+      5004,
+      6,
+      9002,
+      6,
+      "FLOAT"
+    ],
+    [
+      13773,
+      9002,
+      0,
+      5516,
+      1,
+      "CONDITIONING"
+    ],
+    [
+      13774,
+      9002,
+      1,
+      5516,
+      2,
+      "CONDITIONING"
+    ],
+    [
+      13775,
+      9002,
+      2,
+      5516,
+      3,
+      "LATENT"
+    ],
+    [
+      13778,
+      5014,
+      2,
+      5544,
+      0,
+      "STRING"
+    ],
+    [
+      13780,
+      5004,
+      5,
+      5014,
+      11,
+      "COMBO"
+    ],
+    [
+      13783,
+      5516,
+      1,
+      5518,
+      2,
+      "LATENT"
+    ],
+    [
+      13784,
+      5004,
+      3,
+      5014,
+      1,
+      "CLIP"
+    ],
+    [
+      13785,
+      5516,
+      0,
+      5518,
+      1,
+      "LATENT"
+    ],
+    [
+      13786,
+      5014,
+      1,
+      9004,
+      0,
+      "IMAGE"
+    ],
+    [
+      13787,
+      5014,
+      6,
+      9004,
+      1,
+      "INT"
+    ],
+    [
+      13788,
+      9004,
+      0,
+      9002,
+      9,
+      "STRING"
+    ],
+    [
+      13789,
+      5014,
+      6,
+      9002,
+      7,
+      "INT"
+    ],
+    [
+      13790,
+      5014,
+      5,
+      9002,
+      8,
+      "FLOAT"
+    ],
+    [
+      13791,
+      5004,
+      6,
+      5014,
+      12,
+      "FLOAT"
+    ],
+    [
+      13792,
+      9002,
+      3,
+      9006,
+      0,
+      "VIDEO"
+    ],
+    [
+      13793,
+      9007,
+      0,
+      5014,
+      7,
+      "FLOAT"
+    ],
+    [
+      13794,
+      9008,
+      0,
+      5014,
+      8,
+      "FLOAT"
+    ],
+    [
+      13795,
+      5014,
+      5,
+      5518,
+      4,
+      "FLOAT"
+    ]
+  ],
+  "groups": [
+    {
+      "id": 1,
+      "title": "Inputs",
+      "bounding": [
+        -3264.491355928488,
+        3164,
+        1304.3659482980293,
+        1147.0030277533106
+      ],
+      "color": "#3f789e",
+      "flags": {}
+    },
+    {
+      "id": 2,
+      "title": "Generate",
+      "bounding": [
+        -1407.2211820415482,
+        3164,
+        357.4220901853274,
+        353.0261211902389
+      ],
+      "color": "#3f789e",
+      "flags": {}
+    }
+  ],
+  "definitions": {
+    "subgraphs": [
+      {
+        "id": "b7c1e94a-3f52-4d08-9a61-2e7c5d4f8a13",
+        "version": 1,
+        "state": {
+          "lastGroupId": 158,
+          "lastNodeId": 9014,
+          "lastLinkId": 13807,
+          "lastRerouteId": 9025
+        },
+        "revision": 0,
+        "config": {},
+        "name": "Load Models",
+        "inputNode": {
+          "id": -10,
+          "bounding": [
+            -1200,
+            40,
+            225.017578125,
+            188
+          ]
+        },
+        "outputNode": {
+          "id": -20,
+          "bounding": [
+            80,
+            40,
+            225.017578125,
+            188
+          ]
+        },
+        "inputs": [
+          {
+            "id": "b7c1e94a-in-0",
+            "name": "audio_vae",
+            "type": "COMBO",
+            "linkIds": [
+              1
+            ],
+            "label": "audio_vae",
+            "pos": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "b7c1e94a-in-1",
+            "name": "video_vae",
+            "type": "COMBO",
+            "linkIds": [
+              2
+            ],
+            "label": "video_vae",
+            "pos": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "b7c1e94a-in-2",
+            "name": "ltx_2.5_model_checkpoint",
+            "type": "COMBO",
+            "linkIds": [
+              3,
+              4
+            ],
+            "label": "ltx_2.5_model_checkpoint",
+            "pos": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "b7c1e94a-in-3",
+            "name": "gemma4_e2b_enhancer",
+            "type": "COMBO",
+            "linkIds": [
+              5
+            ],
+            "label": "gemma4_e2b_enhancer",
+            "pos": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "b7c1e94a-in-4",
+            "name": "gemma4_12b_encoder",
+            "type": "COMBO",
+            "linkIds": [
+              6
+            ],
+            "label": "gemma4_12b_encoder",
+            "pos": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "b7c1e94a-in-5",
+            "name": "ic_lora",
+            "type": "COMBO",
+            "linkIds": [
+              7
+            ],
+            "label": "ic_lora",
+            "pos": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "b7c1e94a-in-6",
+            "name": "lora strength",
+            "type": "FLOAT",
+            "linkIds": [
+              8
+            ],
+            "label": "lora strength",
+            "pos": [
+              0,
+              0
+            ]
+          }
+        ],
+        "outputs": [
+          {
+            "id": "eb483293-e385-4392-bf06-3a66e56ffbb1",
+            "name": "Audio VAE",
+            "type": "VAE",
+            "linkIds": [
+              10
+            ],
+            "localized_name": "Audio VAE",
+            "pos": [
+              -4581.9826283517195,
+              3886.1306684809374
+            ]
+          },
+          {
+            "id": "d41773b2-ded3-44e1-9b0a-ada0eb458ae1",
+            "name": "VAE",
+            "type": "VAE",
+            "linkIds": [
+              11
+            ],
+            "localized_name": "VAE",
+            "pos": [
+              -4581.9826283517195,
+              3906.1306684809374
+            ]
+          },
+          {
+            "id": "81cf793d-2607-4c81-bb97-bdbe6aaebb60",
+            "name": "MODEL",
+            "type": "MODEL",
+            "linkIds": [
+              12
+            ],
+            "localized_name": "MODEL",
+            "pos": [
+              -4581.9826283517195,
+              3926.1306684809374
+            ]
+          },
+          {
+            "id": "b119e276-d984-49da-87d8-c9e0565e3ac2",
+            "name": "text enhancer",
+            "type": "CLIP",
+            "linkIds": [
+              13
+            ],
+            "localized_name": "clip",
+            "label": "text enhancer",
+            "pos": [
+              -4581.9826283517195,
+              3946.1306684809374
+            ]
+          },
+          {
+            "id": "8eef4ceb-bd9a-4b97-bdbd-78ba1335380a",
+            "name": "text_encoder",
+            "type": "CLIP",
+            "linkIds": [
+              14
+            ],
+            "localized_name": "clip_1",
+            "label": "text_encoder",
+            "pos": [
+              -4581.9826283517195,
+              3966.1306684809374
+            ]
+          },
+          {
+            "id": "e3250970-a80e-4f00-b940-1e27244dc079",
+            "name": "ltx_2.5_model_checkpoint_path",
+            "type": "*",
+            "linkIds": [
+              15
+            ],
+            "label": "ltx_2.5_model_checkpoint_path",
+            "pos": [
+              -4581.9826283517195,
+              3986.1306684809374
+            ]
+          },
+          {
+            "id": "645d088c-7969-44d0-8347-418ba5ffccb1",
+            "name": "latent_downscale_factor",
+            "type": "FLOAT",
+            "linkIds": [
+              16
+            ],
+            "pos": [
+              -4581.9826283517195,
+              4006.1306684809374
+            ]
+          }
+        ],
+        "widgets": [],
+        "nodes": [
+          {
+            "id": 5600,
+            "type": "VAELoader",
+            "pos": [
+              -820,
+              40
+            ],
+            "size": [
+              376.83334885736076,
+              59.59521275015277
+            ],
+            "flags": {},
+            "order": 0,
+            "mode": 0,
+            "inputs": [
+              {
+                "localized_name": "vae_name",
+                "name": "vae_name",
+                "type": "COMBO",
+                "widget": {
+                  "name": "vae_name"
+                },
+                "link": 1
+              }
+            ],
+            "outputs": [
+              {
+                "localized_name": "VAE",
+                "name": "VAE",
+                "type": "VAE",
+                "links": [
+                  10
+                ]
+              }
+            ],
+            "title": "Load VAE - Audio",
+            "properties": {
+              "Node name for S&R": "VAELoader",
+              "models": [
+                {
+                  "name": "ltx-2.5-audio-vae-bf16.safetensors",
+                  "url": "https://huggingface.co/Lightricks/LTX-2.5/resolve/main/vae/ltx-2.5-audio-vae-bf16.safetensors",
+                  "directory": "vae"
+                }
+              ]
+            },
+            "widgets_values": [
+              "ltx-2.5-audio-vae-bf16.safetensors"
+            ]
+          },
+          {
+            "id": 5601,
+            "type": "VAELoader",
+            "pos": [
+              -820,
+              190
+            ],
+            "size": [
+              376.83334885736076,
+              59.59521275015277
+            ],
+            "flags": {},
+            "order": 1,
+            "mode": 0,
+            "inputs": [
+              {
+                "localized_name": "vae_name",
+                "name": "vae_name",
+                "type": "COMBO",
+                "widget": {
+                  "name": "vae_name"
+                },
+                "link": 2
+              }
+            ],
+            "outputs": [
+              {
+                "localized_name": "VAE",
+                "name": "VAE",
+                "type": "VAE",
+                "links": [
+                  11
+                ]
+              }
+            ],
+            "title": "Load VAE - Video",
+            "properties": {
+              "Node name for S&R": "VAELoader",
+              "models": [
+                {
+                  "name": "ltx-2.5-video-vae-bf16.safetensors",
+                  "url": "https://huggingface.co/Lightricks/LTX-2.5/resolve/main/vae/ltx-2.5-video-vae-bf16.safetensors",
+                  "directory": "vae"
+                }
+              ]
+            },
+            "widgets_values": [
+              "ltx-2.5-video-vae-bf16.safetensors"
+            ]
+          },
+          {
+            "id": 5602,
+            "type": "UNETLoader",
+            "pos": [
+              -820,
+              340
+            ],
+            "size": [
+              374.74465302622593,
+              82
+            ],
+            "flags": {},
+            "order": 2,
+            "mode": 0,
+            "inputs": [
+              {
+                "localized_name": "unet_name",
+                "name": "unet_name",
+                "type": "COMBO",
+                "widget": {
+                  "name": "unet_name"
+                },
+                "link": 3
+              }
+            ],
+            "outputs": [
+              {
+                "localized_name": "MODEL",
+                "name": "MODEL",
+                "type": "MODEL",
+                "links": [
+                  9
+                ]
+              }
+            ],
+            "properties": {
+              "Node name for S&R": "UNETLoader",
+              "models": [
+                {
+                  "name": "ltx-2.5-22b-distilled-transformer-bf16.safetensors",
+                  "url": "https://huggingface.co/Lightricks/LTX-2.5/resolve/main/diffusion_models/ltx-2.5-22b-distilled-transformer-bf16.safetensors",
+                  "directory": "diffusion_models"
+                }
+              ]
+            },
+            "widgets_values": [
+              "ltx-2.5-22b-distilled-transformer-bf16.safetensors",
+              "default"
+            ]
+          },
+          {
+            "id": 5603,
+            "type": "Reroute",
+            "pos": [
+              -820,
+              490
+            ],
+            "size": [
+              365.46643673647395,
+              26
+            ],
+            "flags": {},
+            "order": 3,
+            "mode": 0,
+            "inputs": [
+              {
+                "name": "",
+                "type": "*",
+                "link": 4
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "*",
+                "links": [
+                  15
+                ]
+              }
+            ],
+            "properties": {
+              "showOutputText": false,
+              "horizontal": false
+            }
+          },
+          {
+            "id": 5604,
+            "type": "CLIPLoader",
+            "pos": [
+              -820,
+              790
+            ],
+            "size": [
+              384.6576773713696,
+              106
+            ],
+            "flags": {},
+            "order": 4,
+            "mode": 0,
+            "inputs": [
+              {
+                "localized_name": "clip_name",
+                "name": "clip_name",
+                "type": "COMBO",
+                "widget": {
+                  "name": "clip_name"
+                },
+                "link": 5
+              }
+            ],
+            "outputs": [
+              {
+                "localized_name": "CLIP",
+                "name": "CLIP",
+                "type": "CLIP",
+                "links": [
+                  13
+                ]
+              }
+            ],
+            "title": "Load CLIP - Text Enhancer",
+            "properties": {
+              "Node name for S&R": "CLIPLoader",
+              "models": [
+                {
+                  "name": "gemma4_e2b_it_bf16.safetensors",
+                  "url": "https://huggingface.co/Comfy-Org/gemma-4/resolve/main/text_encoders/gemma4_e2b_it_bf16.safetensors",
+                  "directory": "text_encoders"
+                }
+              ]
+            },
+            "widgets_values": [
+              "gemma4_e2b_it_bf16.safetensors",
+              "ltxv",
+              "default"
+            ]
+          },
+          {
+            "id": 5605,
+            "type": "CLIPLoader",
+            "pos": [
+              -820,
+              940
+            ],
+            "size": [
+              384.6576773713696,
+              106
+            ],
+            "flags": {},
+            "order": 5,
+            "mode": 0,
+            "inputs": [
+              {
+                "localized_name": "clip_name",
+                "name": "clip_name",
+                "type": "COMBO",
+                "widget": {
+                  "name": "clip_name"
+                },
+                "link": 6
+              }
+            ],
+            "outputs": [
+              {
+                "localized_name": "CLIP",
+                "name": "CLIP",
+                "type": "CLIP",
+                "links": [
+                  14
+                ]
+              }
+            ],
+            "title": "Load CLIP - Text Encoder",
+            "properties": {
+              "Node name for S&R": "CLIPLoader",
+              "models": [
+                {
+                  "name": "gemma4-12b-with-proj-ltx-2.5-bf16.safetensors",
+                  "url": "https://huggingface.co/Lightricks/LTX-2.5/resolve/main/text_encoders/gemma4-12b-with-proj-ltx-2.5-bf16.safetensors",
+                  "directory": "text_encoders"
+                }
+              ]
+            },
+            "widgets_values": [
+              "gemma4-12b-with-proj-ltx-2.5-bf16.safetensors",
+              "ltxv",
+              "default"
+            ]
+          },
+          {
+            "id": 5606,
+            "type": "LTXICLoRALoaderModelOnly",
+            "pos": [
+              -340,
+              340
+            ],
+            "size": [
+              384.6576773713696,
+              130.8845841562129
+            ],
+            "flags": {},
+            "order": 6,
+            "mode": 0,
+            "inputs": [
+              {
+                "localized_name": "model",
+                "name": "model",
+                "type": "MODEL",
+                "link": 9
+              },
+              {
+                "localized_name": "lora_name",
+                "name": "lora_name",
+                "type": "COMBO",
+                "widget": {
+                  "name": "lora_name"
+                },
+                "link": 7
+              },
+              {
+                "localized_name": "strength_model",
+                "name": "strength_model",
+                "type": "FLOAT",
+                "widget": {
+                  "name": "strength_model"
+                },
+                "link": 8
+              }
+            ],
+            "outputs": [
+              {
+                "localized_name": "model",
+                "name": "model",
+                "type": "MODEL",
+                "links": [
+                  12
+                ]
+              },
+              {
+                "localized_name": "latent_downscale_factor",
+                "name": "latent_downscale_factor",
+                "type": "FLOAT",
+                "links": [
+                  16
+                ]
+              }
+            ],
+            "properties": {
+              "Node name for S&R": "LTXICLoRALoaderModelOnly",
+              "models": [
+                {
+                  "name": "ltx-2.3-22b-ic-lora-motion-track-control-ref0.5.safetensors",
+                  "url": "https://huggingface.co/Lightricks/LTX-2.3-22b-IC-LoRA-Motion-Track-Control/resolve/main/ltx-2.3-22b-ic-lora-motion-track-control-ref0.5.safetensors",
+                  "directory": "loras"
+                }
+              ]
+            },
+            "widgets_values": [
+              "ltx-2.3-22b-ic-lora-motion-track-control-ref0.5.safetensors",
+              1
+            ]
+          }
+        ],
+        "groups": [
+          {
+            "id": 1,
+            "title": "Load Models - one file per output",
+            "bounding": [
+              -860,
+              -36,
+              1000,
+              1110
+            ],
+            "color": "#3f789e",
+            "flags": {}
+          }
+        ],
+        "links": [
+          {
+            "id": 1,
+            "origin_id": -10,
+            "origin_slot": 0,
+            "target_id": 5600,
+            "target_slot": 0,
+            "type": "COMBO"
+          },
+          {
+            "id": 2,
+            "origin_id": -10,
+            "origin_slot": 1,
+            "target_id": 5601,
+            "target_slot": 0,
+            "type": "COMBO"
+          },
+          {
+            "id": 3,
+            "origin_id": -10,
+            "origin_slot": 2,
+            "target_id": 5602,
+            "target_slot": 0,
+            "type": "COMBO"
+          },
+          {
+            "id": 4,
+            "origin_id": -10,
+            "origin_slot": 2,
+            "target_id": 5603,
+            "target_slot": 0,
+            "type": "COMBO"
+          },
+          {
+            "id": 5,
+            "origin_id": -10,
+            "origin_slot": 3,
+            "target_id": 5604,
+            "target_slot": 0,
+            "type": "COMBO"
+          },
+          {
+            "id": 6,
+            "origin_id": -10,
+            "origin_slot": 4,
+            "target_id": 5605,
+            "target_slot": 0,
+            "type": "COMBO"
+          },
+          {
+            "id": 7,
+            "origin_id": -10,
+            "origin_slot": 5,
+            "target_id": 5606,
+            "target_slot": 1,
+            "type": "COMBO"
+          },
+          {
+            "id": 8,
+            "origin_id": -10,
+            "origin_slot": 6,
+            "target_id": 5606,
+            "target_slot": 2,
+            "type": "FLOAT"
+          },
+          {
+            "id": 9,
+            "origin_id": 5602,
+            "origin_slot": 0,
+            "target_id": 5606,
+            "target_slot": 0,
+            "type": "MODEL"
+          },
+          {
+            "id": 10,
+            "origin_id": 5600,
+            "origin_slot": 0,
+            "target_id": -20,
+            "target_slot": 0,
+            "type": "VAE"
+          },
+          {
+            "id": 11,
+            "origin_id": 5601,
+            "origin_slot": 0,
+            "target_id": -20,
+            "target_slot": 1,
+            "type": "VAE"
+          },
+          {
+            "id": 12,
+            "origin_id": 5606,
+            "origin_slot": 0,
+            "target_id": -20,
+            "target_slot": 2,
+            "type": "MODEL"
+          },
+          {
+            "id": 13,
+            "origin_id": 5604,
+            "origin_slot": 0,
+            "target_id": -20,
+            "target_slot": 3,
+            "type": "CLIP"
+          },
+          {
+            "id": 14,
+            "origin_id": 5605,
+            "origin_slot": 0,
+            "target_id": -20,
+            "target_slot": 4,
+            "type": "CLIP"
+          },
+          {
+            "id": 15,
+            "origin_id": 5603,
+            "origin_slot": 0,
+            "target_id": -20,
+            "target_slot": 5,
+            "type": "*"
+          },
+          {
+            "id": 16,
+            "origin_id": 5606,
+            "origin_slot": 1,
+            "target_id": -20,
+            "target_slot": 6,
+            "type": "FLOAT"
+          }
+        ],
+        "extra": {}
+      },
+      {
+        "id": "e51d7a94-38c6-4b02-9f7a-4d6013e28c5b",
+        "version": 1,
+        "state": {
+          "lastGroupId": 158,
+          "lastNodeId": 9014,
+          "lastLinkId": 13807,
+          "lastRerouteId": 9025
+        },
+        "revision": 0,
+        "config": {},
+        "name": "Input Parameters",
+        "inputNode": {
+          "id": -10,
+          "bounding": [
+            -4355.320430555894,
+            3731.8063836028455,
+            188.595703125,
+            308
+          ]
+        },
+        "outputNode": {
+          "id": -20,
+          "bounding": [
+            -2024.4822429247856,
+            3976.1544743507775,
+            193.76953125,
+            188
+          ]
+        },
+        "inputs": [
+          {
+            "id": "3c8d0a11-8c2b-4465-9481-fb3ac9bfc1c1",
+            "name": "clip",
+            "type": "CLIP",
+            "linkIds": [
+              13438,
+              13439
+            ],
+            "localized_name": "clip",
+            "label": "text encoder clip",
+            "pos": [
+              -4190.724727430894,
+              3755.8063836028455
+            ]
+          },
+          {
+            "id": "fd1430ec-80a3-4d75-94af-969a19da705a",
+            "name": "clip_1",
+            "type": "CLIP",
+            "linkIds": [
+              13727,
+              13754
+            ],
+            "localized_name": "clip_1",
+            "label": "text enhancer clip",
+            "pos": [
+              -4190.724727430894,
+              3775.8063836028455
+            ]
+          },
+          {
+            "id": "f08d2d6d-42a8-4dea-a0e4-9859f4a89222",
+            "name": "input",
+            "type": "IMAGE,MASK",
+            "linkIds": [
+              13601
+            ],
+            "localized_name": "input",
+            "label": "image",
+            "pos": [
+              -4190.724727430894,
+              3795.8063836028455
+            ]
+          },
+          {
+            "id": "56bb5430-bd86-4456-8f28-2018ca88f215",
+            "name": "value_3",
+            "type": "BOOLEAN",
+            "linkIds": [
+              13626
+            ],
+            "label": "use image input",
+            "pos": [
+              -4190.724727430894,
+              3815.8063836028455
+            ]
+          },
+          {
+            "id": "11271e88-8a8f-410e-b09d-6ac67d8acd33",
+            "name": "value_2",
+            "type": "STRING",
+            "linkIds": [
+              13619,
+              13728,
+              13755,
+              13779
+            ],
+            "label": "Positive prompt",
+            "pos": [
+              -4190.724727430894,
+              3835.8063836028455
+            ]
+          },
+          {
+            "id": "ce36a100-da99-465e-a116-04305495c0b2",
+            "name": "cond",
+            "type": "BOOLEAN",
+            "linkIds": [
+              13621,
+              13780
+            ],
+            "label": "Enhance positive prompt",
+            "pos": [
+              -4190.724727430894,
+              3855.8063836028455
+            ]
+          },
+          {
+            "id": "24bd03d0-cafb-4678-aeb0-09e9ac3f3831",
+            "name": "text",
+            "type": "STRING",
+            "linkIds": [
+              13487,
+              13620
+            ],
+            "label": "Negative prompt",
+            "pos": [
+              -4190.724727430894,
+              3875.8063836028455
+            ]
+          },
+          {
+            "id": "239d664b-9504-401a-9075-e2bbbfa5316f",
+            "name": "value",
+            "type": "FLOAT",
+            "linkIds": [
+              13493,
+              13794,
+              13804
+            ],
+            "label": "fps",
+            "pos": [
+              -4190.724727430894,
+              3895.8063836028455
+            ]
+          },
+          {
+            "id": "48050b9d-59ea-42c5-93d0-25e1f4558c8f",
+            "name": "value_5",
+            "type": "FLOAT",
+            "linkIds": [
+              13795
+            ],
+            "label": "duration in seconds",
+            "pos": [
+              -4190.724727430894,
+              3915.8063836028455
+            ]
+          },
+          {
+            "id": "67291efc-5e2e-4177-b8e0-183b525746ff",
+            "name": "seed",
+            "type": "INT",
+            "linkIds": [
+              13730,
+              13746
+            ],
+            "label": "enhancer_seed",
+            "pos": [
+              -4190.724727430894,
+              3935.8063836028455
+            ]
+          },
+          {
+            "id": "244b3603-4c49-4df4-ac66-4bf2fab9ac10",
+            "name": "value_4",
+            "type": "STRING",
+            "linkIds": [
+              13617,
+              13618,
+              13783
+            ],
+            "label": "LTX API key",
+            "pos": [
+              -4190.724727430894,
+              3955.8063836028455
+            ]
+          },
+          {
+            "id": "869c2ef8-7a5c-46d1-bbeb-0d3fee52ec49",
+            "name": "ckpt_name",
+            "type": "COMBO",
+            "linkIds": [
+              13615,
+              13616
+            ],
+            "label": "ltx model ckpt path",
+            "pos": [
+              -4190.724727430894,
+              3975.8063836028455
+            ]
+          },
+          {
+            "id": "2c7b48f0-16ad-4e59-83d1-9b0f6ea24c37",
+            "name": "value_6",
+            "type": "FLOAT",
+            "linkIds": [
+              13803
+            ],
+            "label": "latent_downscale_factor",
+            "pos": [
+              -4190.724727430894,
+              3995.8063836028455
+            ]
+          }
+        ],
+        "outputs": [
+          {
+            "id": "85ec5f1f-9cce-4d7c-a5a6-420b55211a54",
+            "name": "BOOLEAN",
+            "type": "BOOLEAN",
+            "linkIds": [
+              13499
+            ],
+            "label": "bypass_i2v",
+            "pos": [
+              -2000.4822429247856,
+              4000.1544743507775
+            ]
+          },
+          {
+            "id": "15da5d9f-f888-4ef4-8c25-0250bc179854",
+            "name": "resized",
+            "type": "IMAGE",
+            "linkIds": [
+              13802
+            ],
+            "localized_name": "resized",
+            "label": "resized image",
+            "pos": [
+              -2000.4822429247856,
+              4020.1544743507775
+            ]
+          },
+          {
+            "id": "2e98124e-b012-43e6-9ddc-550f40cbe9d4",
+            "name": "enhanced_prompt",
+            "type": "STRING",
+            "linkIds": [
+              13792
+            ],
+            "label": "effective_positive_prompt",
+            "pos": [
+              -2000.4822429247856,
+              4040.1544743507775
+            ]
+          },
+          {
+            "id": "989e15b5-2a65-42e6-b63a-672c1634996d",
+            "name": "positive",
+            "type": "CONDITIONING",
+            "linkIds": [
+              13790
+            ],
+            "localized_name": "positive",
+            "label": "positive_encoded",
+            "pos": [
+              -2000.4822429247856,
+              4060.1544743507775
+            ]
+          },
+          {
+            "id": "c639aac0-f1d4-488a-8035-fb2125cbdb28",
+            "name": "negative",
+            "type": "CONDITIONING",
+            "linkIds": [
+              13791
+            ],
+            "localized_name": "negative",
+            "label": "negative_encoded",
+            "pos": [
+              -2000.4822429247856,
+              4080.1544743507775
+            ]
+          },
+          {
+            "id": "3db21c86-e964-46c6-bff9-2899a6a66480",
+            "name": "FLOAT",
+            "type": "FLOAT",
+            "linkIds": [
+              13805
+            ],
+            "localized_name": "FLOAT",
+            "label": "fps",
+            "pos": [
+              -2000.4822429247856,
+              4100.1544743507775
+            ]
+          },
+          {
+            "id": "911e4066-f1ef-4bf4-b730-33137222314e",
+            "name": "INT",
+            "type": "INT",
+            "linkIds": [
+              13389
+            ],
+            "localized_name": "INT",
+            "label": "number of frames",
+            "pos": [
+              -2000.4822429247856,
+              4120.1544743507775
+            ]
+          }
+        ],
+        "widgets": [],
+        "nodes": [
+          {
+            "id": 5019,
+            "type": "ComfyNotNode",
+            "pos": [
+              -3626.6158880298262,
+              2775.4135682722263
+            ],
+            "size": [
+              281.3216407572436,
+              26
+            ],
+            "flags": {},
+            "order": 5,
+            "mode": 0,
+            "inputs": [
+              {
+                "localized_name": "value",
+                "name": "value",
+                "type": "*",
+                "link": 13627
+              }
+            ],
+            "outputs": [
+              {
+                "localized_name": "BOOLEAN",
+                "name": "BOOLEAN",
+                "type": "BOOLEAN",
+                "links": [
+                  13499
+                ]
+              }
+            ],
+            "title": "Not (use image > bypass_i2v)",
+            "properties": {
+              "Node name for S&R": "ComfyNotNode",
+              "cnr_id": "comfy-core",
+              "ver": "0.25.0"
+            },
+            "widgets_values": [],
+            "color": "#432",
+            "bgcolor": "#653"
+          },
+          {
+            "id": 2612,
+            "type": "CLIPTextEncode",
+            "pos": [
+              -3080.841932461055,
+              4545.199745889718
+            ],
+            "size": [
+              281.48203125,
+              88
+            ],
+            "flags": {},
+            "order": 2,
+            "mode": 0,
+            "inputs": [
+              {
+                "localized_name": "clip",
+                "name": "clip",
+                "type": "CLIP",
+                "link": 13439
+              },
+              {
+                "localized_name": "text",
+                "name": "text",
+                "type": "STRING",
+                "widget": {
+                  "name": "text"
+                },
+                "link": 13487
+              }
+            ],
+            "outputs": [
+              {
+                "localized_name": "CONDITIONING",
+                "name": "CONDITIONING",
+                "type": "CONDITIONING",
+                "slot_index": 0,
+                "links": [
+                  7652
+                ]
+              }
+            ],
+            "title": "CLIP Text Encode (Negative Prompt)",
+            "properties": {
+              "Node name for S&R": "CLIPTextEncode",
+              "cnr_id": "comfy-core",
+              "ver": "0.3.28"
+            },
+            "widgets_values": [
+              ""
+            ],
+            "color": "#322",
+            "bgcolor": "#533"
+          },
+          {
+            "id": 5506,
+            "type": "PrimitiveBoolean",
+            "pos": [
+              -3913.872779586849,
+              2774.9099171545317
+            ],
+            "size": [
+              270,
+              58
+            ],
+            "flags": {},
+            "order": 8,
+            "mode": 0,
+            "inputs": [
+              {
+                "localized_name": "value",
+                "name": "value",
+                "type": "BOOLEAN",
+                "widget": {
+                  "name": "value"
+                },
+                "link": 13626
+              }
+            ],
+            "outputs": [
+              {
+                "localized_name": "BOOLEAN",
+                "name": "BOOLEAN",
+                "type": "BOOLEAN",
+                "links": [
+                  13627,
+                  13776
+                ]
+              }
+            ],
+            "properties": {
+              "Node name for S&R": "PrimitiveBoolean",
+              "cnr_id": "comfy-core",
+              "ver": "0.25.0"
+            },
+            "widgets_values": [
+              false
+            ]
+          },
+          {
+            "id": 5555,
+            "type": "ComfySwitchNode",
+            "pos": [
+              -3444.1459842064082,
+              3799.2069739887756
+            ],
+            "size": [
+              270,
+              78
+            ],
+            "flags": {},
+            "order": 11,
+            "mode": 0,
+            "inputs": [
+              {
+                "localized_name": "on_false",
+                "name": "on_false",
+                "type": "STRING",
+                "link": 13778
+              },
+              {
+                "localized_name": "on_true",
+                "name": "on_true",
+                "type": "STRING",
+                "link": 13777
+              },
+              {
+                "localized_name": "switch",
+                "name": "switch",
+                "type": "BOOLEAN",
+                "widget": {
+                  "name": "switch"
+                },
+                "link": 13776
+              }
+            ],
+            "outputs": [
+              {
+                "localized_name": "output",
+                "name": "output",
+                "type": "STRING",
+                "links": [
+                  13781
+                ]
+              }
+            ],
+            "properties": {
+              "Node name for S&R": "ComfySwitchNode"
+            },
+            "widgets_values": [
+              false
+            ]
+          },
+          {
+            "id": 2483,
+            "type": "CLIPTextEncode",
+            "pos": [
+              -3080.841932461055,
+              4410.502327239212
+            ],
+            "size": [
+              281.48203125,
+              88
+            ],
+            "flags": {},
+            "order": 1,
+            "mode": 0,
+            "inputs": [
+              {
+                "localized_name": "clip",
+                "name": "clip",
+                "type": "CLIP",
+                "link": 13438
+              },
+              {
+                "localized_name": "text",
+                "name": "text",
+                "type": "STRING",
+                "widget": {
+                  "name": "text"
+                },
+                "link": 13782
+              }
+            ],
+            "outputs": [
+              {
+                "localized_name": "CONDITIONING",
+                "name": "CONDITIONING",
+                "type": "CONDITIONING",
+                "slot_index": 0,
+                "links": [
+                  7065
+                ]
+              }
+            ],
+            "title": "CLIP Text Encode (Positive Prompt)",
+            "properties": {
+              "Node name for S&R": "CLIPTextEncode",
+              "cnr_id": "comfy-core",
+              "ver": "0.3.28"
+            },
+            "widgets_values": [
+              ""
+            ],
+            "color": "#232",
+            "bgcolor": "#353"
+          },
+          {
+            "id": 1241,
+            "type": "LTXVConditioning",
+            "pos": [
+              -2731.1617994897206,
+              4469.001527870965
+            ],
+            "size": [
+              210,
+              78
+            ],
+            "flags": {},
+            "order": 0,
+            "mode": 0,
+            "inputs": [
+              {
+                "localized_name": "positive",
+                "name": "positive",
+                "type": "CONDITIONING",
+                "link": 7065
+              },
+              {
+                "localized_name": "negative",
+                "name": "negative",
+                "type": "CONDITIONING",
+                "link": 7652
+              },
+              {
+                "localized_name": "frame_rate",
+                "name": "frame_rate",
+                "type": "FLOAT",
+                "widget": {
+                  "name": "frame_rate"
+                },
+                "link": 13493
+              }
+            ],
+            "outputs": [
+              {
+                "localized_name": "positive",
+                "name": "positive",
+                "type": "CONDITIONING",
+                "slot_index": 0,
+                "links": [
+                  13786
+                ]
+              },
+              {
+                "localized_name": "negative",
+                "name": "negative",
+                "type": "CONDITIONING",
+                "slot_index": 1,
+                "links": [
+                  13789
+                ]
+              }
+            ],
+            "properties": {
+              "Node name for S&R": "LTXVConditioning",
+              "cnr_id": "comfy-core",
+              "ver": "0.3.28"
+            },
+            "widgets_values": [
+              24
+            ]
+          },
+          {
+            "id": 5560,
+            "type": "ComfySwitchNode",
+            "pos": [
+              -2410.934606945665,
+              4697.814085105158
+            ],
+            "size": [
+              334.9048828125,
+              78
+            ],
+            "flags": {},
+            "order": 15,
+            "mode": 0,
+            "inputs": [
+              {
+                "localized_name": "on_false",
+                "name": "on_false",
+                "type": "CONDITIONING",
+                "link": 13789
+              },
+              {
+                "localized_name": "on_true",
+                "name": "on_true",
+                "type": "CONDITIONING",
+                "link": 13788
+              },
+              {
+                "localized_name": "switch",
+                "name": "switch",
+                "type": "BOOLEAN",
+                "widget": {
+                  "name": "switch"
+                },
+                "link": 13787
+              }
+            ],
+            "outputs": [
+              {
+                "localized_name": "output",
+                "name": "output",
+                "type": "CONDITIONING",
+                "links": [
+                  13791
+                ]
+              }
+            ],
+            "title": "negative conditioning source - If/Else Switch",
+            "properties": {
+              "Node name for S&R": "ComfySwitchNode"
+            },
+            "widgets_values": [
+              false
+            ]
+          },
+          {
+            "id": 5558,
+            "type": "ComfySwitchNode",
+            "pos": [
+              -2410.934606945665,
+              4578.882046271007
+            ],
+            "size": [
+              329.77109375,
+              78
+            ],
+            "flags": {},
+            "order": 14,
+            "mode": 0,
+            "inputs": [
+              {
+                "localized_name": "on_false",
+                "name": "on_false",
+                "type": "CONDITIONING",
+                "link": 13786
+              },
+              {
+                "localized_name": "on_true",
+                "name": "on_true",
+                "type": "CONDITIONING",
+                "link": 13785
+              },
+              {
+                "localized_name": "switch",
+                "name": "switch",
+                "type": "BOOLEAN",
+                "widget": {
+                  "name": "switch"
+                },
+                "link": 13784
+              }
+            ],
+            "outputs": [
+              {
+                "localized_name": "output",
+                "name": "output",
+                "type": "CONDITIONING",
+                "links": [
+                  13790
+                ]
+              }
+            ],
+            "title": "positive conditioning source - If/Else Switch",
+            "properties": {
+              "Node name for S&R": "ComfySwitchNode"
+            },
+            "widgets_values": [
+              false
+            ]
+          },
+          {
+            "id": 5556,
+            "type": "ComfySwitchNode",
+            "pos": [
+              -3444.1459842064082,
+              4123.242547565758
+            ],
+            "size": [
+              270,
+              78
+            ],
+            "flags": {},
+            "order": 12,
+            "mode": 0,
+            "inputs": [
+              {
+                "localized_name": "on_false",
+                "name": "on_false",
+                "type": "STRING",
+                "link": 13779
+              },
+              {
+                "localized_name": "on_true",
+                "name": "on_true",
+                "type": "STRING",
+                "link": 13781
+              },
+              {
+                "localized_name": "switch",
+                "name": "switch",
+                "type": "BOOLEAN",
+                "widget": {
+                  "name": "switch"
+                },
+                "link": 13780
+              }
+            ],
+            "outputs": [
+              {
+                "localized_name": "output",
+                "name": "output",
+                "type": "STRING",
+                "links": [
+                  13782,
+                  13792
+                ]
+              }
+            ],
+            "properties": {
+              "Node name for S&R": "ComfySwitchNode"
+            },
+            "widgets_values": [
+              false
+            ]
+          },
+          {
+            "id": 5561,
+            "type": "ComfyMathExpression",
+            "pos": [
+              -3626.6158880298262,
+              4709.308412458824
+            ],
+            "size": [
+              315.2310546875,
+              148
+            ],
+            "flags": {},
+            "order": 16,
+            "mode": 0,
+            "inputs": [
+              {
+                "label": "a",
+                "localized_name": "values.a",
+                "name": "values.a",
+                "type": "FLOAT,INT,BOOLEAN",
+                "link": 13794
+              },
+              {
+                "label": "b",
+                "localized_name": "values.b",
+                "name": "values.b",
+                "shape": 7,
+                "type": "FLOAT,INT,BOOLEAN",
+                "link": 13795
+              },
+              {
+                "label": "c",
+                "localized_name": "values.c",
+                "name": "values.c",
+                "shape": 7,
+                "type": "FLOAT,INT,BOOLEAN",
+                "link": null
+              }
+            ],
+            "outputs": [
+              {
+                "localized_name": "FLOAT",
+                "name": "FLOAT",
+                "type": "FLOAT",
+                "links": []
+              },
+              {
+                "localized_name": "INT",
+                "name": "INT",
+                "type": "INT",
+                "links": [
+                  13796
+                ]
+              },
+              {
+                "localized_name": "BOOL",
+                "name": "BOOL",
+                "type": "BOOLEAN",
+                "links": []
+              }
+            ],
+            "title": "calculate frames count - Math Expression",
+            "properties": {
+              "Node name for S&R": "ComfyMathExpression"
+            },
+            "widgets_values": [
+              "1 + floor(a*b/8)*8"
+            ]
+          },
+          {
+            "id": 4988,
+            "type": "PrimitiveInt",
+            "pos": [
+              -3626.6158880298262,
+              4904.031635460357
+            ],
+            "size": [
+              281.3216407572436,
+              82
+            ],
+            "flags": {},
+            "order": 3,
+            "mode": 0,
+            "inputs": [
+              {
+                "localized_name": "value",
+                "name": "value",
+                "type": "INT",
+                "widget": {
+                  "name": "value"
+                },
+                "link": 13796
+              }
+            ],
+            "outputs": [
+              {
+                "localized_name": "INT",
+                "name": "INT",
+                "type": "INT",
+                "links": [
+                  13389
+                ]
+              }
+            ],
+            "title": "number of frames",
+            "properties": {
+              "Node name for S&R": "PrimitiveInt",
+              "cnr_id": "comfy-core",
+              "ver": "0.16.0"
+            },
+            "widgets_values": [
+              193,
+              "fixed"
+            ],
+            "color": "#2a363b",
+            "bgcolor": "#3f5159"
+          },
+          {
+            "id": 5504,
+            "type": "GemmaAPITextEncode",
+            "pos": [
+              -3916.5116870881043,
+              5109.424947142164
+            ],
+            "size": [
+              373.6919921875,
+              160
+            ],
+            "flags": {},
+            "order": 6,
+            "mode": 0,
+            "inputs": [
+              {
+                "localized_name": "api_key",
+                "name": "api_key",
+                "type": "STRING",
+                "widget": {
+                  "name": "api_key"
+                },
+                "link": 13617
+              },
+              {
+                "localized_name": "prompt",
+                "name": "prompt",
+                "type": "STRING",
+                "widget": {
+                  "name": "prompt"
+                },
+                "link": 13619
+              },
+              {
+                "localized_name": "enhance_prompt",
+                "name": "enhance_prompt",
+                "type": "BOOLEAN",
+                "widget": {
+                  "name": "enhance_prompt"
+                },
+                "link": 13621
+              },
+              {
+                "localized_name": "ckpt_name",
+                "name": "ckpt_name",
+                "type": "COMBO",
+                "widget": {
+                  "name": "ckpt_name"
+                },
+                "link": 13615
+              }
+            ],
+            "outputs": [
+              {
+                "localized_name": "conditioning",
+                "name": "conditioning",
+                "type": "CONDITIONING",
+                "links": [
+                  13785
+                ]
+              }
+            ],
+            "title": "\ud83c\udd5b\ud83c\udd63\ud83c\udd67 Gemma API Text Encode - POSITIVE",
+            "properties": {
+              "Node name for S&R": "GemmaAPITextEncode"
+            },
+            "widgets_values": [
+              "",
+              "",
+              "ltx-2.3-22b-dev.safetensors",
+              "ltx-2.3-22b-dev.safetensors"
+            ]
+          },
+          {
+            "id": 5505,
+            "type": "GemmaAPITextEncode",
+            "pos": [
+              -3916.5116870881043,
+              5309.955033229137
+            ],
+            "size": [
+              373.6919921875,
+              162.18575427239557
+            ],
+            "flags": {},
+            "order": 7,
+            "mode": 0,
+            "inputs": [
+              {
+                "localized_name": "api_key",
+                "name": "api_key",
+                "type": "STRING",
+                "widget": {
+                  "name": "api_key"
+                },
+                "link": 13618
+              },
+              {
+                "localized_name": "prompt",
+                "name": "prompt",
+                "type": "STRING",
+                "widget": {
+                  "name": "prompt"
+                },
+                "link": 13620
+              },
+              {
+                "localized_name": "ckpt_name",
+                "name": "ckpt_name",
+                "type": "COMBO",
+                "widget": {
+                  "name": "ckpt_name"
+                },
+                "link": 13616
+              }
+            ],
+            "outputs": [
+              {
+                "localized_name": "conditioning",
+                "name": "conditioning",
+                "type": "CONDITIONING",
+                "links": [
+                  13788
+                ]
+              }
+            ],
+            "title": "\ud83c\udd5b\ud83c\udd63\ud83c\udd67 Gemma API Text Encode - NEGATIVE",
+            "properties": {
+              "Node name for S&R": "GemmaAPITextEncode"
+            },
+            "widgets_values": [
+              "",
+              "",
+              false,
+              "ltx-2.3-22b-dev.safetensors"
+            ]
+          },
+          {
+            "id": 5563,
+            "type": "ComfyMathExpression",
+            "pos": [
+              -3913.872779586849,
+              3244.7686212832796
+            ],
+            "size": [
+              270,
+              148
+            ],
+            "flags": {},
+            "order": 18,
+            "mode": 0,
+            "inputs": [
+              {
+                "label": "a",
+                "localized_name": "values.a",
+                "name": "values.a",
+                "type": "FLOAT,INT,BOOLEAN",
+                "link": 13803
+              },
+              {
+                "label": "b",
+                "localized_name": "values.b",
+                "name": "values.b",
+                "shape": 7,
+                "type": "FLOAT,INT,BOOLEAN",
+                "link": null
+              },
+              {
+                "label": "c",
+                "localized_name": "values.c",
+                "name": "values.c",
+                "shape": 7,
+                "type": "FLOAT,INT,BOOLEAN",
+                "link": null
+              }
+            ],
+            "outputs": [
+              {
+                "localized_name": "FLOAT",
+                "name": "FLOAT",
+                "type": "FLOAT",
+                "links": []
+              },
+              {
+                "localized_name": "INT",
+                "name": "INT",
+                "type": "INT",
+                "links": [
+                  13800
+                ]
+              },
+              {
+                "localized_name": "BOOL",
+                "name": "BOOL",
+                "type": "BOOLEAN",
+                "links": []
+              }
+            ],
+            "title": "latent multiple - Math Expression",
+            "properties": {
+              "Node name for S&R": "ComfyMathExpression"
+            },
+            "widgets_values": [
+              "a*32"
+            ]
+          },
+          {
+            "id": 4990,
+            "type": "ResizeImageMaskNode",
+            "pos": [
+              -3913.872779586849,
+              2880.7686212832796
+            ],
+            "size": [
+              270,
+              106
+            ],
+            "flags": {},
+            "order": 4,
+            "mode": 0,
+            "inputs": [
+              {
+                "localized_name": "input",
+                "name": "input",
+                "type": "IMAGE,MASK",
+                "link": 13601
+              }
+            ],
+            "outputs": [
+              {
+                "localized_name": "resized",
+                "name": "resized",
+                "type": "IMAGE,MASK",
+                "links": [
+                  13801
+                ]
+              }
+            ],
+            "properties": {
+              "Node name for S&R": "ResizeImageMaskNode",
+              "cnr_id": "comfy-core",
+              "ver": "0.16.0"
+            },
+            "widgets_values": [
+              "scale shorter dimension",
+              544,
+              "lanczos"
+            ],
+            "color": "#432",
+            "bgcolor": "#653"
+          },
+          {
+            "id": 5562,
+            "type": "ResizeImageMaskNode",
+            "pos": [
+              -3913.872779586849,
+              3062.7686212832796
+            ],
+            "size": [
+              270,
+              126
+            ],
+            "flags": {},
+            "order": 17,
+            "mode": 0,
+            "inputs": [
+              {
+                "localized_name": "input",
+                "name": "input",
+                "type": "IMAGE,MASK",
+                "link": 13801
+              },
+              {
+                "localized_name": "resize_type.multiple",
+                "name": "resize_type.multiple",
+                "type": "INT",
+                "widget": {
+                  "name": "resize_type.multiple"
+                },
+                "link": 13800
+              }
+            ],
+            "outputs": [
+              {
+                "localized_name": "resized",
+                "name": "resized",
+                "type": "IMAGE,MASK",
+                "links": [
+                  13802
+                ]
+              },
+              {
+                "name": "MASK",
+                "type": "MASK",
+                "links": []
+              }
+            ],
+            "title": "round to a latent multiple",
+            "properties": {
+              "Node name for S&R": "ResizeImageMaskNode"
+            },
+            "widgets_values": [
+              "scale to multiple",
+              32,
+              "lanczos"
+            ]
+          },
+          {
+            "id": 5549,
+            "type": "TextGenerateLTX2Prompt",
+            "pos": [
+              -3916.5116870881043,
+              3533.4711408350518
+            ],
+            "size": [
+              453.3632124556915,
+              412
+            ],
+            "flags": {
+              "collapsed": false
+            },
+            "order": 10,
+            "mode": 0,
+            "inputs": [
+              {
+                "localized_name": "clip",
+                "name": "clip",
+                "type": "CLIP",
+                "link": 13754
+              },
+              {
+                "localized_name": "image",
+                "name": "image",
+                "shape": 7,
+                "type": "IMAGE",
+                "link": null
+              },
+              {
+                "localized_name": "video",
+                "name": "video",
+                "shape": 7,
+                "type": "IMAGE",
+                "link": null
+              },
+              {
+                "localized_name": "audio",
+                "name": "audio",
+                "shape": 7,
+                "type": "AUDIO",
+                "link": null
+              },
+              {
+                "localized_name": "prompt",
+                "name": "prompt",
+                "type": "STRING",
+                "widget": {
+                  "name": "prompt"
+                },
+                "link": 13755
+              },
+              {
+                "localized_name": "seed",
+                "name": "sampling_mode.seed",
+                "type": "INT",
+                "widget": {
+                  "name": "sampling_mode.seed"
+                },
+                "link": 13746
+              }
+            ],
+            "outputs": [
+              {
+                "localized_name": "generated_text",
+                "name": "generated_text",
+                "type": "STRING",
+                "links": [
+                  13778
+                ]
+              }
+            ],
+            "title": "Positive prompt (t2v) enhancer - TextGenerateLTX2Prompt",
+            "properties": {
+              "Node name for S&R": "TextGenerateLTX2Prompt"
+            },
+            "widgets_values": [
+              "",
+              600,
+              "on",
+              0.01,
+              0,
+              1,
+              0,
+              1.15,
+              0,
+              0,
+              false,
+              true
+            ],
+            "color": "#232",
+            "bgcolor": "#353"
+          },
+          {
+            "id": 5546,
+            "type": "TextGenerateLTX2Prompt",
+            "pos": [
+              -3920.0728754876113,
+              3984.888422087136
+            ],
+            "size": [
+              451.50546875,
+              412
+            ],
+            "flags": {},
+            "order": 9,
+            "mode": 0,
+            "inputs": [
+              {
+                "localized_name": "clip",
+                "name": "clip",
+                "type": "CLIP",
+                "link": 13727
+              },
+              {
+                "localized_name": "image",
+                "name": "image",
+                "shape": 7,
+                "type": "IMAGE",
+                "link": null
+              },
+              {
+                "localized_name": "video",
+                "name": "video",
+                "shape": 7,
+                "type": "IMAGE",
+                "link": null
+              },
+              {
+                "localized_name": "audio",
+                "name": "audio",
+                "shape": 7,
+                "type": "AUDIO",
+                "link": null
+              },
+              {
+                "localized_name": "prompt",
+                "name": "prompt",
+                "type": "STRING",
+                "widget": {
+                  "name": "prompt"
+                },
+                "link": 13728
+              },
+              {
+                "localized_name": "seed",
+                "name": "sampling_mode.seed",
+                "type": "INT",
+                "widget": {
+                  "name": "sampling_mode.seed"
+                },
+                "link": 13730
+              }
+            ],
+            "outputs": [
+              {
+                "localized_name": "generated_text",
+                "name": "generated_text",
+                "type": "STRING",
+                "links": [
+                  13777
+                ]
+              }
+            ],
+            "title": "Positive prompt + image enhancer - TextGenerateLTX2Prompt",
+            "properties": {
+              "Node name for S&R": "TextGenerateLTX2Prompt"
+            },
+            "widgets_values": [
+              "",
+              600,
+              "on",
+              0.01,
+              0,
+              1,
+              0,
+              1.15,
+              0,
+              0,
+              false,
+              true
+            ],
+            "color": "#232",
+            "bgcolor": "#353"
+          },
+          {
+            "id": 9014,
+            "type": "Reroute",
+            "pos": [
+              -3393.511402168698,
+              3939.718460627981
+            ],
+            "size": [
+              75,
+              26
+            ],
+            "flags": {},
+            "order": 19,
+            "mode": 0,
+            "inputs": [
+              {
+                "name": "",
+                "type": "*",
+                "link": 13804
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "*",
+                "links": [
+                  13805
+                ]
+              }
+            ],
+            "properties": {
+              "showOutputText": false,
+              "horizontal": false
+            }
+          },
+          {
+            "id": 5557,
+            "type": "StringContains",
+            "pos": [
+              -2641.440053087193,
+              4791.701274741746
+            ],
+            "size": [
+              210,
+              166
+            ],
+            "flags": {},
+            "order": 13,
+            "mode": 0,
+            "inputs": [
+              {
+                "localized_name": "string",
+                "name": "string",
+                "type": "STRING",
+                "widget": {
+                  "name": "string"
+                },
+                "link": 13783
+              }
+            ],
+            "outputs": [
+              {
+                "localized_name": "contains",
+                "name": "contains",
+                "type": "BOOLEAN",
+                "links": [
+                  13784,
+                  13787
+                ]
+              }
+            ],
+            "title": "has ltxv api key?",
+            "properties": {
+              "Node name for S&R": "StringContains"
+            },
+            "widgets_values": [
+              "",
+              "ltxv_",
+              true
+            ]
+          }
+        ],
+        "groups": [
+          {
+            "id": 154,
+            "title": "Input Image - pass only if use_image",
+            "bounding": [
+              -3939.872779586849,
+              2708.9099171545317,
+              620.5785323142663,
+              709.8587041287478
+            ],
+            "color": "#3f789e",
+            "flags": {}
+          },
+          {
+            "id": 155,
+            "title": "Prompt enhancement only if enhance_positive_prompt",
+            "bounding": [
+              -3942.5116870881043,
+              3467.4711408350518,
+              794.365702881696,
+              947.7609780452258
+            ],
+            "color": "#3f789e",
+            "flags": {}
+          },
+          {
+            "id": 156,
+            "title": "Frame rate and count",
+            "bounding": [
+              -3652.6158880298262,
+              4643.308412458824,
+              367.2310546875001,
+              368.72322300153337
+            ],
+            "color": "#3f789e",
+            "flags": {}
+          },
+          {
+            "id": 157,
+            "title": "Prompt Text Encode via API for more memory efficient run",
+            "bounding": [
+              -3942.5116870881043,
+              5043.424947142164,
+              425.6919921875001,
+              454.7158403593694
+            ],
+            "color": "#b58b2a",
+            "flags": {}
+          },
+          {
+            "id": 158,
+            "title": "Text encoding",
+            "bounding": [
+              -3106.841932461055,
+              4344.502327239212,
+              611.6801329713344,
+              314.6974186505058
+            ],
+            "color": "#3f789e",
+            "flags": {}
+          }
+        ],
+        "links": [
+          {
+            "id": 7065,
+            "origin_id": 2483,
+            "origin_slot": 0,
+            "target_id": 1241,
+            "target_slot": 0,
+            "type": "CONDITIONING"
+          },
+          {
+            "id": 7652,
+            "origin_id": 2612,
+            "origin_slot": 0,
+            "target_id": 1241,
+            "target_slot": 1,
+            "type": "CONDITIONING"
+          },
+          {
+            "id": 13439,
+            "origin_id": -10,
+            "origin_slot": 0,
+            "target_id": 2612,
+            "target_slot": 0,
+            "type": "CLIP",
+            "parentId": 9014
+          },
+          {
+            "id": 13438,
+            "origin_id": -10,
+            "origin_slot": 0,
+            "target_id": 2483,
+            "target_slot": 0,
+            "type": "CLIP",
+            "parentId": 9013
+          },
+          {
+            "id": 13389,
+            "origin_id": 4988,
+            "origin_slot": 0,
+            "target_id": -20,
+            "target_slot": 6,
+            "type": "INT",
+            "parentId": 9009
+          },
+          {
+            "id": 13487,
+            "origin_id": -10,
+            "origin_slot": 6,
+            "target_id": 2612,
+            "target_slot": 1,
+            "type": "STRING",
+            "parentId": 9017
+          },
+          {
+            "id": 13493,
+            "origin_id": -10,
+            "origin_slot": 7,
+            "target_id": 1241,
+            "target_slot": 2,
+            "type": "FLOAT",
+            "parentId": 9003
+          },
+          {
+            "id": 13499,
+            "origin_id": 5019,
+            "origin_slot": 0,
+            "target_id": -20,
+            "target_slot": 0,
+            "type": "BOOLEAN"
+          },
+          {
+            "id": 13601,
+            "origin_id": -10,
+            "origin_slot": 2,
+            "target_id": 4990,
+            "target_slot": 0,
+            "type": "IMAGE,MASK"
+          },
+          {
+            "id": 13615,
+            "origin_id": -10,
+            "origin_slot": 11,
+            "target_id": 5504,
+            "target_slot": 3,
+            "type": "COMBO"
+          },
+          {
+            "id": 13616,
+            "origin_id": -10,
+            "origin_slot": 11,
+            "target_id": 5505,
+            "target_slot": 2,
+            "type": "COMBO",
+            "parentId": 9021
+          },
+          {
+            "id": 13617,
+            "origin_id": -10,
+            "origin_slot": 10,
+            "target_id": 5504,
+            "target_slot": 0,
+            "type": "STRING"
+          },
+          {
+            "id": 13618,
+            "origin_id": -10,
+            "origin_slot": 10,
+            "target_id": 5505,
+            "target_slot": 0,
+            "type": "STRING",
+            "parentId": 9006
+          },
+          {
+            "id": 13619,
+            "origin_id": -10,
+            "origin_slot": 4,
+            "target_id": 5504,
+            "target_slot": 1,
+            "type": "STRING"
+          },
+          {
+            "id": 13620,
+            "origin_id": -10,
+            "origin_slot": 6,
+            "target_id": 5505,
+            "target_slot": 1,
+            "type": "STRING",
+            "parentId": 9016
+          },
+          {
+            "id": 13621,
+            "origin_id": -10,
+            "origin_slot": 5,
+            "target_id": 5504,
+            "target_slot": 2,
+            "type": "BOOLEAN"
+          },
+          {
+            "id": 13626,
+            "origin_id": -10,
+            "origin_slot": 3,
+            "target_id": 5506,
+            "target_slot": 0,
+            "type": "BOOLEAN",
+            "parentId": 419
+          },
+          {
+            "id": 13627,
+            "origin_id": 5506,
+            "origin_slot": 0,
+            "target_id": 5019,
+            "target_slot": 0,
+            "type": "BOOLEAN"
+          },
+          {
+            "id": 13727,
+            "origin_id": -10,
+            "origin_slot": 1,
+            "target_id": 5546,
+            "target_slot": 0,
+            "type": "CLIP"
+          },
+          {
+            "id": 13728,
+            "origin_id": -10,
+            "origin_slot": 4,
+            "target_id": 5546,
+            "target_slot": 4,
+            "type": "STRING"
+          },
+          {
+            "id": 13730,
+            "origin_id": -10,
+            "origin_slot": 9,
+            "target_id": 5546,
+            "target_slot": 5,
+            "type": "INT"
+          },
+          {
+            "id": 13746,
+            "origin_id": -10,
+            "origin_slot": 9,
+            "target_id": 5549,
+            "target_slot": 5,
+            "type": "INT"
+          },
+          {
+            "id": 13754,
+            "origin_id": -10,
+            "origin_slot": 1,
+            "target_id": 5549,
+            "target_slot": 0,
+            "type": "CLIP"
+          },
+          {
+            "id": 13755,
+            "origin_id": -10,
+            "origin_slot": 4,
+            "target_id": 5549,
+            "target_slot": 4,
+            "type": "STRING"
+          },
+          {
+            "id": 13776,
+            "origin_id": 5506,
+            "origin_slot": 0,
+            "target_id": 5555,
+            "target_slot": 2,
+            "type": "BOOLEAN"
+          },
+          {
+            "id": 13777,
+            "origin_id": 5546,
+            "origin_slot": 0,
+            "target_id": 5555,
+            "target_slot": 1,
+            "type": "STRING"
+          },
+          {
+            "id": 13778,
+            "origin_id": 5549,
+            "origin_slot": 0,
+            "target_id": 5555,
+            "target_slot": 0,
+            "type": "STRING"
+          },
+          {
+            "id": 13779,
+            "origin_id": -10,
+            "origin_slot": 4,
+            "target_id": 5556,
+            "target_slot": 0,
+            "type": "STRING",
+            "parentId": 415
+          },
+          {
+            "id": 13780,
+            "origin_id": -10,
+            "origin_slot": 5,
+            "target_id": 5556,
+            "target_slot": 2,
+            "type": "BOOLEAN",
+            "parentId": 417
+          },
+          {
+            "id": 13781,
+            "origin_id": 5555,
+            "origin_slot": 0,
+            "target_id": 5556,
+            "target_slot": 1,
+            "type": "STRING",
+            "parentId": 135
+          },
+          {
+            "id": 13782,
+            "origin_id": 5556,
+            "origin_slot": 0,
+            "target_id": 2483,
+            "target_slot": 1,
+            "type": "STRING"
+          },
+          {
+            "id": 13783,
+            "origin_id": -10,
+            "origin_slot": 10,
+            "target_id": 5557,
+            "target_slot": 0,
+            "type": "STRING",
+            "parentId": 9007
+          },
+          {
+            "id": 13784,
+            "origin_id": 5557,
+            "origin_slot": 0,
+            "target_id": 5558,
+            "target_slot": 2,
+            "type": "BOOLEAN"
+          },
+          {
+            "id": 13785,
+            "origin_id": 5504,
+            "origin_slot": 0,
+            "target_id": 5558,
+            "target_slot": 1,
+            "type": "CONDITIONING"
+          },
+          {
+            "id": 13786,
+            "origin_id": 1241,
+            "origin_slot": 0,
+            "target_id": 5558,
+            "target_slot": 0,
+            "type": "CONDITIONING"
+          },
+          {
+            "id": 13787,
+            "origin_id": 5557,
+            "origin_slot": 0,
+            "target_id": 5560,
+            "target_slot": 2,
+            "type": "BOOLEAN"
+          },
+          {
+            "id": 13788,
+            "origin_id": 5505,
+            "origin_slot": 0,
+            "target_id": 5560,
+            "target_slot": 1,
+            "type": "CONDITIONING",
+            "parentId": 9011
+          },
+          {
+            "id": 13789,
+            "origin_id": 1241,
+            "origin_slot": 1,
+            "target_id": 5560,
+            "target_slot": 0,
+            "type": "CONDITIONING"
+          },
+          {
+            "id": 13790,
+            "origin_id": 5558,
+            "origin_slot": 0,
+            "target_id": -20,
+            "target_slot": 3,
+            "type": "CONDITIONING"
+          },
+          {
+            "id": 13791,
+            "origin_id": 5560,
+            "origin_slot": 0,
+            "target_id": -20,
+            "target_slot": 4,
+            "type": "CONDITIONING"
+          },
+          {
+            "id": 13792,
+            "origin_id": 5556,
+            "origin_slot": 0,
+            "target_id": -20,
+            "target_slot": 2,
+            "type": "STRING"
+          },
+          {
+            "id": 13794,
+            "origin_id": -10,
+            "origin_slot": 7,
+            "target_id": 5561,
+            "target_slot": 0,
+            "type": "FLOAT",
+            "parentId": 9002
+          },
+          {
+            "id": 13795,
+            "origin_id": -10,
+            "origin_slot": 8,
+            "target_id": 5561,
+            "target_slot": 1,
+            "type": "FLOAT",
+            "parentId": 9019
+          },
+          {
+            "id": 13796,
+            "origin_id": 5561,
+            "origin_slot": 1,
+            "target_id": 4988,
+            "target_slot": 0,
+            "type": "INT",
+            "parentId": 137
+          },
+          {
+            "id": 13800,
+            "origin_id": 5563,
+            "origin_slot": 1,
+            "target_id": 5562,
+            "target_slot": 1,
+            "type": "INT"
+          },
+          {
+            "id": 13801,
+            "origin_id": 4990,
+            "origin_slot": 0,
+            "target_id": 5562,
+            "target_slot": 0,
+            "type": "IMAGE,MASK"
+          },
+          {
+            "id": 13802,
+            "origin_id": 5562,
+            "origin_slot": 0,
+            "target_id": -20,
+            "target_slot": 1,
+            "type": "IMAGE,MASK"
+          },
+          {
+            "id": 13803,
+            "origin_id": -10,
+            "origin_slot": 12,
+            "target_id": 5563,
+            "target_slot": 0,
+            "type": "FLOAT,INT,BOOLEAN"
+          },
+          {
+            "id": 13804,
+            "origin_id": -10,
+            "origin_slot": 7,
+            "target_id": 9014,
+            "target_slot": 0,
+            "type": "*"
+          },
+          {
+            "id": 13805,
+            "origin_id": 9014,
+            "origin_slot": 0,
+            "target_id": -20,
+            "target_slot": 5,
+            "type": "*"
+          }
+        ],
+        "reroutes": [
+          {
+            "id": 9001,
+            "pos": [
+              -4126.724727430894,
+              5021.806383602845
+            ],
+            "linkIds": [
+              13794,
+              13493
+            ]
+          },
+          {
+            "id": 9002,
+            "parentId": 9001,
+            "pos": [
+              -3682.6158880298262,
+              5021.806383602845
+            ],
+            "linkIds": [
+              13794,
+              13493
+            ]
+          },
+          {
+            "id": 9003,
+            "parentId": 9002,
+            "pos": [
+              -2779.1617994897206,
+              5021.806383602845
+            ],
+            "linkIds": [
+              13493
+            ]
+          },
+          {
+            "id": 9005,
+            "pos": [
+              -4126.724727430894,
+              5047.806383602845
+            ],
+            "linkIds": [
+              13618,
+              13783
+            ]
+          },
+          {
+            "id": 9006,
+            "parentId": 9005,
+            "pos": [
+              -4044.5116870881043,
+              5047.806383602845
+            ],
+            "linkIds": [
+              13618,
+              13783
+            ]
+          },
+          {
+            "id": 9007,
+            "parentId": 9006,
+            "pos": [
+              -2681.440053087193,
+              5047.806383602845
+            ],
+            "linkIds": [
+              13783
+            ]
+          },
+          {
+            "id": 9008,
+            "pos": [
+              -3305.2942472725827,
+              4977
+            ],
+            "linkIds": [
+              13389
+            ]
+          },
+          {
+            "id": 9009,
+            "parentId": 9008,
+            "pos": [
+              -2064.4822429247856,
+              4977
+            ],
+            "linkIds": [
+              13389
+            ]
+          },
+          {
+            "id": 9010,
+            "pos": [
+              -3502.819694900604,
+              5416
+            ],
+            "linkIds": [
+              13788
+            ]
+          },
+          {
+            "id": 9011,
+            "parentId": 9010,
+            "pos": [
+              -2428.934606945665,
+              5416
+            ],
+            "linkIds": [
+              13788
+            ]
+          },
+          {
+            "id": 9012,
+            "pos": [
+              -4126.724727430894,
+              4405.806383602845
+            ],
+            "linkIds": [
+              13439,
+              13438
+            ]
+          },
+          {
+            "id": 9013,
+            "parentId": 9012,
+            "pos": [
+              -3128.841932461055,
+              4405.806383602845
+            ],
+            "linkIds": [
+              13439,
+              13438
+            ]
+          },
+          {
+            "id": 9014,
+            "parentId": 9013,
+            "pos": [
+              -3120.841932461055,
+              4405.806383602845
+            ],
+            "linkIds": [
+              13439
+            ]
+          },
+          {
+            "id": 9015,
+            "pos": [
+              -4126.724727430894,
+              5307.806383602845
+            ],
+            "linkIds": [
+              13620,
+              13487
+            ]
+          },
+          {
+            "id": 9016,
+            "parentId": 9015,
+            "pos": [
+              -3964.5116870881043,
+              5307.806383602845
+            ],
+            "linkIds": [
+              13620,
+              13487
+            ]
+          },
+          {
+            "id": 9017,
+            "parentId": 9016,
+            "pos": [
+              -3120.841932461055,
+              5307.806383602845
+            ],
+            "linkIds": [
+              13487
+            ]
+          },
+          {
+            "id": 9018,
+            "pos": [
+              -4126.724727430894,
+              4429.806383602845
+            ],
+            "linkIds": [
+              13795
+            ]
+          },
+          {
+            "id": 9019,
+            "parentId": 9018,
+            "pos": [
+              -4100.738353941938,
+              4758.614384087966
+            ],
+            "linkIds": [
+              13795
+            ]
+          },
+          {
+            "id": 9020,
+            "pos": [
+              -4126.724727430894,
+              4489.806383602845
+            ],
+            "linkIds": [
+              13616
+            ]
+          },
+          {
+            "id": 9021,
+            "parentId": 9020,
+            "pos": [
+              -4076.5116870881043,
+              4489.806383602845
+            ],
+            "linkIds": [
+              13616
+            ]
+          },
+          {
+            "id": 415,
+            "parentId": 414,
+            "pos": [
+              -3956.5116870881043,
+              4913.424947142164
+            ],
+            "linkIds": [
+              13618
+            ]
+          },
+          {
+            "id": 414,
+            "pos": [
+              -4126.724727430894,
+              4913.424947142164
+            ],
+            "linkIds": [
+              13618
+            ]
+          },
+          {
+            "id": 417,
+            "parentId": 416,
+            "pos": [
+              -3484.1459842064082,
+              4070
+            ],
+            "linkIds": [
+              13780
+            ]
+          },
+          {
+            "id": 416,
+            "pos": [
+              -4126.724727430894,
+              4070
+            ],
+            "linkIds": [
+              13780
+            ]
+          },
+          {
+            "id": 137,
+            "parentId": 136,
+            "pos": [
+              -3635.4226269586984,
+              4864.557946839356
+            ],
+            "linkIds": [
+              13796
+            ]
+          },
+          {
+            "id": 136,
+            "pos": [
+              -3303.42362286665,
+              4866.654782628991
+            ],
+            "linkIds": [
+              13796
+            ]
+          },
+          {
+            "id": 135,
+            "parentId": 134,
+            "pos": [
+              -3448.698953526434,
+              4012.8412167372203
+            ],
+            "linkIds": [
+              13781
+            ]
+          },
+          {
+            "id": 134,
+            "pos": [
+              -3170.0413183116257,
+              4000.267557479773
+            ],
+            "linkIds": [
+              13781
+            ]
+          },
+          {
+            "id": 419,
+            "parentId": 418,
+            "pos": [
+              -3953.872779586849,
+              2654.9099171545317
+            ],
+            "linkIds": [
+              13626
+            ]
+          },
+          {
+            "id": 418,
+            "pos": [
+              -4126.724727430894,
+              2654.9099171545317
+            ],
+            "linkIds": [
+              13626
+            ]
+          }
+        ],
+        "extra": {}
+      },
+      {
+        "id": "f9337bd7-ca7a-4a59-99f1-65b664bed7e7",
+        "version": 1,
+        "state": {
+          "lastGroupId": 158,
+          "lastNodeId": 9014,
+          "lastLinkId": 13807,
+          "lastRerouteId": 9025
+        },
+        "revision": 0,
+        "config": {},
+        "name": "Sampler - Distilled (8 steps)",
+        "inputNode": {
+          "id": -10,
+          "bounding": [
+            -1798.4177305123035,
+            3997.1015002002086,
+            130.564453125,
+            188
+          ]
+        },
+        "outputNode": {
+          "id": -20,
+          "bounding": [
+            -62.25147580523367,
+            4047.1015002002086,
+            128,
+            88
+          ]
+        },
+        "inputs": [
+          {
+            "id": "5b61db22-e75f-4c19-9d7c-c4d954a79045",
+            "name": "model",
+            "type": "MODEL",
+            "linkIds": [
+              13434
+            ],
+            "localized_name": "model",
+            "pos": [
+              -1691.8532773873035,
+              4021.1015002002086
+            ]
+          },
+          {
+            "id": "3c18fb6e-bb38-4b6a-bee5-6f1fce5748ea",
+            "name": "positive",
+            "type": "CONDITIONING",
+            "linkIds": [
+              13469,
+              13689
+            ],
+            "localized_name": "positive",
+            "pos": [
+              -1691.8532773873035,
+              4041.1015002002086
+            ]
+          },
+          {
+            "id": "54941af4-c08d-46e4-8c80-af573832f888",
+            "name": "negative",
+            "type": "CONDITIONING",
+            "linkIds": [
+              13472,
+              13690
+            ],
+            "localized_name": "negative",
+            "pos": [
+              -1691.8532773873035,
+              4061.1015002002086
+            ]
+          },
+          {
+            "id": "4fd3a55c-2fc4-4e54-b32a-9059d4d716bc",
+            "name": "latent_image",
+            "type": "LATENT",
+            "linkIds": [
+              13644
+            ],
+            "localized_name": "latent_image",
+            "pos": [
+              -1691.8532773873035,
+              4081.1015002002086
+            ]
+          },
+          {
+            "id": "c136a9f8-2914-4989-b406-d4fae3490d80",
+            "name": "noise_seed",
+            "type": "INT",
+            "linkIds": [
+              13686
+            ],
+            "label": "noise seed",
+            "pos": [
+              -1691.8532773873035,
+              4101.101500200209
+            ]
+          },
+          {
+            "id": "5f0a051e-ce96-43ad-8b7f-fb73dacea867",
+            "name": "cfg",
+            "type": "FLOAT",
+            "linkIds": [
+              13687
+            ],
+            "label": "guider cfg",
+            "pos": [
+              -1691.8532773873035,
+              4121.101500200209
+            ]
+          },
+          {
+            "id": "9fdc2e66-9ed2-4c40-847d-af31bbbf482b",
+            "name": "sampler_name",
+            "type": "COMBO",
+            "linkIds": [
+              13688
+            ],
+            "pos": [
+              -1691.8532773873035,
+              4141.101500200209
+            ]
+          }
+        ],
+        "outputs": [
+          {
+            "id": "71fb5e86-aa11-4146-9a8c-3344e60cab92",
+            "name": "video_latent",
+            "type": "LATENT",
+            "linkIds": [
+              13692
+            ],
+            "pos": [
+              -38.25147580523367,
+              4071.1015002002086
+            ]
+          },
+          {
+            "id": "ab9a40a7-2f54-4a95-a151-191ba86f39c2",
+            "name": "audio_latent",
+            "type": "LATENT",
+            "linkIds": [
+              13658
+            ],
+            "pos": [
+              -38.25147580523367,
+              4091.1015002002086
+            ]
+          }
+        ],
+        "widgets": [],
+        "nodes": [
+          {
+            "id": 4832,
+            "type": "RandomNoise",
+            "pos": [
+              -1557.8532773873035,
+              3823.422821367455
+            ],
+            "size": [
+              499.94633283206986,
+              82
+            ],
+            "flags": {},
+            "order": 5,
+            "mode": 0,
+            "inputs": [
+              {
+                "label": "noise seed",
+                "localized_name": "noise_seed",
+                "name": "noise_seed",
+                "type": "INT",
+                "widget": {
+                  "name": "noise_seed"
+                },
+                "link": 13686
+              }
+            ],
+            "outputs": [
+              {
+                "localized_name": "NOISE",
+                "name": "NOISE",
+                "type": "NOISE",
+                "links": [
+                  13093
+                ]
+              }
+            ],
+            "properties": {
+              "Node name for S&R": "RandomNoise",
+              "cnr_id": "comfy-core",
+              "ver": "0.14.1"
+            },
+            "widgets_values": [
+              42,
+              "fixed"
+            ]
+          },
+          {
+            "id": 4828,
+            "type": "CFGGuider",
+            "pos": [
+              -1557.8532773873035,
+              3981.422821367455
+            ],
+            "size": [
+              499.94633283206986,
+              114
+            ],
+            "flags": {},
+            "order": 2,
+            "mode": 0,
+            "inputs": [
+              {
+                "localized_name": "model",
+                "name": "model",
+                "type": "MODEL",
+                "link": 13434
+              },
+              {
+                "localized_name": "positive",
+                "name": "positive",
+                "type": "CONDITIONING",
+                "link": 13469
+              },
+              {
+                "localized_name": "negative",
+                "name": "negative",
+                "type": "CONDITIONING",
+                "link": 13472
+              },
+              {
+                "label": "guider cfg",
+                "localized_name": "cfg",
+                "name": "cfg",
+                "type": "FLOAT",
+                "widget": {
+                  "name": "cfg"
+                },
+                "link": 13687
+              }
+            ],
+            "outputs": [
+              {
+                "localized_name": "GUIDER",
+                "name": "GUIDER",
+                "type": "GUIDER",
+                "links": [
+                  13089
+                ]
+              }
+            ],
+            "properties": {
+              "Node name for S&R": "CFGGuider",
+              "cnr_id": "comfy-core",
+              "ver": "0.14.1"
+            },
+            "widgets_values": [
+              1
+            ]
+          },
+          {
+            "id": 4831,
+            "type": "KSamplerSelect",
+            "pos": [
+              -1557.8532773873035,
+              4171.422821367455
+            ],
+            "size": [
+              499.94633283206986,
+              74
+            ],
+            "flags": {},
+            "order": 4,
+            "mode": 0,
+            "inputs": [
+              {
+                "localized_name": "sampler_name",
+                "name": "sampler_name",
+                "type": "COMBO",
+                "widget": {
+                  "name": "sampler_name"
+                },
+                "link": 13688
+              }
+            ],
+            "outputs": [
+              {
+                "localized_name": "SAMPLER",
+                "name": "SAMPLER",
+                "type": "SAMPLER",
+                "links": [
+                  13090
+                ]
+              }
+            ],
+            "properties": {
+              "Node name for S&R": "KSamplerSelect",
+              "cnr_id": "comfy-core",
+              "ver": "0.14.1"
+            },
+            "widgets_values": [
+              "euler_ancestral"
+            ]
+          },
+          {
+            "id": 4984,
+            "type": "ManualSigmas",
+            "pos": [
+              -1557.8532773873035,
+              4321.422821367455
+            ],
+            "size": [
+              499.94633283206986,
+              67.3573576655076
+            ],
+            "flags": {},
+            "order": 0,
+            "mode": 0,
+            "inputs": [],
+            "outputs": [
+              {
+                "localized_name": "SIGMAS",
+                "name": "SIGMAS",
+                "type": "SIGMAS",
+                "links": [
+                  13374
+                ]
+              }
+            ],
+            "properties": {
+              "Node name for S&R": "ManualSigmas",
+              "cnr_id": "comfy-core",
+              "ver": "0.14.1"
+            },
+            "widgets_values": [
+              "1.0, 0.99375, 0.9875, 0.98125, 0.975, 0.909375, 0.725, 0.421875, 0.0"
+            ]
+          },
+          {
+            "id": 4999,
+            "type": "Note",
+            "pos": [
+              -1557.8532773873035,
+              3645.422821367455
+            ],
+            "size": [
+              222.81278386605618,
+              88
+            ],
+            "flags": {},
+            "order": 1,
+            "mode": 0,
+            "inputs": [],
+            "outputs": [],
+            "properties": {},
+            "widgets_values": [
+              "Do explore various samplers and cfg values (although we advise them to be kept close to 1)"
+            ],
+            "color": "#432",
+            "bgcolor": "#653"
+          },
+          {
+            "id": 4829,
+            "type": "SamplerCustomAdvanced",
+            "pos": [
+              -967.9069445552336,
+              4053.1015002002086
+            ],
+            "size": [
+              212.3638671875,
+              106
+            ],
+            "flags": {},
+            "order": 3,
+            "mode": 0,
+            "inputs": [
+              {
+                "localized_name": "noise",
+                "name": "noise",
+                "type": "NOISE",
+                "link": 13093
+              },
+              {
+                "localized_name": "guider",
+                "name": "guider",
+                "type": "GUIDER",
+                "link": 13089
+              },
+              {
+                "localized_name": "sampler",
+                "name": "sampler",
+                "type": "SAMPLER",
+                "link": 13090
+              },
+              {
+                "localized_name": "sigmas",
+                "name": "sigmas",
+                "type": "SIGMAS",
+                "link": 13374
+              },
+              {
+                "localized_name": "latent_image",
+                "name": "latent_image",
+                "type": "LATENT",
+                "link": 13644
+              }
+            ],
+            "outputs": [
+              {
+                "localized_name": "output",
+                "name": "output",
+                "type": "LATENT",
+                "links": [
+                  13363
+                ]
+              },
+              {
+                "localized_name": "denoised_output",
+                "name": "denoised_output",
+                "type": "LATENT",
+                "links": []
+              }
+            ],
+            "properties": {
+              "Node name for S&R": "SamplerCustomAdvanced",
+              "cnr_id": "comfy-core",
+              "ver": "0.14.1"
+            },
+            "widgets_values": []
+          },
+          {
+            "id": 4845,
+            "type": "LTXVSeparateAVLatent",
+            "pos": [
+              -665.5430773677336,
+              4083.1015002002086
+            ],
+            "size": [
+              193.2916015625,
+              46
+            ],
+            "flags": {},
+            "order": 6,
+            "mode": 0,
+            "inputs": [
+              {
+                "localized_name": "av_latent",
+                "name": "av_latent",
+                "type": "LATENT",
+                "link": 13363
+              }
+            ],
+            "outputs": [
+              {
+                "localized_name": "video_latent",
+                "name": "video_latent",
+                "type": "LATENT",
+                "links": [
+                  13691
+                ]
+              },
+              {
+                "localized_name": "audio_latent",
+                "name": "audio_latent",
+                "type": "LATENT",
+                "links": [
+                  13658
+                ]
+              }
+            ],
+            "properties": {
+              "Node name for S&R": "LTXVSeparateAVLatent",
+              "cnr_id": "comfy-core",
+              "ver": "0.10.0"
+            },
+            "widgets_values": []
+          },
+          {
+            "id": 5000,
+            "type": "LTXVCropGuides",
+            "pos": [
+              -382.25147580523367,
+              4073.1015002002086
+            ],
+            "size": [
+              210,
+              66
+            ],
+            "flags": {},
+            "order": 7,
+            "mode": 0,
+            "inputs": [
+              {
+                "localized_name": "positive",
+                "name": "positive",
+                "type": "CONDITIONING",
+                "link": 13689
+              },
+              {
+                "localized_name": "negative",
+                "name": "negative",
+                "type": "CONDITIONING",
+                "link": 13690
+              },
+              {
+                "localized_name": "latent",
+                "name": "latent",
+                "type": "LATENT",
+                "link": 13691
+              }
+            ],
+            "outputs": [
+              {
+                "localized_name": "positive",
+                "name": "positive",
+                "type": "CONDITIONING",
+                "links": []
+              },
+              {
+                "localized_name": "negative",
+                "name": "negative",
+                "type": "CONDITIONING",
+                "links": []
+              },
+              {
+                "localized_name": "latent",
+                "name": "latent",
+                "type": "LATENT",
+                "links": [
+                  13692
+                ]
+              }
+            ],
+            "properties": {
+              "Node name for S&R": "LTXVCropGuides"
+            },
+            "widgets_values": []
+          }
+        ],
+        "groups": [
+          {
+            "id": 147,
+            "title": "Generate",
+            "bounding": [
+              -1583.8532773873035,
+              3757.422821367455,
+              1437.6018015820698,
+              657.3573576655081
+            ],
+            "color": "#b58b2a",
+            "flags": {}
+          }
+        ],
+        "links": [
+          {
+            "id": 13093,
+            "origin_id": 4832,
+            "origin_slot": 0,
+            "target_id": 4829,
+            "target_slot": 0,
+            "type": "NOISE"
+          },
+          {
+            "id": 13089,
+            "origin_id": 4828,
+            "origin_slot": 0,
+            "target_id": 4829,
+            "target_slot": 1,
+            "type": "GUIDER"
+          },
+          {
+            "id": 13090,
+            "origin_id": 4831,
+            "origin_slot": 0,
+            "target_id": 4829,
+            "target_slot": 2,
+            "type": "SAMPLER"
+          },
+          {
+            "id": 13374,
+            "origin_id": 4984,
+            "origin_slot": 0,
+            "target_id": 4829,
+            "target_slot": 3,
+            "type": "SIGMAS"
+          },
+          {
+            "id": 13363,
+            "origin_id": 4829,
+            "origin_slot": 0,
+            "target_id": 4845,
+            "target_slot": 0,
+            "type": "LATENT"
+          },
+          {
+            "id": 13434,
+            "origin_id": -10,
+            "origin_slot": 0,
+            "target_id": 4828,
+            "target_slot": 0,
+            "type": "MODEL"
+          },
+          {
+            "id": 13469,
+            "origin_id": -10,
+            "origin_slot": 1,
+            "target_id": 4828,
+            "target_slot": 1,
+            "type": "CONDITIONING"
+          },
+          {
+            "id": 13472,
+            "origin_id": -10,
+            "origin_slot": 2,
+            "target_id": 4828,
+            "target_slot": 2,
+            "type": "CONDITIONING"
+          },
+          {
+            "id": 13644,
+            "origin_id": -10,
+            "origin_slot": 3,
+            "target_id": 4829,
+            "target_slot": 4,
+            "type": "LATENT",
+            "parentId": 6029
+          },
+          {
+            "id": 13658,
+            "origin_id": 4845,
+            "origin_slot": 1,
+            "target_id": -20,
+            "target_slot": 1,
+            "type": "LATENT",
+            "parentId": 6031
+          },
+          {
+            "id": 13686,
+            "origin_id": -10,
+            "origin_slot": 4,
+            "target_id": 4832,
+            "target_slot": 0,
+            "type": "INT"
+          },
+          {
+            "id": 13687,
+            "origin_id": -10,
+            "origin_slot": 5,
+            "target_id": 4828,
+            "target_slot": 3,
+            "type": "FLOAT"
+          },
+          {
+            "id": 13688,
+            "origin_id": -10,
+            "origin_slot": 6,
+            "target_id": 4831,
+            "target_slot": 0,
+            "type": "COMBO"
+          },
+          {
+            "id": 13689,
+            "origin_id": -10,
+            "origin_slot": 1,
+            "target_id": 5000,
+            "target_slot": 0,
+            "type": "CONDITIONING",
+            "parentId": 6025
+          },
+          {
+            "id": 13690,
+            "origin_id": -10,
+            "origin_slot": 2,
+            "target_id": 5000,
+            "target_slot": 1,
+            "type": "CONDITIONING",
+            "parentId": 6027
+          },
+          {
+            "id": 13691,
+            "origin_id": 4845,
+            "origin_slot": 0,
+            "target_id": 5000,
+            "target_slot": 2,
+            "type": "LATENT"
+          },
+          {
+            "id": 13692,
+            "origin_id": 5000,
+            "origin_slot": 2,
+            "target_id": -20,
+            "target_slot": 0,
+            "type": "LATENT"
+          }
+        ],
+        "reroutes": [
+          {
+            "id": 6024,
+            "pos": [
+              -1627.8532773873035,
+              3933
+            ],
+            "linkIds": [
+              13689
+            ]
+          },
+          {
+            "id": 6025,
+            "parentId": 6024,
+            "pos": [
+              -422.25147580523367,
+              3933
+            ],
+            "linkIds": [
+              13689
+            ]
+          },
+          {
+            "id": 6026,
+            "pos": [
+              -1627.8532773873035,
+              4276
+            ],
+            "linkIds": [
+              13690
+            ]
+          },
+          {
+            "id": 6027,
+            "parentId": 6026,
+            "pos": [
+              -422.25147580523367,
+              4276
+            ],
+            "linkIds": [
+              13690
+            ]
+          },
+          {
+            "id": 6028,
+            "pos": [
+              -1627.8532773873035,
+              4126
+            ],
+            "linkIds": [
+              13644
+            ]
+          },
+          {
+            "id": 6029,
+            "parentId": 6028,
+            "pos": [
+              -1007.9069445552336,
+              4126
+            ],
+            "linkIds": [
+              13644
+            ]
+          },
+          {
+            "id": 6030,
+            "pos": [
+              -432.25147580523367,
+              4159
+            ],
+            "linkIds": [
+              13658
+            ]
+          },
+          {
+            "id": 6031,
+            "parentId": 6030,
+            "pos": [
+              -102.25147580523367,
+              4159
+            ],
+            "linkIds": [
+              13658
+            ]
+          }
+        ],
+        "extra": {}
+      },
+      {
+        "id": "bee43e38-9234-4e41-86ff-63874164f482",
+        "version": 1,
+        "state": {
+          "lastGroupId": 158,
+          "lastNodeId": 9014,
+          "lastLinkId": 13807,
+          "lastRerouteId": 9025
+        },
+        "revision": 0,
+        "config": {},
+        "name": "Decode",
+        "inputNode": {
+          "id": -10,
+          "bounding": [
+            -1614.0593544574465,
+            3633.526514780813,
+            145.658203125,
+            248
+          ]
+        },
+        "outputNode": {
+          "id": -20,
+          "bounding": [
+            -618.4011513324465,
+            3723.526514780813,
+            128,
+            68
+          ]
+        },
+        "inputs": [
+          {
+            "id": "423bde19-2ce0-4154-ad35-5ea07a466994",
+            "name": "vae",
+            "type": "VAE",
+            "linkIds": [
+              13710
+            ],
+            "localized_name": "vae",
+            "pos": [
+              -1492.4011513324465,
+              3630.526514780813
+            ]
+          },
+          {
+            "id": "0f5c908f-a20b-4bde-b4aa-7964626668ca",
+            "name": "latents",
+            "type": "LATENT",
+            "linkIds": [
+              13711
+            ],
+            "localized_name": "latents",
+            "label": "video_latent",
+            "pos": [
+              -1492.4011513324465,
+              3650.526514780813
+            ]
+          },
+          {
+            "id": "3a7f5609-1830-4ac6-a4ed-b1ed95661dea",
+            "name": "samples",
+            "type": "LATENT",
+            "linkIds": [
+              13669
+            ],
+            "localized_name": "samples",
+            "label": "audio_latent",
+            "pos": [
+              -1492.4011513324465,
+              3670.526514780813
+            ]
+          },
+          {
+            "id": "d7417024-88ba-4d63-ab40-2bdd6789ac59",
+            "name": "audio_vae",
+            "type": "VAE",
+            "linkIds": [
+              13429
+            ],
+            "localized_name": "audio_vae",
+            "pos": [
+              -1492.4011513324465,
+              3690.526514780813
+            ]
+          },
+          {
+            "id": "135318cf-13a1-46df-9dc6-10c814fe4a3b",
+            "name": "fps",
+            "type": "FLOAT",
+            "linkIds": [
+              13475
+            ],
+            "localized_name": "fps",
+            "pos": [
+              -1492.4011513324465,
+              3710.526514780813
+            ]
+          },
+          {
+            "id": "baced759-c6b8-45b2-a6cd-d606cbd5bc4b",
+            "name": "bit_depth",
+            "type": "INT",
+            "linkIds": [
+              13699
+            ],
+            "pos": [
+              -1492.4011513324465,
+              3730.526514780813
+            ]
+          },
+          {
+            "id": "425f98fa-15bb-4a5a-82d3-81beb7e73a19",
+            "name": "tile_size",
+            "type": "INT",
+            "linkIds": [
+              13736
+            ],
+            "pos": [
+              -1492.4011513324465,
+              3750.526514780813
+            ]
+          },
+          {
+            "id": "6d49eb2c-deaa-4163-b4dc-230e2bcd51aa",
+            "name": "overlap",
+            "type": "INT",
+            "linkIds": [
+              13737
+            ],
+            "pos": [
+              -1492.4011513324465,
+              3770.526514780813
+            ]
+          },
+          {
+            "id": "f4fb2fb3-137b-4274-b5f3-5d08cb1f82fc",
+            "name": "temporal_size",
+            "type": "INT",
+            "linkIds": [
+              13738
+            ],
+            "pos": [
+              -1492.4011513324465,
+              3790.526514780813
+            ]
+          },
+          {
+            "id": "702f5a10-9a13-4e8a-9cc8-244b5f8ba7aa",
+            "name": "temporal_overlap",
+            "type": "INT",
+            "linkIds": [
+              13739
+            ],
+            "pos": [
+              -1492.4011513324465,
+              3810.526514780813
+            ]
+          }
+        ],
+        "outputs": [
+          {
+            "id": "dc6707aa-e87d-4616-a4e6-84471c015b6b",
+            "name": "VIDEO",
+            "type": "VIDEO",
+            "linkIds": [
+              13112
+            ],
+            "localized_name": "VIDEO",
+            "pos": [
+              -594.4011513324465,
+              3720.526514780813
+            ]
+          }
+        ],
+        "widgets": [],
+        "nodes": [
+          {
+            "id": 4848,
+            "type": "LTXVAudioVAEDecode",
+            "pos": [
+              -1358.4011513324465,
+              3636.526514780813
+            ],
+            "size": [
+              270,
+              46
+            ],
+            "flags": {},
+            "order": 0,
+            "mode": 0,
+            "inputs": [
+              {
+                "localized_name": "samples",
+                "name": "samples",
+                "type": "LATENT",
+                "link": 13669
+              },
+              {
+                "localized_name": "audio_vae",
+                "name": "audio_vae",
+                "type": "VAE",
+                "link": 13429
+              }
+            ],
+            "outputs": [
+              {
+                "localized_name": "Audio",
+                "name": "Audio",
+                "type": "AUDIO",
+                "links": [
+                  13108
+                ]
+              }
+            ],
+            "properties": {
+              "Node name for S&R": "LTXVAudioVAEDecode",
+              "cnr_id": "comfy-core",
+              "ver": "0.3.64"
+            },
+            "widgets_values": []
+          },
+          {
+            "id": 4849,
+            "type": "CreateVideo",
+            "pos": [
+              -998.4011513324465,
+              3721.526514780813
+            ],
+            "size": [
+              270,
+              102
+            ],
+            "flags": {},
+            "order": 1,
+            "mode": 0,
+            "inputs": [
+              {
+                "localized_name": "images",
+                "name": "images",
+                "type": "IMAGE",
+                "link": 13712
+              },
+              {
+                "localized_name": "audio",
+                "name": "audio",
+                "shape": 7,
+                "type": "AUDIO",
+                "link": 13108
+              },
+              {
+                "localized_name": "fps",
+                "name": "fps",
+                "type": "FLOAT",
+                "widget": {
+                  "name": "fps"
+                },
+                "link": 13475
+              },
+              {
+                "localized_name": "bit_depth",
+                "name": "bit_depth",
+                "shape": 7,
+                "type": "INT",
+                "widget": {
+                  "name": "bit_depth"
+                },
+                "link": 13699
+              }
+            ],
+            "outputs": [
+              {
+                "localized_name": "VIDEO",
+                "name": "VIDEO",
+                "type": "VIDEO",
+                "links": [
+                  13112
+                ]
+              }
+            ],
+            "properties": {
+              "Node name for S&R": "CreateVideo",
+              "cnr_id": "comfy-core",
+              "ver": "0.14.1"
+            },
+            "widgets_values": [
+              30,
+              8
+            ]
+          },
+          {
+            "id": 5538,
+            "type": "VAEDecodeTiled",
+            "pos": [
+              -1358.4011513324465,
+              3758.526514780813
+            ],
+            "size": [
+              270,
+              150
+            ],
+            "flags": {},
+            "order": 2,
+            "mode": 0,
+            "inputs": [
+              {
+                "localized_name": "samples",
+                "name": "samples",
+                "type": "LATENT",
+                "link": 13711
+              },
+              {
+                "localized_name": "vae",
+                "name": "vae",
+                "type": "VAE",
+                "link": 13710
+              },
+              {
+                "localized_name": "tile_size",
+                "name": "tile_size",
+                "type": "INT",
+                "widget": {
+                  "name": "tile_size"
+                },
+                "link": 13736
+              },
+              {
+                "localized_name": "overlap",
+                "name": "overlap",
+                "type": "INT",
+                "widget": {
+                  "name": "overlap"
+                },
+                "link": 13737
+              },
+              {
+                "localized_name": "temporal_size",
+                "name": "temporal_size",
+                "type": "INT",
+                "widget": {
+                  "name": "temporal_size"
+                },
+                "link": 13738
+              },
+              {
+                "localized_name": "temporal_overlap",
+                "name": "temporal_overlap",
+                "type": "INT",
+                "widget": {
+                  "name": "temporal_overlap"
+                },
+                "link": 13739
+              }
+            ],
+            "outputs": [
+              {
+                "localized_name": "IMAGE",
+                "name": "IMAGE",
+                "type": "IMAGE",
+                "links": [
+                  13712
+                ]
+              }
+            ],
+            "properties": {
+              "Node name for S&R": "VAEDecodeTiled"
+            },
+            "widgets_values": [
+              512,
+              64,
+              64,
+              8
+            ]
+          }
+        ],
+        "groups": [
+          {
+            "id": 150,
+            "title": "Decode",
+            "bounding": [
+              -1384.4011513324465,
+              3570.526514780813,
+              682,
+              364
+            ],
+            "color": "#b58b2a",
+            "flags": {}
+          }
+        ],
+        "links": [
+          {
+            "id": 13108,
+            "origin_id": 4848,
+            "origin_slot": 0,
+            "target_id": 4849,
+            "target_slot": 1,
+            "type": "AUDIO"
+          },
+          {
+            "id": 13669,
+            "origin_id": -10,
+            "origin_slot": 2,
+            "target_id": 4848,
+            "target_slot": 0,
+            "type": "LATENT"
+          },
+          {
+            "id": 13429,
+            "origin_id": -10,
+            "origin_slot": 3,
+            "target_id": 4848,
+            "target_slot": 1,
+            "type": "VAE"
+          },
+          {
+            "id": 13475,
+            "origin_id": -10,
+            "origin_slot": 4,
+            "target_id": 4849,
+            "target_slot": 2,
+            "type": "FLOAT",
+            "parentId": 6033
+          },
+          {
+            "id": 13112,
+            "origin_id": 4849,
+            "origin_slot": 0,
+            "target_id": -20,
+            "target_slot": 0,
+            "type": "VIDEO"
+          },
+          {
+            "id": 13699,
+            "origin_id": -10,
+            "origin_slot": 5,
+            "target_id": 4849,
+            "target_slot": 3,
+            "type": "INT",
+            "parentId": 6035
+          },
+          {
+            "id": 13710,
+            "origin_id": -10,
+            "origin_slot": 0,
+            "target_id": 5538,
+            "target_slot": 1,
+            "type": "VAE"
+          },
+          {
+            "id": 13711,
+            "origin_id": -10,
+            "origin_slot": 1,
+            "target_id": 5538,
+            "target_slot": 0,
+            "type": "LATENT"
+          },
+          {
+            "id": 13712,
+            "origin_id": 5538,
+            "origin_slot": 0,
+            "target_id": 4849,
+            "target_slot": 0,
+            "type": "IMAGE"
+          },
+          {
+            "id": 13736,
+            "origin_id": -10,
+            "origin_slot": 6,
+            "target_id": 5538,
+            "target_slot": 2,
+            "type": "INT"
+          },
+          {
+            "id": 13737,
+            "origin_id": -10,
+            "origin_slot": 7,
+            "target_id": 5538,
+            "target_slot": 3,
+            "type": "INT"
+          },
+          {
+            "id": 13738,
+            "origin_id": -10,
+            "origin_slot": 8,
+            "target_id": 5538,
+            "target_slot": 4,
+            "type": "INT"
+          },
+          {
+            "id": 13739,
+            "origin_id": -10,
+            "origin_slot": 9,
+            "target_id": 5538,
+            "target_slot": 5,
+            "type": "INT"
+          }
+        ],
+        "reroutes": [
+          {
+            "id": 6032,
+            "pos": [
+              -1428.4011513324465,
+              3714
+            ],
+            "linkIds": [
+              13475
+            ]
+          },
+          {
+            "id": 6033,
+            "parentId": 6032,
+            "pos": [
+              -1038.4011513324465,
+              3714
+            ],
+            "linkIds": [
+              13475
+            ]
+          },
+          {
+            "id": 6034,
+            "pos": [
+              -1428.4011513324465,
+              3938
+            ],
+            "linkIds": [
+              13699
+            ]
+          },
+          {
+            "id": 6035,
+            "parentId": 6034,
+            "pos": [
+              -1038.4011513324465,
+              3938
+            ],
+            "linkIds": [
+              13699
+            ]
+          }
+        ],
+        "extra": {}
+      },
+      {
+        "id": "a86c2f15-90d4-4e73-b1c8-3f57ea9d621e",
+        "version": 1,
+        "state": {
+          "lastGroupId": 158,
+          "lastNodeId": 9014,
+          "lastLinkId": 13807,
+          "lastRerouteId": 9025
+        },
+        "revision": 0,
+        "config": {},
+        "name": "Preprocess",
+        "inputNode": {
+          "id": -10,
+          "bounding": [
+            -2900,
+            3796,
+            184.962890625,
+            248
+          ]
+        },
+        "outputNode": {
+          "id": -20,
+          "bounding": [
+            -752.3621728846234,
+            3856,
+            133.51171875,
+            128
+          ]
+        },
+        "inputs": [
+          {
+            "id": "69d1cdf4-0d56-4f0f-846f-cd84b3b25c87",
+            "name": "positive",
+            "type": "CONDITIONING",
+            "linkIds": [
+              8
+            ],
+            "pos": [
+              -2739.037109375,
+              3820
+            ]
+          },
+          {
+            "id": "4bc56f63-813f-46e1-aa55-eea14fdc24fc",
+            "name": "negative",
+            "type": "CONDITIONING",
+            "linkIds": [
+              9
+            ],
+            "pos": [
+              -2739.037109375,
+              3840
+            ]
+          },
+          {
+            "id": "0ca13075-aa84-484b-8e31-c5086c1f0f14",
+            "name": "vae",
+            "type": "VAE",
+            "linkIds": [
+              10,
+              11
+            ],
+            "pos": [
+              -2739.037109375,
+              3860
+            ]
+          },
+          {
+            "id": "f3712a14-b362-4e00-97e0-1f0001a83047",
+            "name": "audio_vae",
+            "type": "VAE",
+            "linkIds": [
+              34
+            ],
+            "pos": [
+              -2739.037109375,
+              3880
+            ]
+          },
+          {
+            "id": "180695ef-6f9f-444f-8399-6180cbd529ae",
+            "name": "image",
+            "type": "IMAGE",
+            "linkIds": [
+              13,
+              26
+            ],
+            "pos": [
+              -2739.037109375,
+              3900
+            ]
+          },
+          {
+            "id": "2365ca94-7390-4ee0-8021-a105b82b9174",
+            "name": "bypass",
+            "type": "BOOLEAN",
+            "linkIds": [
+              14
+            ],
+            "pos": [
+              -2739.037109375,
+              3920
+            ]
+          },
+          {
+            "id": "4fccf0f0-42af-4b92-874c-7284f7481f65",
+            "name": "latent_downscale_factor",
+            "type": "FLOAT",
+            "linkIds": [
+              15
+            ],
+            "pos": [
+              -2739.037109375,
+              3940
+            ]
+          },
+          {
+            "id": "ab9532e2-9106-448d-ba6e-b5e267c2a822",
+            "name": "length",
+            "type": "INT",
+            "linkIds": [
+              19,
+              13806
+            ],
+            "pos": [
+              -2739.037109375,
+              3960
+            ]
+          },
+          {
+            "id": "b0fef937-42f3-4885-94d5-e5009a7f0970",
+            "name": "fps",
+            "type": "FLOAT",
+            "linkIds": [
+              21,
+              40,
+              13807
+            ],
+            "pos": [
+              -2739.037109375,
+              3980
+            ]
+          },
+          {
+            "id": "7d3e9a51-42bc-4f86-a07e-15c8b4d3f290",
+            "name": "tracks",
+            "type": "STRING",
+            "linkIds": [
+              29
+            ],
+            "label": "tracks",
+            "pos": [
+              -2739.037109375,
+              4000
+            ]
+          }
+        ],
+        "outputs": [
+          {
+            "id": "4a18e409-6ab0-40d3-9826-8d048181c5ef",
+            "name": "positive",
+            "type": "CONDITIONING",
+            "linkIds": [
+              23
+            ],
+            "pos": [
+              -728.3621728846234,
+              3880
+            ]
+          },
+          {
+            "id": "fde7e0f2-4b8a-4272-af85-a0950f25aaa8",
+            "name": "negative",
+            "type": "CONDITIONING",
+            "linkIds": [
+              24
+            ],
+            "pos": [
+              -728.3621728846234,
+              3900
+            ]
+          },
+          {
+            "id": "93c2ec3c-ac3b-49cf-9cc1-3f2dee6803b3",
+            "name": "latent",
+            "type": "LATENT",
+            "linkIds": [
+              25
+            ],
+            "pos": [
+              -728.3621728846234,
+              3920
+            ]
+          },
+          {
+            "id": "b0f27c8e-5d31-49a6-8b74-e2916cf5a3d8",
+            "name": "tracks_preview",
+            "type": "VIDEO",
+            "linkIds": [
+              41
+            ],
+            "label": "tracks_preview",
+            "pos": [
+              -728.3621728846234,
+              3940
+            ]
+          }
+        ],
+        "widgets": [],
+        "nodes": [
+          {
+            "id": 4528,
+            "type": "LTXVConcatAVLatent",
+            "pos": [
+              -1043.6703760096234,
+              3912
+            ],
+            "size": [
+              181.308203125,
+              46
+            ],
+            "flags": {},
+            "order": 2,
+            "mode": 0,
+            "inputs": [
+              {
+                "localized_name": "video_latent",
+                "name": "video_latent",
+                "type": "LATENT",
+                "link": 6
+              },
+              {
+                "localized_name": "audio_latent",
+                "name": "audio_latent",
+                "type": "LATENT",
+                "link": 38
+              }
+            ],
+            "outputs": [
+              {
+                "localized_name": "latent",
+                "name": "latent",
+                "type": "LATENT",
+                "links": [
+                  25
+                ]
+              }
+            ],
+            "properties": {
+              "Node name for S&R": "LTXVConcatAVLatent",
+              "cnr_id": "comfy-core",
+              "ver": "0.10.0"
+            },
+            "widgets_values": []
+          },
+          {
+            "id": 3059,
+            "type": "EmptyLTXVLatentVideo",
+            "pos": [
+              -2249.8190088221236,
+              3835
+            ],
+            "size": [
+              306,
+              194
+            ],
+            "flags": {},
+            "order": 0,
+            "mode": 0,
+            "inputs": [
+              {
+                "localized_name": "width",
+                "name": "width",
+                "type": "INT",
+                "widget": {
+                  "name": "width"
+                },
+                "link": 32
+              },
+              {
+                "localized_name": "height",
+                "name": "height",
+                "type": "INT",
+                "widget": {
+                  "name": "height"
+                },
+                "link": 33
+              },
+              {
+                "localized_name": "length",
+                "name": "length",
+                "type": "INT",
+                "widget": {
+                  "name": "length"
+                },
+                "link": 19
+              }
+            ],
+            "outputs": [
+              {
+                "localized_name": "LATENT",
+                "name": "LATENT",
+                "type": "LATENT",
+                "links": [
+                  1
+                ]
+              }
+            ],
+            "properties": {
+              "Node name for S&R": "EmptyLTXVLatentVideo",
+              "cnr_id": "comfy-core",
+              "ver": "0.3.43"
+            },
+            "widgets_values": [
+              960,
+              544,
+              121,
+              1
+            ]
+          },
+          {
+            "id": 5012,
+            "type": "LTXAddVideoICLoRAGuide",
+            "pos": [
+              -1450.5567041346235,
+              3794
+            ],
+            "size": [
+              316.886328125,
+              282
+            ],
+            "flags": {},
+            "order": 3,
+            "mode": 0,
+            "inputs": [
+              {
+                "localized_name": "positive",
+                "name": "positive",
+                "type": "CONDITIONING",
+                "link": 4
+              },
+              {
+                "localized_name": "negative",
+                "name": "negative",
+                "type": "CONDITIONING",
+                "link": 5
+              },
+              {
+                "localized_name": "vae",
+                "name": "vae",
+                "type": "VAE",
+                "link": 11
+              },
+              {
+                "localized_name": "latent",
+                "name": "latent",
+                "type": "LATENT",
+                "link": 3
+              },
+              {
+                "localized_name": "image",
+                "name": "image",
+                "type": "IMAGE",
+                "link": 30
+              },
+              {
+                "localized_name": "latent_downscale_factor",
+                "name": "latent_downscale_factor",
+                "type": "FLOAT",
+                "widget": {
+                  "name": "latent_downscale_factor"
+                },
+                "link": 15
+              }
+            ],
+            "outputs": [
+              {
+                "localized_name": "positive",
+                "name": "positive",
+                "type": "CONDITIONING",
+                "links": [
+                  23
+                ]
+              },
+              {
+                "localized_name": "negative",
+                "name": "negative",
+                "type": "CONDITIONING",
+                "links": [
+                  24
+                ]
+              },
+              {
+                "localized_name": "latent",
+                "name": "latent",
+                "type": "LATENT",
+                "links": [
+                  6
+                ]
+              }
+            ],
+            "properties": {
+              "Node name for S&R": "LTXAddVideoICLoRAGuide"
+            },
+            "widgets_values": [
+              0,
+              1,
+              1,
+              "disabled",
+              false,
+              256,
+              64
+            ]
+          },
+          {
+            "id": 3159,
+            "type": "LTXVImgToVideoInplace",
+            "pos": [
+              -1853.8190088221236,
+              3951.5702461343285
+            ],
+            "size": [
+              313.2623046875,
+              142.859507731343
+            ],
+            "flags": {},
+            "order": 1,
+            "mode": 0,
+            "inputs": [
+              {
+                "localized_name": "vae",
+                "name": "vae",
+                "type": "VAE",
+                "link": 10
+              },
+              {
+                "localized_name": "image",
+                "name": "image",
+                "type": "IMAGE",
+                "link": 13
+              },
+              {
+                "localized_name": "latent",
+                "name": "latent",
+                "type": "LATENT",
+                "link": 1
+              },
+              {
+                "localized_name": "bypass",
+                "name": "bypass",
+                "type": "BOOLEAN",
+                "widget": {
+                  "name": "bypass"
+                },
+                "link": 14
+              }
+            ],
+            "outputs": [
+              {
+                "localized_name": "latent",
+                "name": "latent",
+                "type": "LATENT",
+                "links": [
+                  3
+                ]
+              }
+            ],
+            "properties": {
+              "Node name for S&R": "LTXVImgToVideoInplace"
+            },
+            "widgets_values": [
+              0.7,
+              false
+            ]
+          },
+          {
+            "id": 9005,
+            "type": "LTXVConditioning",
+            "pos": [
+              -2610,
+              3920
+            ],
+            "size": [
+              270.1809911778764,
+              78
+            ],
+            "flags": {},
+            "order": 4,
+            "mode": 0,
+            "inputs": [
+              {
+                "localized_name": "positive",
+                "name": "positive",
+                "type": "CONDITIONING",
+                "link": 8
+              },
+              {
+                "localized_name": "negative",
+                "name": "negative",
+                "type": "CONDITIONING",
+                "link": 9
+              },
+              {
+                "localized_name": "frame_rate",
+                "name": "frame_rate",
+                "type": "FLOAT",
+                "widget": {
+                  "name": "frame_rate"
+                },
+                "link": 21
+              }
+            ],
+            "outputs": [
+              {
+                "localized_name": "positive",
+                "name": "positive",
+                "type": "CONDITIONING",
+                "slot_index": 0,
+                "links": [
+                  4
+                ]
+              },
+              {
+                "localized_name": "negative",
+                "name": "negative",
+                "type": "CONDITIONING",
+                "slot_index": 1,
+                "links": [
+                  5
+                ]
+              }
+            ],
+            "properties": {
+              "Node name for S&R": "LTXVConditioning",
+              "cnr_id": "comfy-core",
+              "ver": "0.3.28"
+            },
+            "widgets_values": [
+              24
+            ]
+          },
+          {
+            "id": 9011,
+            "type": "GetImageSize",
+            "pos": [
+              -2610,
+              3738
+            ],
+            "size": [
+              270.1809911778764,
+              124
+            ],
+            "flags": {},
+            "order": 6,
+            "mode": 0,
+            "inputs": [
+              {
+                "localized_name": "image",
+                "name": "image",
+                "type": "IMAGE",
+                "link": 26
+              }
+            ],
+            "outputs": [
+              {
+                "localized_name": "width",
+                "name": "width",
+                "type": "INT",
+                "links": [
+                  27,
+                  32
+                ]
+              },
+              {
+                "localized_name": "height",
+                "name": "height",
+                "type": "INT",
+                "links": [
+                  28,
+                  33
+                ]
+              },
+              {
+                "localized_name": "batch_size",
+                "name": "batch_size",
+                "type": "INT",
+                "links": []
+              }
+            ],
+            "properties": {
+              "Node name for S&R": "GetImageSize"
+            },
+            "widgets_values": []
+          },
+          {
+            "id": 9012,
+            "type": "LTXVDrawTracks",
+            "pos": [
+              -2249.8190088221236,
+              3659
+            ],
+            "size": [
+              306,
+              136
+            ],
+            "flags": {},
+            "order": 7,
+            "mode": 0,
+            "inputs": [
+              {
+                "localized_name": "tracks",
+                "name": "tracks",
+                "type": "STRING",
+                "widget": {
+                  "name": "tracks"
+                },
+                "link": 29
+              },
+              {
+                "localized_name": "width",
+                "name": "width",
+                "type": "INT",
+                "widget": {
+                  "name": "width"
+                },
+                "link": 27
+              },
+              {
+                "localized_name": "height",
+                "name": "height",
+                "type": "INT",
+                "widget": {
+                  "name": "height"
+                },
+                "link": 28
+              }
+            ],
+            "outputs": [
+              {
+                "localized_name": "IMAGE",
+                "name": "IMAGE",
+                "type": "IMAGE",
+                "links": [
+                  30,
+                  39
+                ]
+              }
+            ],
+            "title": "draw the motion tracks",
+            "properties": {
+              "Node name for S&R": "LTXVDrawTracks"
+            },
+            "widgets_values": [
+              "",
+              512,
+              512
+            ]
+          },
+          {
+            "id": 9013,
+            "type": "CreateVideo",
+            "pos": [
+              -1853.8190088221236,
+              3775.5702461343285
+            ],
+            "size": [
+              313.2623046875,
+              102
+            ],
+            "flags": {},
+            "order": 8,
+            "mode": 0,
+            "inputs": [
+              {
+                "localized_name": "images",
+                "name": "images",
+                "type": "IMAGE",
+                "link": 39
+              },
+              {
+                "localized_name": "audio",
+                "name": "audio",
+                "shape": 7,
+                "type": "AUDIO",
+                "link": null
+              },
+              {
+                "localized_name": "fps",
+                "name": "fps",
+                "type": "FLOAT",
+                "widget": {
+                  "name": "fps"
+                },
+                "link": 40
+              }
+            ],
+            "outputs": [
+              {
+                "localized_name": "VIDEO",
+                "name": "VIDEO",
+                "type": "VIDEO",
+                "links": [
+                  41
+                ]
+              }
+            ],
+            "title": "tracks preview",
+            "properties": {
+              "Node name for S&R": "CreateVideo"
+            },
+            "widgets_values": [
+              30,
+              8
+            ]
+          },
+          {
+            "id": 9009,
+            "type": "LTXVEmptyLatentAudio",
+            "pos": [
+              -2249.8190088221236,
+              4105
+            ],
+            "size": [
+              306,
+              106
+            ],
+            "flags": {},
+            "order": 5,
+            "mode": 0,
+            "inputs": [
+              {
+                "localized_name": "audio_vae",
+                "name": "audio_vae",
+                "type": "VAE",
+                "link": 34
+              },
+              {
+                "localized_name": "frames_number",
+                "name": "frames_number",
+                "type": "INT",
+                "widget": {
+                  "name": "frames_number"
+                },
+                "link": 13806
+              },
+              {
+                "localized_name": "frame_rate",
+                "name": "frame_rate",
+                "type": "FLOAT,INT",
+                "widget": {
+                  "name": "frame_rate"
+                },
+                "link": 13807
+              }
+            ],
+            "outputs": [
+              {
+                "localized_name": "Latent",
+                "name": "Latent",
+                "type": "LATENT",
+                "links": [
+                  38
+                ]
+              }
+            ],
+            "properties": {
+              "Node name for S&R": "LTXVEmptyLatentAudio"
+            },
+            "widgets_values": [
+              121,
+              25,
+              1
+            ]
+          }
+        ],
+        "groups": [],
+        "links": [
+          {
+            "id": 1,
+            "origin_id": 3059,
+            "origin_slot": 0,
+            "target_id": 3159,
+            "target_slot": 2,
+            "type": "LATENT"
+          },
+          {
+            "id": 3,
+            "origin_id": 3159,
+            "origin_slot": 0,
+            "target_id": 5012,
+            "target_slot": 3,
+            "type": "LATENT"
+          },
+          {
+            "id": 4,
+            "origin_id": 9005,
+            "origin_slot": 0,
+            "target_id": 5012,
+            "target_slot": 0,
+            "type": "CONDITIONING",
+            "parentId": 8009
+          },
+          {
+            "id": 5,
+            "origin_id": 9005,
+            "origin_slot": 1,
+            "target_id": 5012,
+            "target_slot": 1,
+            "type": "CONDITIONING",
+            "parentId": 8011
+          },
+          {
+            "id": 6,
+            "origin_id": 5012,
+            "origin_slot": 2,
+            "target_id": 4528,
+            "target_slot": 0,
+            "type": "LATENT"
+          },
+          {
+            "id": 8,
+            "origin_id": -10,
+            "origin_slot": 0,
+            "target_id": 9005,
+            "target_slot": 0,
+            "type": "CONDITIONING"
+          },
+          {
+            "id": 9,
+            "origin_id": -10,
+            "origin_slot": 1,
+            "target_id": 9005,
+            "target_slot": 1,
+            "type": "CONDITIONING"
+          },
+          {
+            "id": 10,
+            "origin_id": -10,
+            "origin_slot": 2,
+            "target_id": 3159,
+            "target_slot": 0,
+            "type": "VAE",
+            "parentId": 8002
+          },
+          {
+            "id": 11,
+            "origin_id": -10,
+            "origin_slot": 2,
+            "target_id": 5012,
+            "target_slot": 2,
+            "type": "VAE",
+            "parentId": 8003
+          },
+          {
+            "id": 13,
+            "origin_id": -10,
+            "origin_slot": 4,
+            "target_id": 3159,
+            "target_slot": 1,
+            "type": "IMAGE",
+            "parentId": 8013
+          },
+          {
+            "id": 14,
+            "origin_id": -10,
+            "origin_slot": 5,
+            "target_id": 3159,
+            "target_slot": 3,
+            "type": "BOOLEAN",
+            "parentId": 8015
+          },
+          {
+            "id": 15,
+            "origin_id": -10,
+            "origin_slot": 6,
+            "target_id": 5012,
+            "target_slot": 5,
+            "type": "FLOAT",
+            "parentId": 8005
+          },
+          {
+            "id": 19,
+            "origin_id": -10,
+            "origin_slot": 7,
+            "target_id": 3059,
+            "target_slot": 2,
+            "type": "INT",
+            "parentId": 8023
+          },
+          {
+            "id": 21,
+            "origin_id": -10,
+            "origin_slot": 8,
+            "target_id": 9005,
+            "target_slot": 2,
+            "type": "FLOAT"
+          },
+          {
+            "id": 23,
+            "origin_id": 5012,
+            "origin_slot": 0,
+            "target_id": -20,
+            "target_slot": 0,
+            "type": "CONDITIONING",
+            "parentId": 8030
+          },
+          {
+            "id": 24,
+            "origin_id": 5012,
+            "origin_slot": 1,
+            "target_id": -20,
+            "target_slot": 1,
+            "type": "CONDITIONING",
+            "parentId": 8032
+          },
+          {
+            "id": 25,
+            "origin_id": 4528,
+            "origin_slot": 0,
+            "target_id": -20,
+            "target_slot": 2,
+            "type": "LATENT"
+          },
+          {
+            "id": 26,
+            "origin_id": -10,
+            "origin_slot": 4,
+            "target_id": 9011,
+            "target_slot": 0,
+            "type": "IMAGE"
+          },
+          {
+            "id": 27,
+            "origin_id": 9011,
+            "origin_slot": 0,
+            "target_id": 9012,
+            "target_slot": 1,
+            "type": "INT"
+          },
+          {
+            "id": 28,
+            "origin_id": 9011,
+            "origin_slot": 1,
+            "target_id": 9012,
+            "target_slot": 2,
+            "type": "INT"
+          },
+          {
+            "id": 29,
+            "origin_id": -10,
+            "origin_slot": 9,
+            "target_id": 9012,
+            "target_slot": 0,
+            "type": "STRING",
+            "parentId": 8026
+          },
+          {
+            "id": 30,
+            "origin_id": 9012,
+            "origin_slot": 0,
+            "target_id": 5012,
+            "target_slot": 4,
+            "type": "IMAGE",
+            "parentId": 8021
+          },
+          {
+            "id": 32,
+            "origin_id": 9011,
+            "origin_slot": 0,
+            "target_id": 3059,
+            "target_slot": 0,
+            "type": "INT"
+          },
+          {
+            "id": 33,
+            "origin_id": 9011,
+            "origin_slot": 1,
+            "target_id": 3059,
+            "target_slot": 1,
+            "type": "INT"
+          },
+          {
+            "id": 34,
+            "origin_id": -10,
+            "origin_slot": 3,
+            "target_id": 9009,
+            "target_slot": 0,
+            "type": "VAE",
+            "parentId": 8028
+          },
+          {
+            "id": 38,
+            "origin_id": 9009,
+            "origin_slot": 0,
+            "target_id": 4528,
+            "target_slot": 1,
+            "type": "LATENT",
+            "parentId": 8007
+          },
+          {
+            "id": 39,
+            "origin_id": 9012,
+            "origin_slot": 0,
+            "target_id": 9013,
+            "target_slot": 0,
+            "type": "IMAGE"
+          },
+          {
+            "id": 40,
+            "origin_id": -10,
+            "origin_slot": 8,
+            "target_id": 9013,
+            "target_slot": 2,
+            "type": "FLOAT",
+            "parentId": 8017
+          },
+          {
+            "id": 41,
+            "origin_id": 9013,
+            "origin_slot": 0,
+            "target_id": -20,
+            "target_slot": 3,
+            "type": "VIDEO",
+            "parentId": 8019
+          },
+          {
+            "id": 13806,
+            "origin_id": -10,
+            "origin_slot": 7,
+            "target_id": 9009,
+            "target_slot": 1,
+            "type": "INT",
+            "parentId": 8023
+          },
+          {
+            "id": 13807,
+            "origin_id": -10,
+            "origin_slot": 8,
+            "target_id": 9009,
+            "target_slot": 2,
+            "type": "FLOAT,INT"
+          }
+        ],
+        "reroutes": [
+          {
+            "id": 8001,
+            "pos": [
+              -2680,
+              4238
+            ],
+            "linkIds": [
+              10,
+              11
+            ]
+          },
+          {
+            "id": 8002,
+            "parentId": 8001,
+            "pos": [
+              -1901.8190088221236,
+              4238
+            ],
+            "linkIds": [
+              10,
+              11
+            ]
+          },
+          {
+            "id": 8003,
+            "parentId": 8002,
+            "pos": [
+              -1490.5567041346235,
+              4238
+            ],
+            "linkIds": [
+              11
+            ]
+          },
+          {
+            "id": 8004,
+            "pos": [
+              -2680,
+              4284
+            ],
+            "linkIds": [
+              15
+            ]
+          },
+          {
+            "id": 8005,
+            "parentId": 8004,
+            "pos": [
+              -1490.5567041346235,
+              4284
+            ],
+            "linkIds": [
+              15
+            ]
+          },
+          {
+            "id": 8006,
+            "pos": [
+              -1903.8190088221236,
+              4110
+            ],
+            "linkIds": [
+              38
+            ]
+          },
+          {
+            "id": 8007,
+            "parentId": 8006,
+            "pos": [
+              -1083.6703760096234,
+              4110
+            ],
+            "linkIds": [
+              38
+            ]
+          },
+          {
+            "id": 8008,
+            "pos": [
+              -2283.8190088221236,
+              4326
+            ],
+            "linkIds": [
+              4
+            ]
+          },
+          {
+            "id": 8009,
+            "parentId": 8008,
+            "pos": [
+              -1490.5567041346235,
+              4326
+            ],
+            "linkIds": [
+              4
+            ]
+          },
+          {
+            "id": 8010,
+            "pos": [
+              -2259.8190088221236,
+              4380
+            ],
+            "linkIds": [
+              5
+            ]
+          },
+          {
+            "id": 8011,
+            "parentId": 8010,
+            "pos": [
+              -1490.5567041346235,
+              4380
+            ],
+            "linkIds": [
+              5
+            ]
+          },
+          {
+            "id": 8012,
+            "pos": [
+              -2680,
+              4414
+            ],
+            "linkIds": [
+              13
+            ]
+          },
+          {
+            "id": 8013,
+            "parentId": 8012,
+            "pos": [
+              -1893.8190088221236,
+              4414
+            ],
+            "linkIds": [
+              13
+            ]
+          },
+          {
+            "id": 8014,
+            "pos": [
+              -2680,
+              4468
+            ],
+            "linkIds": [
+              14
+            ]
+          },
+          {
+            "id": 8015,
+            "parentId": 8014,
+            "pos": [
+              -1893.8190088221236,
+              4468
+            ],
+            "linkIds": [
+              14
+            ]
+          },
+          {
+            "id": 8016,
+            "pos": [
+              -2680,
+              4494
+            ],
+            "linkIds": [
+              40
+            ]
+          },
+          {
+            "id": 8017,
+            "parentId": 8016,
+            "pos": [
+              -1973.8190088221236,
+              4494
+            ],
+            "linkIds": [
+              40
+            ]
+          },
+          {
+            "id": 8018,
+            "pos": [
+              -1492.5567041346235,
+              4147.570246134328
+            ],
+            "linkIds": [
+              41
+            ]
+          },
+          {
+            "id": 8019,
+            "parentId": 8018,
+            "pos": [
+              -792.3621728846234,
+              4147.570246134328
+            ],
+            "linkIds": [
+              41
+            ]
+          },
+          {
+            "id": 8020,
+            "pos": [
+              -1903.8190088221236,
+              3902
+            ],
+            "linkIds": [
+              30
+            ]
+          },
+          {
+            "id": 8021,
+            "parentId": 8020,
+            "pos": [
+              -1490.5567041346235,
+              3902
+            ],
+            "linkIds": [
+              30
+            ]
+          },
+          {
+            "id": 8022,
+            "pos": [
+              -2680,
+              4022
+            ],
+            "linkIds": [
+              19,
+              13806
+            ]
+          },
+          {
+            "id": 8023,
+            "parentId": 8022,
+            "pos": [
+              -2306.489175874675,
+              4020.595526853627
+            ],
+            "linkIds": [
+              19,
+              13806
+            ]
+          },
+          {
+            "id": 8025,
+            "pos": [
+              -2680,
+              4147
+            ],
+            "linkIds": [
+              29
+            ]
+          },
+          {
+            "id": 8026,
+            "parentId": 8025,
+            "pos": [
+              -2305.8190088221236,
+              4147
+            ],
+            "linkIds": [
+              29
+            ]
+          },
+          {
+            "id": 8028,
+            "pos": [
+              -2297.8190088221236,
+              3874
+            ],
+            "linkIds": [
+              34
+            ]
+          },
+          {
+            "id": 8029,
+            "pos": [
+              -1093.6703760096234,
+              3986
+            ],
+            "linkIds": [
+              23
+            ]
+          },
+          {
+            "id": 8030,
+            "parentId": 8029,
+            "pos": [
+              -792.3621728846234,
+              3986
+            ],
+            "linkIds": [
+              23
+            ]
+          },
+          {
+            "id": 8031,
+            "pos": [
+              -1093.6703760096234,
+              4023
+            ],
+            "linkIds": [
+              24
+            ]
+          },
+          {
+            "id": 8032,
+            "parentId": 8031,
+            "pos": [
+              -792.3621728846234,
+              4023
+            ],
+            "linkIds": [
+              24
+            ]
+          }
+        ],
+        "extra": {}
+      }
+    ]
+  },
+  "config": {},
+  "extra": {
+    "frontendVersion": "1.48.7",
+    "VHS_latentpreview": false,
+    "VHS_latentpreviewrate": 0,
+    "VHS_MetadataImage": true,
+    "VHS_KeepIntermediate": true,
+    "workspace_info": {
+      "id": "elBQFQknIoLYTEwIloQuw"
+    },
+    "node_versions": {
+      "comfy-core": "0.3.30",
+      "comfyui-kjnodes": "1.0.8"
+    },
+    "workflowRendererVersion": "LG",
+    "reroutes": [
+      {
+        "id": 5001,
+        "pos": [
+          -3411.9833575513267,
+          3183
+        ],
+        "linkIds": [
+          13762,
+          13670
+        ]
+      },
+      {
+        "id": 5002,
+        "parentId": 5001,
+        "pos": [
+          -1902,
+          3183
+        ],
+        "linkIds": [
+          13762,
+          13670
+        ]
+      },
+      {
+        "id": 5003,
+        "parentId": 5002,
+        "pos": [
+          -902.7990918562209,
+          3183
+        ],
+        "linkIds": [
+          13670
+        ]
+      },
+      {
+        "id": 5004,
+        "pos": [
+          -3411.9833575513267,
+          4176.821237738759
+        ],
+        "linkIds": [
+          13763,
+          13673
+        ]
+      },
+      {
+        "id": 5005,
+        "parentId": 5004,
+        "pos": [
+          -1902,
+          4176.821237738759
+        ],
+        "linkIds": [
+          13763,
+          13673
+        ]
+      },
+      {
+        "id": 5006,
+        "parentId": 5005,
+        "pos": [
+          -902.7990918562209,
+          4176.821237738759
+        ],
+        "linkIds": [
+          13673
+        ]
+      },
+      {
+        "id": 5007,
+        "pos": [
+          -3411.9833575513267,
+          4318.821237738759
+        ],
+        "linkIds": [
+          13653
+        ]
+      },
+      {
+        "id": 5008,
+        "parentId": 5007,
+        "pos": [
+          -1421.2211820415482,
+          4318.821237738759
+        ],
+        "linkIds": [
+          13653
+        ]
+      },
+      {
+        "id": 5009,
+        "pos": [
+          -3411.9833575513267,
+          4364.821237738759
+        ],
+        "linkIds": [
+          13791,
+          13766
+        ]
+      },
+      {
+        "id": 5010,
+        "parentId": 5009,
+        "pos": [
+          -2778.938968112034,
+          4359.472717165642
+        ],
+        "linkIds": [
+          13791,
+          13766
+        ]
+      },
+      {
+        "id": 5011,
+        "parentId": 5010,
+        "pos": [
+          -1910,
+          4364.821237738759
+        ],
+        "linkIds": [
+          13766
+        ]
+      },
+      {
+        "id": 5012,
+        "pos": [
+          -3411.9833575513267,
+          3447
+        ],
+        "linkIds": [
+          13466
+        ]
+      },
+      {
+        "id": 5013,
+        "parentId": 5012,
+        "pos": [
+          -2799,
+          3447
+        ],
+        "linkIds": [
+          13466
+        ]
+      },
+      {
+        "id": 5014,
+        "pos": [
+          -3411.9833575513267,
+          3630.8212377387586
+        ],
+        "linkIds": [
+          13780
+        ]
+      },
+      {
+        "id": 5015,
+        "parentId": 5014,
+        "pos": [
+          -2799,
+          3630.8212377387586
+        ],
+        "linkIds": [
+          13780
+        ]
+      },
+      {
+        "id": 5016,
+        "pos": [
+          -3411.9833575513267,
+          3155
+        ],
+        "linkIds": [
+          13784
+        ]
+      },
+      {
+        "id": 5017,
+        "parentId": 5016,
+        "pos": [
+          -2799,
+          3155
+        ],
+        "linkIds": [
+          13784
+        ]
+      },
+      {
+        "id": 5018,
+        "pos": [
+          -2353,
+          3159
+        ],
+        "linkIds": [
+          13760
+        ]
+      },
+      {
+        "id": 5019,
+        "parentId": 5018,
+        "pos": [
+          -1894,
+          3159
+        ],
+        "linkIds": [
+          13760
+        ]
+      },
+      {
+        "id": 5020,
+        "pos": [
+          -2353,
+          3536
+        ],
+        "linkIds": [
+          13761
+        ]
+      },
+      {
+        "id": 5021,
+        "parentId": 5020,
+        "pos": [
+          -1894,
+          3536
+        ],
+        "linkIds": [
+          13761
+        ]
+      },
+      {
+        "id": 5022,
+        "pos": [
+          -2353,
+          3588
+        ],
+        "linkIds": [
+          13764
+        ]
+      },
+      {
+        "id": 5023,
+        "parentId": 5022,
+        "pos": [
+          -1894,
+          3588
+        ],
+        "linkIds": [
+          13764
+        ]
+      },
+      {
+        "id": 5024,
+        "pos": [
+          -2353,
+          3636
+        ],
+        "linkIds": [
+          13765
+        ]
+      },
+      {
+        "id": 5025,
+        "parentId": 5024,
+        "pos": [
+          -1894,
+          3636
+        ],
+        "linkIds": [
+          13765
+        ]
+      },
+      {
+        "id": 5026,
+        "pos": [
+          -2353,
+          3688
+        ],
+        "linkIds": [
+          13789
+        ]
+      },
+      {
+        "id": 5027,
+        "parentId": 5026,
+        "pos": [
+          -1894,
+          3688
+        ],
+        "linkIds": [
+          13789
+        ]
+      },
+      {
+        "id": 5028,
+        "pos": [
+          -2353,
+          3736
+        ],
+        "linkIds": [
+          13790
+        ]
+      },
+      {
+        "id": 5029,
+        "parentId": 5028,
+        "pos": [
+          -1894,
+          3736
+        ],
+        "linkIds": [
+          13790
+        ]
+      },
+      {
+        "id": 5031,
+        "pos": [
+          -2846.500847047942,
+          4106.2300230914525
+        ],
+        "linkIds": [
+          13793
+        ]
+      },
+      {
+        "id": 5033,
+        "pos": [
+          -2820.917713677237,
+          4240.145868047466
+        ],
+        "linkIds": [
+          13794
+        ]
+      },
+      {
+        "id": 9024,
+        "pos": [
+          -2367.9614522313123,
+          4056.3972883357687
+        ],
+        "linkIds": [
+          13795
+        ]
+      },
+      {
+        "id": 9025,
+        "parentId": 9024,
+        "pos": [
+          -936.3393363699505,
+          4058.8726235351596
+        ],
+        "linkIds": [
+          13795
+        ]
+      }
+    ],
+    "ds": {
+      "scale": 0.4290769741515836,
+      "offset": [
+        3837.3307336218963,
+        -2787.610138806609
+      ]
+    },
+    "linkExtensions": [
+      {
+        "id": 13466,
+        "parentId": 5013
+      },
+      {
+        "id": 13653,
+        "parentId": 5008
+      },
+      {
+        "id": 13670,
+        "parentId": 5003
+      },
+      {
+        "id": 13673,
+        "parentId": 5006
+      },
+      {
+        "id": 13760,
+        "parentId": 5019
+      },
+      {
+        "id": 13761,
+        "parentId": 5021
+      },
+      {
+        "id": 13762,
+        "parentId": 5002
+      },
+      {
+        "id": 13763,
+        "parentId": 5005
+      },
+      {
+        "id": 13764,
+        "parentId": 5023
+      },
+      {
+        "id": 13765,
+        "parentId": 5025
+      },
+      {
+        "id": 13766,
+        "parentId": 5011
+      },
+      {
+        "id": 13780,
+        "parentId": 5015
+      },
+      {
+        "id": 13784,
+        "parentId": 5017
+      },
+      {
+        "id": 13789,
+        "parentId": 5027
+      },
+      {
+        "id": 13790,
+        "parentId": 5029
+      },
+      {
+        "id": 13791,
+        "parentId": 5010
+      },
+      {
+        "id": 13793,
+        "parentId": 5031
+      },
+      {
+        "id": 13794,
+        "parentId": 5033
+      },
+      {
+        "id": 13795,
+        "parentId": 9025
+      }
+    ]
+  },
+  "version": 0.4
+}

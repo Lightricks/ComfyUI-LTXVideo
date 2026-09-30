@@ -5,7 +5,7 @@ import torch
 from comfy_extras.nodes_custom_sampler import SamplerCustomAdvanced
 from comfy_extras.nodes_lt import LTXVAddGuide, LTXVCropGuides
 
-from .latents import LTXVAddLatentGuide, LTXVSelectLatents
+from .latents import LTXVSelectLatents, add_latent_guide
 from .nodes_registry import comfy_node
 
 
@@ -233,7 +233,7 @@ class LTXVTiledSampler:
                             tile_positive,
                             tile_negative,
                             tile_latents,
-                        ) = LTXVAddLatentGuide().generate(
+                        ) = add_latent_guide(
                             vae=vae,
                             positive=tile_positive,
                             negative=tile_negative,
@@ -249,7 +249,7 @@ class LTXVTiledSampler:
                             tile_positive,
                             tile_negative,
                             tile_latents,
-                        ) = LTXVAddLatentGuide().generate(
+                        ) = add_latent_guide(
                             vae=vae,
                             positive=tile_positive,
                             negative=tile_negative,

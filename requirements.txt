@@ -1,6 +1,10 @@
+# Required for HDR primaries (same as ltx-core); no baked-matrix fallback.
+colour-science>=0.4.4
 diffusers
 einops
 huggingface_hub>=0.25.2
 kornia
 ninja~=1.11.1.4
+# Required for HDR EXR read/write (same as ltx-pipelines); no OpenCV EXR fallback.
+openimageio
 transformers[timm]>=4.50.0

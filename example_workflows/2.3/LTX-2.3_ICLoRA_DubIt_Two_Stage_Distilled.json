@@ -1595,7 +1595,7 @@
         "Node name for S&R": "LTXICLoRALoaderModelOnly"
       },
       "widgets_values": [
-        "ltxv/ltx2/ltx-2.3-22b-ic-lora-lipdub-0.9.safetensors",
+        "ltxv/ltx2/ltx-2.3-22b-ic-lora-dubit-0.9.safetensors",
         1
       ]
     },
@@ -1775,7 +1775,7 @@
         "Node name for S&R": "LoadVideo"
       },
       "widgets_values": [
-        "lipdub_input.mp4",
+        "dubit_input.mp4",
         "image"
       ]
     },
@@ -1840,7 +1840,7 @@
       "outputs": [],
       "properties": {},
       "widgets_values": [
-        "# How to Prompt a Good Lipdub/Rephrase\n\nThis workflow supports both **dubbing** (translating speech into another language) and **rephrasing** (changing what the speaker says while keeping the same language). In both cases, the model will generate new lip movements and audio to match the text you provide.\n\n## 1. Include the translated words in your prompt\n\nThe prompt should contain the translated words you want the speaker to say. The model will **not** translate it for you.\n\n## 2. Use native script\n\nUse the alphabet of the language you want the model to speak - for example, Cyrillic for Russian or Chinese characters for Chinese.\n\n## 3. Single speaker only\n\nThe current LoRA supports only one speaker.\n\n## 4. Match the length of the original for the best audio\n\nTry to keep your translation close to the length of the original dialogue.\n\n- **Too long** — The model might skip words.\n- **Too short** — The output might sound slow and unnatural.\n\n> **Tip:** Since there are many ways to say the same thing, play around with your wording until the length is right.\n"
+        "# How to Prompt a Good Dub-It/Rephrase\n\nThis workflow supports both **dubbing** (translating speech into another language) and **rephrasing** (changing what the speaker says while keeping the same language). In both cases, the model will generate new lip movements and audio to match the text you provide.\n\n## 1. Include the translated words in your prompt\n\nThe prompt should contain the translated words you want the speaker to say. The model will **not** translate it for you.\n\n## 2. Use native script\n\nUse the alphabet of the language you want the model to speak - for example, Cyrillic for Russian or Chinese characters for Chinese.\n\n## 3. Single speaker only\n\nThe current LoRA supports only one speaker.\n\n## 4. Match the length of the original for the best audio\n\nTry to keep your translation close to the length of the original dialogue.\n\n- **Too long** — The model might skip words.\n- **Too short** — The output might sound slow and unnatural.\n\n> **Tip:** Since there are many ways to say the same thing, play around with your wording until the length is right.\n"
       ],
       "color": "#432",
       "bgcolor": "#653"
@@ -1863,7 +1863,7 @@
       "outputs": [],
       "properties": {},
       "widgets_values": [
-        "The `latent_downscale_factor` output from the IC-LoRA Loader is intentionally ignored. The lipdub LoRA was trained with `reference_downscale_factor = 1` (full resolution), so no spatial downscaling of the reference is needed. For reference on handling other values, see `LTX-2.3_ICLoRA_Union_Control_Distilled.json`"
+        "The `latent_downscale_factor` output from the IC-LoRA Loader is intentionally ignored. The Dub-It LoRA was trained with `reference_downscale_factor = 1` (full resolution), so no spatial downscaling of the reference is needed. For reference on handling other values, see `LTX-2.3_ICLoRA_Union_Control_Distilled.json`"
       ],
       "color": "#432",
       "bgcolor": "#653"

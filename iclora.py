@@ -12,6 +12,16 @@ from comfy_api.latest import io
 
 from .latents import LTXVDilateLatent
 from .nodes_registry import NODES_DISPLAY_NAME_PREFIX, comfy_node
+from .tiled_fusion_plan import snap_frames
+
+FRAME_IDX_TOOLTIP = (
+    "RoPE position of the reference, in pixel frames.\n"
+    "0 aligns the reference with the generated clip. Use for video references.\n"
+    ">0 places the reference at a specific pixel-frame position in the clip.\n"
+    "-1 places the reference outside the generated frame range, while still using it "
+    "for attention conditioning. Use for single-image references.\n"
+    "For multi-frame references, >0 values are rounded down to 1 mod 8."
+)
 
 
 @comfy_node(name="LTXAddVideoICLoRAGuide")
@@ -28,7 +38,9 @@ class LTXAddVideoICLoRAGuide(io.ComfyNode):
                 "Adds one or more conditioning frames starting at the specified frame index. "
                 "Supports both single images and multi-frame videos. "
                 "The latent_downscale_factor resizes input to a fraction of the target size "
-                "(1 = original, 2 = half, 3 = third, etc.) for IC-LoRA on small grids."
+                "(1 = original, 2 = half, 3 = third, etc.) for IC-LoRA on small grids. "
+                "For LTXVTiledFusionSampler temporal windows, turn on use_streaming and "
+                "set tile_frames to the same 8n+1 value as the sampler (97 for LTX)."
             ),
             inputs=[
                 io.Conditioning.Input("positive"),
@@ -44,12 +56,7 @@ class LTXAddVideoICLoRAGuide(io.ComfyNode):
                     default=0,
                     min=-9999,
                     max=9999,
-                    tooltip=(
-                        "Frame index to start the conditioning at. "
-                        "For single-frame videos, any frame_idx value is acceptable. "
-                        "For videos, frame_idx must be 1 modulo 8, otherwise it will be rounded "
-                        "down to the nearest 1 modulo 8. Negative values are counted from the end of the video."
-                    ),
+                    tooltip=FRAME_IDX_TOOLTIP,
                 ),
                 io.Float.Input(
                     "strength",
@@ -93,6 +100,31 @@ class LTXAddVideoICLoRAGuide(io.ComfyNode):
                     step=16,
                     tooltip="Overlap between tiles for tiled encoding. Only used when use_tiled_encode is enabled.",
                 ),
+                io.Boolean.Input(
+                    "use_streaming",
+                    optional=True,
+                    default=False,
+                    tooltip=(
+                        "Off (default): encode the whole clip as one IC-LoRA guide. "
+                        "On: re-encode one fresh guide per LTXVTiledFusionSampler "
+                        "temporal window and write the plan the sampler reads. "
+                        "Set tile_frames on this node and the sampler to the same "
+                        "value (97 for LTX)."
+                    ),
+                ),
+                io.Int.Input(
+                    "tile_frames",
+                    optional=True,
+                    default=97,
+                    min=0,
+                    max=1000,
+                    step=1,
+                    tooltip=(
+                        "Window length in pixel frames, used only when use_streaming "
+                        "is on. Snapped to 8n+1. Must match LTXVTiledFusionSampler. "
+                        "Ignored when use_streaming is off."
+                    ),
+                ),
             ],
             outputs=[
                 io.Conditioning.Output("positive"),
@@ -100,6 +132,35 @@ class LTXAddVideoICLoRAGuide(io.ComfyNode):
                 io.Latent.Output("latent"),
             ],
         )
+
+    @classmethod
+    def resolve_frame_idx(
+        cls,
+        positive,
+        frame_idx,
+        latent_length,
+        image_length,
+        guide_latent,
+        scale_factors,
+    ):
+        """Map frame_idx to the position append_keyframe should use.
+
+        A negative value is a RoPE position before the clip, not an index counted back
+        from its end, so it bypasses get_latent_index. That is what lets a one-frame
+        reference sit at -1: adjacent to the first generated frame without landing in
+        its slot, which is the only position a one-frame guide can occupy that makes it
+        indistinguishable from the frame being generated. The length assert is
+        meaningless there -- the guide is outside the clip by construction.
+        """
+        if frame_idx < 0:
+            return frame_idx
+        frame_idx, latent_idx = nodes_lt.LTXVAddGuide.get_latent_index(
+            positive, latent_length, image_length, frame_idx, scale_factors
+        )
+        assert (
+            latent_idx + guide_latent.shape[2] <= latent_length
+        ), "Conditioning frames exceed the length of the latent sequence."
+        return frame_idx
 
     @classmethod
     def encode(
@@ -145,6 +206,186 @@ class LTXAddVideoICLoRAGuide(io.ComfyNode):
         return encode_pixels, guide_latent
 
     @classmethod
+    def encode_windowed_guides(
+        cls,
+        positive,
+        negative,
+        vae,
+        latent_image,
+        noise_mask,
+        image,
+        latent_length,
+        latent_width,
+        latent_height,
+        scale_factors,
+        strength,
+        crop,
+        tile_frames,
+        attention_strength=1.0,
+        attention_mask=None,
+        frame_idx=0,
+        use_tiled_encode=False,
+    ):
+        """Re-encode each fusion window as its own clip, or return None.
+
+        Mid-clip causal latents cannot be sliced into windows, so each window's
+        pixels are encoded as a clip starting at 0. The shared plan is written
+        onto the conditioning so LTXVTiledFusionSampler pairs window w with
+        guide block w. Returns None when the clip fits one window.
+        """
+        from .iclora_attention import append_guide_attention_entry
+        from .tiled_fusion_plan import attach_temporal_plan, temporal_plan
+
+        t_scale = scale_factors[0]
+        tf_lat = max(1, (tile_frames - 1) // t_scale + 1)
+        if not (0 < tf_lat < latent_length):
+            return None
+        if int(frame_idx) != 0:
+            raise ValueError(
+                "use_streaming encodes each window as a fresh clip at frame 0; "
+                f"frame_idx={frame_idx} is not supported. Use the whole-clip path "
+                "(use_streaming off) for stills or mid-clip placement."
+            )
+        if use_tiled_encode:
+            raise ValueError(
+                "use_streaming cannot use tiled VAE encode; tiled guide encodes "
+                "imprint a grid into the conditioning. Leave use_tiled_encode off."
+            )
+        keep = ((image.shape[0] - 1) // t_scale) * t_scale + 1
+        image = image[:keep]
+        ts = temporal_plan(latent_length, tf_lat)
+        span_px = (tf_lat - 1) * t_scale + 1
+        need = ts[-1] * t_scale + span_px
+        if image.shape[0] < need:
+            raise ValueError(
+                f"windowed guide needs {need} frames for {latent_length} "
+                f"content latents, found {image.shape[0]}"
+            )
+        for w, t0 in enumerate(ts):
+            span = image[t0 * t_scale : t0 * t_scale + span_px]
+            _, guide_latent = cls.encode(
+                vae,
+                latent_width,
+                latent_height,
+                span,
+                scale_factors,
+                1.0,
+                crop,
+                False,
+                256,
+                64,
+            )
+            shape = list(guide_latent.shape[2:])
+            toks = shape[0] * shape[1] * shape[2]
+            positive, negative, latent_image, noise_mask = (
+                nodes_lt.LTXVAddGuide.append_keyframe(
+                    positive,
+                    negative,
+                    0,
+                    latent_image,
+                    noise_mask,
+                    guide_latent,
+                    strength,
+                    scale_factors,
+                    guide_mask=None,
+                    latent_downscale_factor=1.0,
+                    causal_fix=True,
+                )
+            )
+            # Pixel mask is (1, 1, F, H, W) after normalize_mask. F==1 broadcasts;
+            # otherwise it must match this window's encoded span, not the full clip.
+            window_mask = attention_mask
+            if window_mask is not None and window_mask.shape[2] != 1:
+                start = t0 * t_scale
+                window_mask = window_mask[:, :, start : start + span_px]
+            positive = append_guide_attention_entry(
+                positive,
+                toks,
+                shape,
+                attention_strength=attention_strength,
+                attention_mask=window_mask,
+            )
+            negative = append_guide_attention_entry(
+                negative,
+                toks,
+                shape,
+                attention_strength=attention_strength,
+                attention_mask=window_mask,
+            )
+            logging.info(
+                "window %d/%d: guide frames %d-%d -> %s",
+                w + 1,
+                len(ts),
+                t0 * t_scale,
+                t0 * t_scale + span_px - 1,
+                tuple(shape),
+            )
+        plan = {
+            "tile_frames": int(tile_frames),
+            "tf_lat": int(tf_lat),
+            "n_content": int(latent_length),
+            "ts": [int(v) for v in ts],
+        }
+        positive = attach_temporal_plan(positive, plan)
+        negative = attach_temporal_plan(negative, plan)
+        logging.info("%d per-window guides (t0 = %s)", len(ts), plan["ts"])
+        return io.NodeOutput(
+            positive, negative, {"samples": latent_image, "noise_mask": noise_mask}
+        )
+
+    @classmethod
+    def maybe_encode_windowed(
+        cls,
+        positive,
+        negative,
+        vae,
+        latent_image,
+        noise_mask,
+        image,
+        latent_length,
+        latent_width,
+        latent_height,
+        scale_factors,
+        strength,
+        crop,
+        use_streaming,
+        tile_frames,
+        latent_downscale_factor=1.0,
+        attention_strength=1.0,
+        attention_mask=None,
+        frame_idx=0,
+        use_tiled_encode=False,
+    ):
+        """Run the windowed encode only when use_streaming is on. Else None."""
+        if not use_streaming:
+            return None
+        if latent_downscale_factor != 1:
+            raise ValueError(
+                "use_streaming requires latent_downscale_factor=1; "
+                "windowed fusion guides cannot be dilated."
+            )
+        tf = snap_frames(int(tile_frames) if tile_frames and tile_frames > 0 else 97)
+        return cls.encode_windowed_guides(
+            positive,
+            negative,
+            vae,
+            latent_image,
+            noise_mask,
+            image,
+            latent_length,
+            latent_width,
+            latent_height,
+            scale_factors,
+            strength,
+            crop,
+            tf,
+            attention_strength=attention_strength,
+            attention_mask=attention_mask,
+            frame_idx=frame_idx,
+            use_tiled_encode=use_tiled_encode,
+        )
+
+    @classmethod
     def execute(
         cls,
         positive,
@@ -159,12 +400,36 @@ class LTXAddVideoICLoRAGuide(io.ComfyNode):
         use_tiled_encode,
         tile_size,
         tile_overlap,
+        use_streaming=False,
+        tile_frames=0,
     ) -> io.NodeOutput:
         scale_factors = vae.downscale_index_formula
         latent_image = latent["samples"]
         noise_mask = nodes_lt.get_noise_mask(latent)
 
         _, _, latent_length, latent_height, latent_width = latent_image.shape
+
+        windowed = cls.maybe_encode_windowed(
+            positive,
+            negative,
+            vae,
+            latent_image,
+            noise_mask,
+            image,
+            latent_length,
+            latent_width,
+            latent_height,
+            scale_factors,
+            strength,
+            crop,
+            use_streaming,
+            tile_frames,
+            latent_downscale_factor=latent_downscale_factor,
+            frame_idx=frame_idx,
+            use_tiled_encode=use_tiled_encode,
+        )
+        if windowed is not None:
+            return windowed
 
         time_scale_factor = scale_factors[0]
         num_frames_to_keep = (
@@ -219,12 +484,9 @@ class LTXAddVideoICLoRAGuide(io.ComfyNode):
             guide_latent.shape[2] * guide_latent.shape[3] * guide_latent.shape[4]
         )
 
-        frame_idx, latent_idx = nodes_lt.LTXVAddGuide.get_latent_index(
-            positive, latent_length, len(image), frame_idx, scale_factors
+        frame_idx = cls.resolve_frame_idx(
+            positive, frame_idx, latent_length, len(image), guide_latent, scale_factors
         )
-        assert (
-            latent_idx + guide_latent.shape[2] <= latent_length
-        ), "Conditioning frames exceed the length of the latent sequence."
 
         positive, negative, latent_image, noise_mask = (
             nodes_lt.LTXVAddGuide.append_keyframe(
@@ -276,7 +538,8 @@ class LTXAddVideoICLoRAGuideAdvanced(LTXAddVideoICLoRAGuide):
             description=(
                 "Adds IC-LoRA guide conditioning with per-guide attention strength control. "
                 "Same as LTXAddVideoICLoRAGuide, but allows controlling how strongly this "
-                "guide influences generation via self-attention, optionally with a spatial mask."
+                "guide influences generation via self-attention, optionally with a spatial mask. "
+                "use_streaming + matching tile_frames re-encodes one guide per Tiled Fusion window."
             ),
             inputs=[
                 io.Conditioning.Input("positive"),
@@ -292,11 +555,7 @@ class LTXAddVideoICLoRAGuideAdvanced(LTXAddVideoICLoRAGuide):
                     default=0,
                     min=-9999,
                     max=9999,
-                    tooltip=(
-                        "Frame index to start the conditioning at. The value is rounded to the "
-                        "nearest frame and wrapped modulo the number of video frames. Negative "
-                        "values are counted from the end of the video before wrapping."
-                    ),
+                    tooltip=FRAME_IDX_TOOLTIP,
                 ),
                 io.Float.Input("strength", default=1.0, min=0.0, max=1.0, step=0.01),
                 io.Float.Input(
@@ -336,6 +595,27 @@ class LTXAddVideoICLoRAGuideAdvanced(LTXAddVideoICLoRAGuide):
                         "Multiplied by attention_strength."
                     ),
                 ),
+                io.Boolean.Input(
+                    "use_streaming",
+                    optional=True,
+                    default=False,
+                    tooltip=(
+                        "Off (default): whole-clip guide. On: one fresh encode per "
+                        "fusion temporal window. Must match the sampler's tile_frames."
+                    ),
+                ),
+                io.Int.Input(
+                    "tile_frames",
+                    optional=True,
+                    default=97,
+                    min=0,
+                    max=1000,
+                    step=1,
+                    tooltip=(
+                        "Used only when use_streaming is on. Snapped to 8n+1. "
+                        "97 for LTX. Must match the sampler."
+                    ),
+                ),
             ],
             outputs=[
                 io.Conditioning.Output("positive"),
@@ -361,6 +641,8 @@ class LTXAddVideoICLoRAGuideAdvanced(LTXAddVideoICLoRAGuide):
         tile_overlap,
         attention_strength=1.0,
         attention_mask=None,
+        use_streaming=False,
+        tile_frames=0,
     ) -> io.NodeOutput:
         from .iclora_attention import normalize_mask
         from .latents import LTXVDilateLatent
@@ -370,6 +652,30 @@ class LTXAddVideoICLoRAGuideAdvanced(LTXAddVideoICLoRAGuide):
         noise_mask = nodes_lt.get_noise_mask(latent)
 
         _, _, latent_length, latent_height, latent_width = latent_image.shape
+
+        windowed = cls.maybe_encode_windowed(
+            positive,
+            negative,
+            vae,
+            latent_image,
+            noise_mask,
+            image,
+            latent_length,
+            latent_width,
+            latent_height,
+            scale_factors,
+            strength,
+            crop,
+            use_streaming,
+            tile_frames,
+            latent_downscale_factor=latent_downscale_factor,
+            attention_strength=attention_strength,
+            attention_mask=normalize_mask(attention_mask),
+            frame_idx=frame_idx,
+            use_tiled_encode=use_tiled_encode,
+        )
+        if windowed is not None:
+            return windowed
 
         time_scale_factor = scale_factors[0]
         num_frames_to_keep = (
@@ -420,12 +726,9 @@ class LTXAddVideoICLoRAGuideAdvanced(LTXAddVideoICLoRAGuide):
             guide_latent.shape[2] * guide_latent.shape[3] * guide_latent.shape[4]
         )
 
-        frame_idx, latent_idx = nodes_lt.LTXVAddGuide.get_latent_index(
-            positive, latent_length, len(image), frame_idx, scale_factors
+        frame_idx = cls.resolve_frame_idx(
+            positive, frame_idx, latent_length, len(image), guide_latent, scale_factors
         )
-        assert (
-            latent_idx + guide_latent.shape[2] <= latent_length
-        ), "Conditioning frames exceed the length of the latent sequence."
 
         positive, negative, latent_image, noise_mask = (
             nodes_lt.LTXVAddGuide.append_keyframe(

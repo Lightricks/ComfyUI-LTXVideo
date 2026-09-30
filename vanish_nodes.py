@@ -97,6 +97,11 @@ class LTXVInpaintPreprocess(io.ComfyNode):
     """Composites images with a green (#66FF00) background where mask is active.
 
     If the mask has a single frame it is broadcast to match the video length.
+
+    The fill is always SDR display-encoded ``#66FF00`` (``_BG_COLOR_RGB``), even
+    when ``images`` are already ACEScct. Native HDR inpaint IC-LoRA was trained
+    with that pixel-space key; converting the green into ACEScct changes the
+    VAE latent cue and breaks inpainting.
     """
 
     @classmethod
@@ -105,8 +110,10 @@ class LTXVInpaintPreprocess(io.ComfyNode):
             node_id="LTXVInpaintPreprocess",
             category="Lightricks/image_processing",
             description=(
-                "Composites images with a green background where mask is "
-                "active, for inpainting conditioning."
+                "Composites images with a green (#66FF00) background where mask "
+                "is active, for inpainting conditioning. Always paints SDR "
+                "#66FF00 (not ACEScct-converted) — that key matches IC-LoRA "
+                "training even on native HDR / ACEScct plates."
             ),
             inputs=[
                 io.Image.Input(

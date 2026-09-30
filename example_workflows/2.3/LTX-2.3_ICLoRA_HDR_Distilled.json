@@ -1119,7 +1119,7 @@
       "outputs": [],
       "properties": {},
       "widgets_values": [
-        "Set OPENCV_IO_ENABLE_OPENEXR=1 in your shell before launching ComfyUI, otherwise save_exr will fail"
+        "EXR export requires OpenImageIO (pip install openimageio). Same backend as ltx-pipelines."
       ],
       "color": "#432",
       "bgcolor": "#653"
@@ -1408,6 +1408,16 @@
           "link": 13664
         },
         {
+          "localized_name": "transfer",
+          "name": "transfer",
+          "shape": 7,
+          "type": "COMBO",
+          "widget": {
+            "name": "transfer"
+          },
+          "link": null
+        },
+        {
           "localized_name": "exposure",
           "name": "exposure",
           "shape": 7,
@@ -1424,6 +1434,16 @@
           "type": "BOOLEAN",
           "widget": {
             "name": "save_exr"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "exr_color_space",
+          "name": "exr_color_space",
+          "shape": 7,
+          "type": "COMBO",
+          "widget": {
+            "name": "exr_color_space"
           },
           "link": null
         },
@@ -1478,8 +1498,10 @@
         "Node name for S&R": "LTXVHDRDecodePostprocess"
       },
       "widgets_values": [
+        "logc3",
         7.1,
         true,
+        "linear",
         "output/hdr_exr3",
         "frame",
         true
@@ -3086,8 +3108,10 @@
       },
       "5114": {
         "inputs": {
+          "transfer": "logc3",
           "exposure": 7.1,
           "save_exr": true,
+          "exr_color_space": "linear",
           "output_dir": "output/hdr_exr3",
           "filename_prefix": "frame",
           "half_precision": true,

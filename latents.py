@@ -7,6 +7,7 @@ import torch
 from comfy.ldm.lightricks.vae.audio_vae import LATENT_DOWNSAMPLE_FACTOR
 from comfy.nested_tensor import NestedTensor
 
+from .iclora_attention import set_last_guide_attention_strength
 from .nodes_registry import comfy_node
 
 
@@ -397,102 +398,47 @@ class LTXVDilateLatent:
         return (latent,)
 
 
-@comfy_node(name="LTXVAddLatentGuide")
-class LTXVAddLatentGuide:
-    @classmethod
-    def INPUT_TYPES(s):
-        return {
-            "required": {
-                "vae": ("VAE",),
-                "positive": ("CONDITIONING",),
-                "negative": ("CONDITIONING",),
-                "latent": ("LATENT",),
-                "guiding_latent": ("LATENT",),
-                "latent_idx": (
-                    "INT",
-                    {
-                        "default": 0,
-                        "min": -9999,
-                        "max": 9999,
-                        "step": 1,
-                        "tooltip": "Latent index to start the conditioning at. Can be negative to"
-                        "indicate that the conditioning is on the frames before the latent.",
-                    },
-                ),
-                "strength": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 1.0}),
-            }
-        }
+def add_latent_guide(
+    *,
+    vae,
+    positive,
+    negative,
+    latent,
+    guiding_latent,
+    latent_idx,
+    strength,
+    attention_mask=None,
+):
+    """Pin an already-encoded latent as a guide, via ComfyUI's native node.
 
-    RETURN_TYPES = ("CONDITIONING", "CONDITIONING", "LATENT")
-    RETURN_NAMES = ("positive", "negative", "latent")
+    ComfyUI ships LTXVAddLatentGuide itself (Comfy-Org/ComfyUI#16176), so the
+    implementation lives there rather than being duplicated here; this is only the
+    call-shape adapter the pack's samplers want -- keyword arguments and a plain
+    tuple instead of a NodeOutput.
 
-    CATEGORY = "ltxtricks"
-    FUNCTION = "generate"
-
-    DESCRIPTION = "Adds a keyframe or a video segment at a specific frame index."
-
-    def generate(
-        self, vae, positive, negative, latent, guiding_latent, latent_idx, strength
-    ):
-        noise_mask = nodes_lt.get_noise_mask(latent)
-        latent = latent["samples"]
-        guide = guiding_latent["samples"]
-
-        # Record original (pre-dilation) guide latent shape for spatial mask downsampling
-        guide_orig_shape = list(guide.shape[2:])  # [F, H_small, W_small]
-
-        assert (
-            latent.shape[4] % guide.shape[4] == 0
-            and latent.shape[3] % guide.shape[3] == 0
-        ), "The ratio of the height and width of the latents and optional_guiding_latents must be an integer"
-
-        guiding_latent = LTXVDilateLatent().dilate_latent(
-            guiding_latent,
-            horizontal_scale=latent.shape[4] // guide.shape[4],
-            vertical_scale=latent.shape[3] // guide.shape[3],
-        )[0]
-
-        guide = guiding_latent["samples"]
-        guide_mask = guiding_latent.get("noise_mask", None)
-
-        # Pre-filter token count = product of dilated spatial dims
-        # (before grid_mask filtering removes padding positions)
-        iclora_tokens_added = guide.shape[2] * guide.shape[3] * guide.shape[4]
-
-        scale_factors = vae.downscale_index_formula
-
-        if latent_idx <= 0:
-            frame_idx = latent_idx * scale_factors[0]
-        else:
-            frame_idx = 1 + (latent_idx - 1) * scale_factors[0]
-
-        positive, negative, latent, noise_mask = nodes_lt.LTXVAddGuide.append_keyframe(
-            positive=positive,
-            negative=negative,
-            frame_idx=frame_idx,
-            latent_image=latent,
-            noise_mask=noise_mask,
-            guiding_latent=guide,
-            strength=strength,
-            scale_factors=scale_factors,
-            guide_mask=guide_mask,
-        )
-
-        # Track this guide in guide_attention_entries for per-reference attention control.
-        from .iclora_attention import append_guide_attention_entry
-
-        positive = append_guide_attention_entry(
-            positive, iclora_tokens_added, guide_orig_shape
-        )
-        negative = append_guide_attention_entry(
-            negative, iclora_tokens_added, guide_orig_shape
-        )
-
-        return (
-            positive,
-            negative,
-            {"samples": latent, "noise_mask": noise_mask},
-        )
+    Deliberately does not forward pixel_frame_offset: that input exists only in
+    Lightricks' ComfyUI fork, and the pack has to keep working against a stock
+    install.
+    """
+    positive, negative, latent = nodes_lt.LTXVAddLatentGuide.execute(
+        positive=positive,
+        negative=negative,
+        vae=vae,
+        latent=latent,
+        guiding_latent=guiding_latent,
+        latent_idx=latent_idx,
+        strength=strength,
+        attention_mask=attention_mask,
+    )
+    if attention_mask is None:
+        # The core node records `strength` as the guide's attention strength too, so a
+        # weakly pinned guide would also become weakly attended. The implementation this
+        # replaced always left attention at full strength, and the samplers calling this
+        # pass strengths well below 1.0 (0.15 in the tiled sampler, 0.5 when extending),
+        # so keep the two decoupled rather than silently reweighting their attention.
+        positive = set_last_guide_attention_strength(positive, 1.0)
+        negative = set_last_guide_attention_strength(negative, 1.0)
+    return positive, negative, latent
 
 
 @comfy_node(name="LTXVImgToVideoConditionOnly")
