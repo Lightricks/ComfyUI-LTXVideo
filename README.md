@@ -86,7 +86,7 @@ The union LoRA is trained to understand and respond to both control signals (dep
 
 ## HDR IC-LoRA
 
-We provide an **HDR IC-LoRA** that upgrades SDR video into ACEScct HDR (same working space as pipelines `hdr_ic_lora`), suitable for grading, EXR export, and HLG masters. Use the **2.5** graph: [`LTX-2.5_ICLoRA_HDR_Distilled.json`](./example_workflows/2.5/LTX-2.5_ICLoRA_HDR_Distilled.json). The 2.3 workflow remains as a legacy LogC3 example.
+We provide an **HDR IC-LoRA** that upgrades SDR video into ACEScct HDR (same working space as pipelines `hdr_ic_lora`), suitable for grading, EXR export, and HLG masters. Use the tiled 2.5 graph [`LTX-2.5_V2V_TiledFusion_SDR_to_HDR.json`](./example_workflows/2.5/LTX-2.5_V2V_TiledFusion_SDR_to_HDR.json), or the 2.3 single-stage [`LTX-2.3_ICLoRA_HDR_Distilled.json`](./example_workflows/2.3/LTX-2.3_ICLoRA_HDR_Distilled.json).
 
 ### Key Features
 
@@ -191,6 +191,7 @@ Example graphs (2.5 distilled):
 
 * [`V2V upscale`](./example_workflows/2.5/LTX-2.5_V2V_TiledFusion_Upscale.json) — detail-refine at FullHD / 4K / 8K
 * [`V2V native 4K/8K`](./example_workflows/2.5/LTX-2.5_V2V_TiledFusion_Native_4K_8K.json) — FullHD stage 1, then 4K or 8K
+* [`V2V SDR→HDR`](./example_workflows/2.5/LTX-2.5_V2V_TiledFusion_SDR_to_HDR.json) — same ladder with the HDR IC-LoRA
 
 Prompt those graphs for look and style only (lighting, palette, sharpness, grade). Do not name specific objects in the scene: after upscale, named details can appear in every spatial tile.
 
