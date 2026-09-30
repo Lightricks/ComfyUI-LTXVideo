@@ -286,6 +286,20 @@ def ltxv_gemma_clip(encoder_path, ltxv_path, processor=None, dtype=None):
     return _LTXVGemmaTextEncoderModel
 
 
+def find_matching_dir(root_path: str, pattern: str) -> str:
+    """Return the parent directory of the first file matching ``pattern`` under ``root_path``."""
+    matches = [
+        Path(p)
+        for p in glob(f"{root_path}/**", recursive=True)
+        if Path(p).match(pattern)
+    ]
+    if not matches:
+        raise FileNotFoundError(
+            f"No files matching pattern '{pattern}' found under {root_path}"
+        )
+    return str(matches[0].parent)
+
+
 def gemma_model_dir(gemma_path: str) -> Path:
     """Resolve the Gemma model directory from a selected weights file."""
     model_dir = Path(folder_paths.get_full_path("text_encoders", gemma_path)).parent
@@ -336,23 +350,23 @@ class LTXVGemmaCLIPModelLoader:
         processor = None
         try:
             image_processor = AutoImageProcessor.from_pretrained(
-                str(model_dir),
+                str(processor_path),
                 local_files_only=True,
             )
             processor = Gemma3Processor(
                 image_processor=image_processor,
                 tokenizer=tokenizer_class().tokenizer,
             )
-            logger.info(f"Loaded processor from {model_dir} - enhancement enabled")
+            logger.info(f"Loaded processor from {model_root} - enhancement enabled")
         except Exception as e:
-            logger.warning(f"Could not load processor from {model_dir}: {e}")
+            logger.warning(f"Could not load processor from {model_root}: {e}")
 
         clip_dtype = torch.bfloat16
         ltxv_full_path = folder_paths.get_full_path("checkpoints", ltxv_path)
         clip_target = comfy.supported_models_base.ClipTarget(
             tokenizer=tokenizer_class,
             clip=ltxv_gemma_clip(
-                model_dir, ltxv_full_path, processor=processor, dtype=clip_dtype
+                gemma_model_path, ltxv_full_path, processor=processor, dtype=clip_dtype
             ),
         )
 
