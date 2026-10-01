@@ -359,7 +359,15 @@ def load_text_embeddings_pipeline(
         }
         for key, expected_val in _expected.items():
             actual = transformer_config.get(key)
-            assert actual == expected_val, (
+            # LTX-V checkpoint metadata serialises text_encoder_norm_type as
+            # the enum name (e.g. "PER_TOKEN_RMS") rather than the value
+            # ("per_token_rms"). Compare strings case-insensitively; keep
+            # strict equality for the bool-typed siblings.
+            if isinstance(expected_val, str) and isinstance(actual, str):
+                ok = actual.casefold() == expected_val.casefold()
+            else:
+                ok = actual == expected_val
+            assert ok, (
                 f"Unexpected config for dual-aggregate model: "
                 f"{key}={actual!r}, expected {expected_val!r}"
             )
