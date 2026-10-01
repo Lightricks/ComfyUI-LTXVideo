@@ -6,10 +6,10 @@ ensuring models load one after another instead of simultaneously.
 This reduces peak VRAM usage in memory-constrained environments.
 """
 
+import comfy.sd
 import comfy.utils
 import folder_paths
 import nodes
-from comfy.ldm.lightricks.vae.audio_vae import AudioVAE
 from comfy_api.latest import io
 from comfy_extras.nodes_hunyuan import LatentUpscaleModelLoader
 
@@ -93,7 +93,13 @@ class LowVRAMAudioVAELoader:
     ) -> tuple:
         ckpt_path = folder_paths.get_full_path_or_raise("checkpoints", ckpt_name)
         sd, metadata = comfy.utils.load_torch_file(ckpt_path, return_metadata=True)
-        audio_vae = AudioVAE(sd, metadata)
+        sd = comfy.utils.state_dict_prefix_replace(
+            sd,
+            {"audio_vae.": "autoencoder.", "vocoder.": "vocoder."},
+            filter_keys=True,
+        )
+        audio_vae = comfy.sd.VAE(sd=sd, metadata=metadata)
+        audio_vae.throw_exception_if_invalid()
         return (audio_vae,)
 
 
