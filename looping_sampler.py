@@ -1,10 +1,12 @@
 import copy
 from dataclasses import dataclass
+from typing import Optional
 
 import comfy
 import torch
+from comfy.nested_tensor import NestedTensor
 
-from .easy_samplers import LTXVBaseSampler, LTXVExtendSampler, LTXVInContextSampler
+from .easy_samplers import LTXVBaseSampler, LTXVExtendSampler, LTXVInContextSampler, _get_raw_conds_from_guider
 from .latents import LTXVDilateLatent, LTXVSelectLatents
 from .nodes_registry import comfy_node
 
@@ -229,6 +231,23 @@ class LTXVLoopingSampler:
                         "tooltip": "The latents to use for normalizing the output latents, they will be used to normalize the output latents to the same statistics as the input latents."
                     },
                 ),
+                "optional_negative_index_strength": (
+                    "FLOAT",
+                    {
+                        "default": 1.0,
+                        "min": 0.0,
+                        "max": 1.0,
+                        "step": 0.01,
+                        "tooltip": "The strength of the negative-index latent conditioning. Lower values reduce the influence of the reference image(s) provided via optional_negative_index_latents.",
+                    },
+                ),
+                "save_checkpoints": (
+                    "BOOLEAN",
+                    {
+                        "default": False,
+                        "tooltip": "If enabled, after each temporal tile writes the accumulated latent as ComfyUI .latent files into the input folder (ltxv_looping_ckpt_v{v}_h{h}_video.latent, and _audio.latent for AV), so a mid-run crash leaves a decodable partial result. Reload with the stock LoadLatent node (+ LTXVConcatAVLatent for AV). Overwritten each tile (the latent is cumulative).",
+                    },
+                ),
             },
         }
 
@@ -244,9 +263,14 @@ class LTXVLoopingSampler:
             return None
         tile_samples = latent_dict["samples"][:, :, :, v_start:v_end, h_start:h_end]
         if "noise_mask" in latent_dict and latent_dict["noise_mask"] is not None:
-            tile_masks = latent_dict["noise_mask"][
-                :, :, :, v_start:v_end, h_start:h_end
-            ]
+            noise_mask = latent_dict["noise_mask"]
+            # If the noise mask has broadcast spatial dims (1x1), keep them
+            # as-is rather than slicing (which would produce zero-size dims
+            # for tiles starting past index 0).
+            if noise_mask.ndim == 5 and noise_mask.shape[3] <= 1 and noise_mask.shape[4] <= 1:
+                tile_masks = noise_mask
+            else:
+                tile_masks = noise_mask[:, :, :, v_start:v_end, h_start:h_end]
             return {"samples": tile_samples, "noise_mask": tile_masks}
         else:
             return {"samples": tile_samples}
@@ -312,11 +336,14 @@ class LTXVLoopingSampler:
         tile_config: TileConfig,
         sampling_config: SamplingConfig,
         model_config: ModelConfig,
+        audio_info: Optional[dict] = None,
+        save_checkpoints: bool = False,
     ):
         """Process all temporal chunks for a single spatial tile."""
         chunk_index = 0
         tile_out_latents = None
         first_tile_out_latents = None
+        accumulated_audio = None
 
         for i_temporal_tile, (start_index, end_index) in enumerate(
             zip(
@@ -431,6 +458,55 @@ class LTXVLoopingSampler:
                 [str(i) for i in this_chunk_keyframe_indices]
             )
             if start_index == 0:
+                # Create audio tile for the base tile.
+                # If input audio data is available (stage-2 refinement),
+                # use the corresponding slice; otherwise create zeros
+                # (stage-1 generation from scratch).
+                audio_tile = None
+                if audio_info is not None:
+                    video_tile_frames = min(
+                        sampling_config.temporal_tile_size,
+                        tile_config.tile_latents["samples"].shape[2],
+                    )
+                    audio_tile_frames = max(
+                        1,
+                        round(
+                            video_tile_frames
+                            * audio_info["total_audio_frames"]
+                            / max(audio_info["total_video_frames"], 1)
+                        ),
+                    )
+                    src_audio = audio_info.get("tensor")
+                    if src_audio is not None:
+                        # Refinement: use input audio slice
+                        available = min(audio_tile_frames, src_audio.shape[2])
+                        audio_tile = src_audio[:, :, :available].clone()
+                        if available < audio_tile_frames:
+                            pad = torch.zeros(
+                                1, audio_info["channels"],
+                                audio_tile_frames - available,
+                                audio_info["freq_bins"],
+                                device=audio_info["device"],
+                                dtype=audio_info["dtype"],
+                            )
+                            audio_tile = torch.cat([audio_tile, pad], dim=2)
+                        print(
+                            f"[LoopingSampler] Base tile audio (from input): {audio_tile.shape}"
+                        )
+                    else:
+                        # Generation: start from zeros
+                        audio_tile = torch.zeros(
+                            1,
+                            audio_info["channels"],
+                            audio_tile_frames,
+                            audio_info["freq_bins"],
+                            device=audio_info["device"],
+                            dtype=audio_info["dtype"],
+                        )
+                        print(
+                            f"[LoopingSampler] Base tile audio (zeros): {audio_tile.shape}"
+                        )
+
                 if tile_config.tile_guiding_latents is not None:
                     tile_out_latents = LTXVInContextSampler().sample(
                         vae=model_config.vae,
@@ -450,6 +526,7 @@ class LTXVLoopingSampler:
                         guiding_strength=sampling_config.guiding_strength,
                         guiding_start_step=sampling_config.guiding_start_step,
                         guiding_end_step=sampling_config.guiding_end_step,
+                        _audio_tile=audio_tile,
                     )[0]
                 else:
                     tile_out_latents = LTXVBaseSampler().sample(
@@ -483,9 +560,43 @@ class LTXVLoopingSampler:
                         optional_initialization_latents=latent_chunk,
                         guiding_start_step=sampling_config.guiding_start_step,
                         guiding_end_step=sampling_config.guiding_end_step,
+                        _audio_tile=audio_tile,
                     )[0]
+
+                # Extract denoised audio from base tile
+                accumulated_audio = tile_out_latents.pop("_audio", None)
                 first_tile_out_latents = copy.deepcopy(tile_out_latents)
             else:
+                # Compute audio init data for the "new frames" portion of
+                # this extend tile (for stage-2 refinement).
+                _audio_new_init = None
+                src_audio = audio_info.get("tensor") if audio_info else None
+                if src_audio is not None and accumulated_audio is not None:
+                    # The extend tile adds new video frames after the overlap.
+                    # Map the video new-frame region to audio frames.
+                    acc_audio_T = accumulated_audio.shape[2]
+                    audio_ratio = (
+                        audio_info["total_audio_frames"]
+                        / max(audio_info["total_video_frames"], 1)
+                    )
+                    video_new_latent = (
+                        latent_chunk["samples"].shape[2]
+                        - sampling_config.temporal_overlap
+                    )
+                    audio_new_frames = max(
+                        1, round(video_new_latent * audio_ratio)
+                    )
+                    # The new audio starts where accumulated audio ends
+                    audio_start = acc_audio_T
+                    audio_end = min(
+                        audio_start + audio_new_frames,
+                        src_audio.shape[2],
+                    )
+                    if audio_start < src_audio.shape[2]:
+                        _audio_new_init = src_audio[
+                            :, :, audio_start:audio_end
+                        ]
+
                 tile_out_latents = LTXVExtendSampler().sample(
                     model=model_config.model,
                     vae=model_config.vae,
@@ -516,11 +627,86 @@ class LTXVLoopingSampler:
                     optional_initialization_latents=latent_chunk,
                     guiding_start_step=sampling_config.guiding_start_step,
                     guiding_end_step=sampling_config.guiding_end_step,
+                    _audio_tile=accumulated_audio,
+                    _audio_new_init=_audio_new_init,
                 )[0]
+
+                # Update accumulated audio from extend tile
+                accumulated_audio = tile_out_latents.pop("_audio", accumulated_audio)
+
+            if save_checkpoints:
+                self._save_chunk_checkpoint(
+                    tile_out_latents, accumulated_audio, tile_config, chunk_index
+                )
 
             chunk_index += 1
 
+        # Store accumulated audio in the output for the caller
+        if accumulated_audio is not None:
+            tile_out_latents["_audio"] = accumulated_audio
+
         return tile_out_latents
+
+    def _save_chunk_checkpoint(
+        self, tile_out_latents, accumulated_audio, tile_config, chunk_index
+    ):
+        """Salvage checkpoint: persist the accumulated latent after each temporal
+        chunk so a mid-run crash leaves a decodable partial result on disk.
+
+        Writes ComfyUI-native ``.latent`` files (one for video, one for audio if
+        present) into the ``input`` directory, so recovery needs no custom node:
+        reload with the stock ``LoadLatent`` node(s) and, for AV, recombine with
+        ``LTXVConcatAVLatent``. The files carry the ``latent_format_version_0``
+        marker, so ``LoadLatent`` round-trips them with multiplier 1.0.
+
+        The latent is cumulative, so each write supersedes the previous one; we
+        overwrite a single per-spatial-tile file per stream and rename atomically
+        (.tmp -> final) to avoid a corrupt file if the process dies mid-write.
+        Best-effort — a checkpoint failure must never abort generation. See
+        CLAUDE.md ("save_checkpoints salvage toggle") for the recovery workflow.
+        """
+        try:
+            import os
+
+            import comfy.utils
+            import folder_paths
+
+            samples = tile_out_latents["samples"]
+            if isinstance(samples, NestedTensor) and len(samples.tensors) == 2:
+                video, audio = samples.tensors[0], samples.tensors[1]
+            else:
+                video, audio = samples, accumulated_audio
+
+            in_dir = folder_paths.get_input_directory()
+            base = f"ltxv_looping_ckpt_v{tile_config.v}_h{tile_config.h}"
+
+            def _write_latent(tensor, suffix):
+                # ComfyUI .latent format: LoadLatent reads "latent_tensor" and,
+                # when "latent_format_version_0" is present, uses multiplier 1.0.
+                payload = {
+                    "latent_tensor": tensor.detach().to("cpu", torch.float32).contiguous(),
+                    "latent_format_version_0": torch.tensor([]),
+                }
+                path = os.path.join(in_dir, f"{base}_{suffix}.latent")
+                tmp = path + ".tmp"
+                comfy.utils.save_torch_file(payload, tmp)
+                os.replace(tmp, path)
+                return os.path.basename(path)
+
+            written = [_write_latent(video, "video")]
+            if audio is not None:
+                written.append(_write_latent(audio, "audio"))
+
+            print(
+                f"[LoopingSampler] Saved salvage checkpoint (chunk {chunk_index}, "
+                f"video={list(video.shape)}"
+                + (f", audio={list(audio.shape)}" if audio is not None else "")
+                + f") -> {', '.join(written)} in input/"
+            )
+        except Exception as e:
+            print(
+                f"[LoopingSampler] WARNING: failed to write salvage checkpoint: {e}"
+            )
 
     def _create_spatial_weights(
         self,
@@ -600,17 +786,24 @@ class LTXVLoopingSampler:
         """Prepare the guider for a specific chunk, handling optional positive conditionings."""
         if optional_positive_conditionings is not None:
             new_guider = copy.copy(guider)
-            positive, negative = guider.raw_conds
+            positive, negative = _get_raw_conds_from_guider(guider)
             # Use the conditioning at chunk_index, or the last one if we've run out
             conditioning_index = min(
                 chunk_index, len(optional_positive_conditionings) - 1
             )
+            new_cond = optional_positive_conditionings[conditioning_index]
+            print(
+                f"[LoopingSampler] Chunk {chunk_index}: using prompt {conditioning_index} "
+                f"(of {len(optional_positive_conditionings)}), "
+                f"cond shape={new_cond[0][0].shape if new_cond and len(new_cond[0]) > 0 else 'N/A'}, "
+                f"has frame_rate={'frame_rate' in new_cond[0][1] if new_cond and len(new_cond[0]) > 1 else 'N/A'}"
+            )
             new_guider.set_conds(
-                optional_positive_conditionings[conditioning_index],
+                new_cond,
                 negative,
             )
             new_guider.raw_conds = (
-                optional_positive_conditionings[conditioning_index],
+                new_cond,
                 negative,
             )
             return new_guider
@@ -710,23 +903,47 @@ class LTXVLoopingSampler:
         cond_image_strength=1.0,
         optional_guiding_latents=None,
         optional_negative_index_latents=None,
-        optional_negative_index_strength=1.0,  # hidden interface
+        optional_negative_index_strength=1.0,
         optional_positive_conditionings=None,
         guiding_start_step=0,
         guiding_end_step=1000,
         optional_cond_image_indices="0",
         optional_normalizing_latents=None,
+        save_checkpoints=False,
         per_tile_seed_offsets="0",  # hidden interface
     ):
         # Get dimensions and prepare for spatial tiling
         samples = latents["samples"]
+
+        # Handle AV latents: separate video and audio, process video through
+        # the tile loop, then reassemble AV output at the end.
+        audio_info = None
         if (
-            isinstance(samples, comfy.nested_tensor.NestedTensor)
+            isinstance(samples, NestedTensor)
             and len(samples.tensors) == 2
         ):
-            raise ValueError(
-                "LoopingSampler currently does not support Audio Visual latents. please only use video latents."
+            video_tensor = samples.tensors[0]
+            audio_tensor = samples.tensors[1]
+            audio_info = {
+                "channels": audio_tensor.shape[1],
+                "freq_bins": audio_tensor.shape[3],
+                "total_video_frames": video_tensor.shape[2],
+                "total_audio_frames": audio_tensor.shape[2],
+                "device": audio_tensor.device,
+                "dtype": audio_tensor.dtype,
+                "tensor": audio_tensor,  # preserve for stage-2 refinement
+            }
+            # Switch to video-only for existing tiling logic
+            latents = latents.copy()
+            latents["samples"] = video_tensor
+            if "noise_mask" in latents and isinstance(latents["noise_mask"], NestedTensor):
+                latents["noise_mask"] = latents["noise_mask"].tensors[0]
+            samples = video_tensor
+            print(
+                f"[LoopingSampler] AV latent detected: video={video_tensor.shape}, "
+                f"audio={audio_tensor.shape}. Audio will be generated jointly."
             )
+
         batch, channels, frames, height, width = samples.shape
         time_scale_factor, width_scale_factor, height_scale_factor = (
             vae.downscale_index_formula
@@ -890,11 +1107,19 @@ class LTXVLoopingSampler:
                     guider=guider,
                 )
 
+                # Only process audio for the first spatial tile (audio has no spatial dim)
+                tile_audio_info = audio_info if (v == 0 and h == 0) else None
                 tile_out_latents = self._process_temporal_chunks(
                     tile_config,
                     sampling_config,
                     model_config,
+                    audio_info=tile_audio_info,
+                    save_checkpoints=save_checkpoints,
                 )
+
+                # Extract accumulated audio from first spatial tile
+                if v == 0 and h == 0 and audio_info is not None:
+                    accumulated_audio = tile_out_latents.pop("_audio", None)
 
                 # Initialize output tensors on first tile (to get correct temporal dimension)
                 if final_output is None:
@@ -931,7 +1156,16 @@ class LTXVLoopingSampler:
 
         # Normalize by weights
         final_output = final_output / (weights + 1e-8)
-        out_latents = {"samples": final_output}
+
+        # Reassemble AV output if audio was processed
+        if audio_info is not None and accumulated_audio is not None:
+            out_latents = {"samples": NestedTensor([final_output, accumulated_audio])}
+            print(
+                f"[LoopingSampler] AV output: video={final_output.shape}, "
+                f"audio={accumulated_audio.shape}"
+            )
+        else:
+            out_latents = {"samples": final_output}
 
         noise.seed = first_seed
         return (out_latents,)
@@ -951,10 +1185,22 @@ class MultiPromptProvider:
                     {
                         "multiline": True,
                         "dynamicPrompts": True,
-                        "tooltip": "Prompts to encode, one per line. Each prompt will be encoded separately. Each prompt will be used in one temporal_tile in LTXVLoopingSampler.",
+                        "tooltip": "Prompts to encode, separated by |. Each prompt will be encoded separately. Each prompt will be used in one temporal_tile in LTXVLoopingSampler.",
                     },
                 ),
                 "clip": ("CLIP", {"tooltip": "CLIP model to encode the prompts."}),
+            },
+            "optional": {
+                "frame_rate": (
+                    "FLOAT",
+                    {
+                        "default": 24.0,
+                        "min": 0.0,
+                        "max": 1000.0,
+                        "step": 0.01,
+                        "tooltip": "Frame rate to embed in the conditioning (same as LTXVConditioning). Required for proper temporal and audio generation.",
+                    },
+                ),
             },
         }
 
@@ -964,11 +1210,16 @@ class MultiPromptProvider:
     FUNCTION = "get_prompt_list"
     CATEGORY = "prompt"
 
-    def get_prompt_list(self, prompts, clip):
+    def get_prompt_list(self, prompts, clip, frame_rate=24.0):
+        import node_helpers
+
         prompt_list = prompts.split("|")
         prompt_list = [prompt.strip() for prompt in prompt_list]
         encoded_prompt_list = [
-            clip.encode_from_tokens_scheduled(clip.tokenize(prompt))
+            node_helpers.conditioning_set_values(
+                clip.encode_from_tokens_scheduled(clip.tokenize(prompt)),
+                {"frame_rate": frame_rate},
+            )
             for prompt in prompt_list
         ]
         return (encoded_prompt_list,)
