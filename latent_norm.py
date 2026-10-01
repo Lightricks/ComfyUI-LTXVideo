@@ -43,6 +43,11 @@ class LTXVAdainLatent:
         latents_copy = copy.deepcopy(latents)
         t = latents_copy["samples"]  #  B x C x F x H x W
 
+        # Guard against division by a (near-)zero input std: a constant channel
+        # or frame yields i_sd == 0 -> 0/0 == NaN. LTXVStatNormLatent guards the
+        # same way (current_std > 1e-8).
+        eps = 1e-8
+
         if per_frame:
             if reference["samples"].size(2) == 1:
                 print("Reference has only one frame, using it for all frames")
@@ -61,15 +66,26 @@ class LTXVAdainLatent:
                     )  # index by original dim order
                     i_sd, i_mean = torch.std_mean(t[i, c], dim=None)
 
-                    t[i, c] = ((t[i, c] - i_mean) / i_sd) * r_sd + r_mean
+                    t[i, c] = ((t[i, c] - i_mean) / (i_sd + eps)) * r_sd + r_mean
                 else:
                     for f in range(t.size(2)):
                         r_sd, r_mean = torch.std_mean(
                             reference["samples"][i, c, f], dim=None
                         )  # index by original dim order
                         i_sd, i_mean = torch.std_mean(t[i, c, f], dim=None)
-                        t[i, c, f] = ((t[i, c, f] - i_mean) / i_sd) * r_sd + r_mean
+                        t[i, c, f] = (
+                            (t[i, c, f] - i_mean) / (i_sd + eps)
+                        ) * r_sd + r_mean
 
+        # torch.lerp(a, b, 0.0) is NOT a no-op when b holds NaN/Inf: 0 * NaN == NaN
+        # leaks through. Short-circuit factor == 0, and sanitize otherwise so a
+        # bad statistic can never propagate past the requested blend.
+        if factor == 0:
+            # t is latents_copy["samples"], mutated in place above; lerp(a, b, 0)
+            # == a, so return the untouched original.
+            latents_copy["samples"] = latents["samples"].clone()
+            return (latents_copy,)
+        t = torch.nan_to_num(t, nan=0.0, posinf=0.0, neginf=0.0)
         latents_copy["samples"] = torch.lerp(latents["samples"], t, factor)
         return (latents_copy,)
 
