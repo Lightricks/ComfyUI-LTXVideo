@@ -2,7 +2,7 @@
   "id": "6b1f4c07-92ae-4d35-8f7c-1a2b5e63d8f4",
   "revision": 0,
   "last_node_id": 9104,
-  "last_link_id": 13948,
+  "last_link_id": 13949,
   "nodes": [
     {
       "id": 5531,
@@ -239,13 +239,13 @@
         150
       ],
       "flags": {},
-      "order": 19,
+      "order": 18,
       "mode": 0,
       "inputs": [
         {
           "name": "images",
           "type": "IMAGE",
-          "link": 13808
+          "link": 13949
         },
         {
           "name": "audio",
@@ -557,14 +557,15 @@
         {
           "name": "tonemapped",
           "type": "IMAGE",
-          "links": []
+          "links": [
+            13949
+          ]
         },
         {
           "name": "hdr_linear",
           "type": "IMAGE",
           "links": [
-            13807,
-            13808
+            13807
           ]
         }
       ],
@@ -946,7 +947,7 @@
         170
       ],
       "flags": {},
-      "order": 18,
+      "order": 19,
       "mode": 0,
       "inputs": [
         {
@@ -1278,14 +1279,6 @@
       "IMAGE"
     ],
     [
-      13808,
-      9012,
-      1,
-      9014,
-      0,
-      "IMAGE"
-    ],
-    [
       13810,
       5548,
       4,
@@ -1382,6 +1375,22 @@
       "IMAGE"
     ],
     [
+      13922,
+      9011,
+      0,
+      5518,
+      0,
+      "VAE"
+    ],
+    [
+      13785,
+      5516,
+      0,
+      5518,
+      1,
+      "LATENT"
+    ],
+    [
       13811,
       9014,
       0,
@@ -1398,20 +1407,12 @@
       "FLOAT"
     ],
     [
-      13922,
-      9011,
+      13949,
+      9012,
       0,
-      5518,
+      9014,
       0,
-      "VAE"
-    ],
-    [
-      13785,
-      5516,
-      0,
-      5518,
-      1,
-      "LATENT"
+      "IMAGE"
     ]
   ],
   "groups": [
@@ -1508,7 +1509,7 @@
         "state": {
           "lastGroupId": 158,
           "lastNodeId": 9104,
-          "lastLinkId": 13948,
+          "lastLinkId": 13949,
           "lastRerouteId": 5060
         },
         "revision": 0,
@@ -1996,7 +1997,7 @@
         "state": {
           "lastGroupId": 158,
           "lastNodeId": 9104,
-          "lastLinkId": 13948,
+          "lastLinkId": 13949,
           "lastRerouteId": 5060
         },
         "revision": 0,
@@ -2793,7 +2794,7 @@
         "state": {
           "lastGroupId": 158,
           "lastNodeId": 9104,
-          "lastLinkId": 13948,
+          "lastLinkId": 13949,
           "lastRerouteId": 5060
         },
         "revision": 0,
@@ -3144,7 +3145,7 @@
         "state": {
           "lastGroupId": 158,
           "lastNodeId": 9104,
-          "lastLinkId": 13948,
+          "lastLinkId": 13949,
           "lastRerouteId": 5060
         },
         "revision": 0,
@@ -3700,7 +3701,7 @@
         "state": {
           "lastGroupId": 158,
           "lastNodeId": 9104,
-          "lastLinkId": 13948,
+          "lastLinkId": 13949,
           "lastRerouteId": 5060
         },
         "revision": 0,
@@ -4920,10 +4921,10 @@
       }
     ],
     "ds": {
-      "scale": 0.4610105476488995,
+      "scale": 0.7424620970940294,
       "offset": [
-        4042.313535811294,
-        -1941.2834383096524
+        1418.4964709195483,
+        -2415.233699923728
       ]
     },
     "linkExtensions": [

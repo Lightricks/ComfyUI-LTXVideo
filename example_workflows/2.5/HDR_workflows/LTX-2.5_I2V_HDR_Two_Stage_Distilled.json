@@ -2,7 +2,7 @@
   "id": "b0f9490f-5bae-434c-8205-c6216ac08d2c",
   "revision": 0,
   "last_node_id": 5600,
-  "last_link_id": 13867,
+  "last_link_id": 13868,
   "nodes": [
     {
       "id": 5529,
@@ -937,13 +937,14 @@
         {
           "name": "tonemapped",
           "type": "IMAGE",
-          "links": []
+          "links": [
+            13868
+          ]
         },
         {
           "name": "hdr_linear",
           "type": "IMAGE",
           "links": [
-            13847,
             13848
           ]
         }
@@ -1027,7 +1028,7 @@
         {
           "name": "images",
           "type": "IMAGE",
-          "link": 13847
+          "link": 13868
         },
         {
           "name": "audio",
@@ -1715,14 +1716,6 @@
       "VAE"
     ],
     [
-      13847,
-      5583,
-      1,
-      5584,
-      0,
-      "IMAGE"
-    ],
-    [
       13848,
       5583,
       1,
@@ -1817,6 +1810,14 @@
       5585,
       0,
       "VIDEO"
+    ],
+    [
+      13868,
+      5583,
+      0,
+      5584,
+      0,
+      "IMAGE"
     ]
   ],
   "groups": [
@@ -1853,7 +1854,7 @@
         "state": {
           "lastGroupId": 158,
           "lastNodeId": 5600,
-          "lastLinkId": 13867,
+          "lastLinkId": 13868,
           "lastRerouteId": 5047
         },
         "revision": 0,
@@ -3512,7 +3513,7 @@
         "state": {
           "lastGroupId": 158,
           "lastNodeId": 5600,
-          "lastLinkId": 13867,
+          "lastLinkId": 13868,
           "lastRerouteId": 5047
         },
         "revision": 0,
@@ -4202,7 +4203,7 @@
         "state": {
           "lastGroupId": 158,
           "lastNodeId": 5600,
-          "lastLinkId": 13867,
+          "lastLinkId": 13868,
           "lastRerouteId": 5047
         },
         "revision": 0,
@@ -4847,7 +4848,7 @@
         "state": {
           "lastGroupId": 158,
           "lastNodeId": 5600,
-          "lastLinkId": 13867,
+          "lastLinkId": 13868,
           "lastRerouteId": 5047
         },
         "revision": 0,
@@ -5306,7 +5307,7 @@
         "state": {
           "lastGroupId": 158,
           "lastNodeId": 5600,
-          "lastLinkId": 13867,
+          "lastLinkId": 13868,
           "lastRerouteId": 5047
         },
         "revision": 0,
@@ -6324,7 +6325,7 @@
         "state": {
           "lastGroupId": 158,
           "lastNodeId": 5600,
-          "lastLinkId": 13867,
+          "lastLinkId": 13868,
           "lastRerouteId": 5047
         },
         "revision": 0,
@@ -7456,8 +7457,8 @@
     "ds": {
       "scale": 0.560421630314949,
       "offset": [
-        4709.49270955704,
-        -3877.7908809041264
+        4966.47542800655,
+        -3789.3900074133353
       ]
     }
   },
