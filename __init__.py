@@ -12,6 +12,7 @@ from .easy_samplers import (
 )
 from .gemma_api_conditioning import GemmaAPITextEncode
 from .gemma_encoder import LTXVGemmaCLIPModelLoader, LTXVGemmaEnhancePrompt
+from .minimax_prompt_enhancer import MiniMaxPromptEnhancer
 from .guide import LTXVAddGuideAdvanced, LTXVAddGuideAdvancedAttention
 from .guiders import GuiderParametersNode, MultimodalGuiderNode
 from .hdr_nodes import (
@@ -110,6 +111,7 @@ NODE_CLASS_MAPPINGS = {
     "LTXVGemmaCLIPModelLoader": LTXVGemmaCLIPModelLoader,
     "LTXVGemmaEnhancePrompt": LTXVGemmaEnhancePrompt,
     "GemmaAPITextEncode": GemmaAPITextEncode,
+    "MiniMaxPromptEnhancer": MiniMaxPromptEnhancer,
     "DynamicConditioning": DynamicConditioning,
     "LowVRAMCheckpointLoader": LowVRAMCheckpointLoader,
     "LowVRAMAudioVAELoader": LowVRAMAudioVAELoader,
