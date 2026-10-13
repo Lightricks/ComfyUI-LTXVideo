@@ -7,4 +7,4 @@ kornia
 ninja~=1.11.1.4
 # Required for HDR EXR read/write (same as ltx-pipelines); no OpenCV EXR fallback.
 openimageio
-transformers[timm]>=4.50.0
+transformers>=4.50.0

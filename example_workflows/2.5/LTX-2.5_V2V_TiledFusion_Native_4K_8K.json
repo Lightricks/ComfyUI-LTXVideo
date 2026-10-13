@@ -1,8 +1,8 @@
 {
   "id": "ltx-2.5-v2v-tiledfusion-native-4k-8k",
   "revision": 0,
-  "last_node_id": 9313,
-  "last_link_id": 13808,
+  "last_node_id": 9316,
+  "last_link_id": 14005,
   "nodes": [
     {
       "id": 5509,
@@ -30,9 +30,9 @@
       ],
       "title": "Prompt (negative)",
       "properties": {
+        "Node name for S&R": "PrimitiveStringMultiline",
         "cnr_id": "comfy-core",
-        "ver": "0.25.0",
-        "Node name for S&R": "PrimitiveStringMultiline"
+        "ver": "0.25.0"
       },
       "widgets_values": [
         ""
@@ -160,9 +160,9 @@
       ],
       "title": "Effective positive prompt (enhanced if enabled)",
       "properties": {
+        "Node name for S&R": "PreviewAny",
         "cnr_id": "comfy-core",
-        "ver": "0.34.0",
-        "Node name for S&R": "PreviewAny"
+        "ver": "0.34.0"
       },
       "widgets_values": [],
       "widgets_values_named": {},
@@ -454,9 +454,9 @@
         }
       ],
       "properties": {
+        "Node name for S&R": "LoadVideo",
         "cnr_id": "comfy-core",
-        "ver": "0.10.0",
-        "Node name for S&R": "LoadVideo"
+        "ver": "0.10.0"
       },
       "widgets_values": [
         "",
@@ -495,9 +495,9 @@
       ],
       "title": "Prompt (positive)",
       "properties": {
+        "Node name for S&R": "PrimitiveStringMultiline",
         "cnr_id": "comfy-core",
-        "ver": "0.25.0",
-        "Node name for S&R": "PrimitiveStringMultiline"
+        "ver": "0.25.0"
       },
       "widgets_values": [
         ""
@@ -1354,9 +1354,9 @@
       ],
       "title": "Prompt (stage 2)",
       "properties": {
+        "Node name for S&R": "PrimitiveStringMultiline",
         "cnr_id": "comfy-core",
-        "ver": "0.25.0",
-        "Node name for S&R": "PrimitiveStringMultiline"
+        "ver": "0.25.0"
       },
       "widgets_values": [
         "The same scene, sharper and more detailed, fine textures, clean edges."
@@ -1744,9 +1744,9 @@
       ],
       "title": "Tiling sizes",
       "properties": {
+        "Node name for S&R": "PreviewAny",
         "cnr_id": "comfy-core",
-        "ver": "0.34.0",
-        "Node name for S&R": "PreviewAny"
+        "ver": "0.34.0"
       },
       "widgets_values": [],
       "widgets_values_named": {},
@@ -1836,14 +1836,6 @@
       5518,
       3,
       "VAE"
-    ],
-    [
-      13675,
-      5518,
-      0,
-      4852,
-      0,
-      "VIDEO"
     ],
     [
       13758,
@@ -2284,6 +2276,14 @@
       9018,
       14,
       "BOOLEAN"
+    ],
+    [
+      13675,
+      5518,
+      0,
+      4852,
+      0,
+      "VIDEO"
     ]
   ],
   "groups": [
@@ -2318,10 +2318,10 @@
         "id": "b7c1e94a-3f52-4d08-9a61-2e7c5d4f8a13",
         "version": 1,
         "state": {
-          "lastGroupId": 158,
-          "lastNodeId": 9313,
-          "lastLinkId": 13808,
-          "lastRerouteId": 9038
+          "lastGroupId": 163,
+          "lastNodeId": 9316,
+          "lastLinkId": 14005,
+          "lastRerouteId": 9179
         },
         "revision": 0,
         "config": {},
@@ -2638,9 +2638,9 @@
             ],
             "title": "Load VAE - Audio",
             "properties": {
+              "Node name for S&R": "VAELoader",
               "cnr_id": "comfy-core",
               "ver": "0.34.0",
-              "Node name for S&R": "VAELoader",
               "models": [
                 {
                   "name": "ltx-2.5-audio-vae-bf16.safetensors",
@@ -2693,9 +2693,9 @@
             ],
             "title": "Load VAE - Video",
             "properties": {
+              "Node name for S&R": "VAELoader",
               "cnr_id": "comfy-core",
               "ver": "0.34.0",
-              "Node name for S&R": "VAELoader",
               "models": [
                 {
                   "name": "ltx-2.5-video-vae-bf16.safetensors",
@@ -2748,9 +2748,9 @@
               }
             ],
             "properties": {
+              "Node name for S&R": "UNETLoader",
               "cnr_id": "comfy-core",
               "ver": "0.34.0",
-              "Node name for S&R": "UNETLoader",
               "models": [
                 {
                   "name": "ltx-2.5-22b-distilled-transformer-bf16.safetensors",
@@ -2840,9 +2840,9 @@
             ],
             "title": "Load CLIP - Text Enhancer",
             "properties": {
+              "Node name for S&R": "CLIPLoader",
               "cnr_id": "comfy-core",
               "ver": "0.34.0",
-              "Node name for S&R": "CLIPLoader",
               "models": [
                 {
                   "name": "gemma4_e2b_it_bf16.safetensors",
@@ -2899,9 +2899,9 @@
             ],
             "title": "Load CLIP - Text Encoder",
             "properties": {
+              "Node name for S&R": "CLIPLoader",
               "cnr_id": "comfy-core",
               "ver": "0.34.0",
-              "Node name for S&R": "CLIPLoader",
               "models": [
                 {
                   "name": "gemma4-12b-with-proj-ltx-2.5-bf16.safetensors",
@@ -2980,9 +2980,9 @@
               }
             ],
             "properties": {
+              "Node name for S&R": "LTXICLoRALoaderModelOnly",
               "aux_id": "LightricksResearch/ComfyUI-LTXVideo-Internal",
               "ver": "65bfc50105d620a6a21675e022d229f947c6eb57",
-              "Node name for S&R": "LTXICLoRALoaderModelOnly",
               "models": [
                 {
                   "name": "ltx-2.5-22b-ic-lora-day-to-night-0.9.safetensors",
@@ -3057,9 +3057,9 @@
               }
             ],
             "properties": {
+              "Node name for S&R": "LTXICLoRALoaderModelOnly",
               "aux_id": "LightricksResearch/ComfyUI-LTXVideo-Internal",
               "ver": "65bfc50105d620a6a21675e022d229f947c6eb57",
-              "Node name for S&R": "LTXICLoRALoaderModelOnly",
               "models": [
                 {
                   "name": "ltx-2.5-22b-ic-lora-refine-details-1.0.safetensors",
@@ -3113,9 +3113,9 @@
               }
             ],
             "properties": {
+              "Node name for S&R": "LatentUpscaleModelLoader",
               "cnr_id": "comfy-core",
               "ver": "0.34.0",
-              "Node name for S&R": "LatentUpscaleModelLoader",
               "models": [
                 {
                   "name": "ltx-2.5-latent-spatial-upscaler-x2-bf16-1.0.safetensors",
@@ -3134,7 +3134,7 @@
         ],
         "groups": [
           {
-            "id": 1,
+            "id": 3,
             "title": "Load Models - one file per output",
             "bounding": [
               306,
@@ -3596,10 +3596,10 @@
         "id": "c28230e9-b195-4ec2-9679-39e1e920f733",
         "version": 1,
         "state": {
-          "lastGroupId": 158,
-          "lastNodeId": 9313,
-          "lastLinkId": 13808,
-          "lastRerouteId": 9038
+          "lastGroupId": 163,
+          "lastNodeId": 9316,
+          "lastLinkId": 14005,
+          "lastRerouteId": 9179
         },
         "revision": 0,
         "config": {},
@@ -3659,7 +3659,7 @@
             "linkIds": [
               13619,
               13755,
-              2
+              13921
             ],
             "label": "Positive prompt",
             "pos": [
@@ -3673,7 +3673,7 @@
             "type": "BOOLEAN",
             "linkIds": [
               13621,
-              3
+              13922
             ],
             "label": "Enhance positive prompt",
             "pos": [
@@ -3840,9 +3840,9 @@
             ],
             "title": "CLIP Text Encode (Negative Prompt)",
             "properties": {
+              "Node name for S&R": "CLIPTextEncode",
               "cnr_id": "comfy-core",
-              "ver": "0.3.28",
-              "Node name for S&R": "CLIPTextEncode"
+              "ver": "0.3.28"
             },
             "widgets_values": [
               ""
@@ -3862,7 +3862,7 @@
             ],
             "size": [
               429.2408203125,
-              412
+              456
             ],
             "flags": {
               "collapsed": false
@@ -3898,6 +3898,13 @@
                 "link": null
               },
               {
+                "localized_name": "system_prompt",
+                "name": "system_prompt",
+                "shape": 7,
+                "type": "STRING",
+                "link": null
+              },
+              {
                 "localized_name": "prompt",
                 "name": "prompt",
                 "type": "STRING",
@@ -3922,15 +3929,21 @@
                 "name": "generated_text",
                 "type": "STRING",
                 "links": [
-                  4
+                  13924
                 ]
+              },
+              {
+                "localized_name": "thinking",
+                "name": "thinking",
+                "type": "STRING",
+                "links": null
               }
             ],
             "title": "Positive prompt (t2v) enhancer - TextGenerateLTX2Prompt",
             "properties": {
+              "Node name for S&R": "TextGenerateLTX2Prompt",
               "cnr_id": "comfy-core",
-              "ver": "0.34.0",
-              "Node name for S&R": "TextGenerateLTX2Prompt"
+              "ver": "0.34.0"
             },
             "widgets_values": [
               "",
@@ -3944,7 +3957,8 @@
               0,
               0,
               false,
-              true
+              true,
+              "auto"
             ],
             "widgets_values_named": {
               "prompt": "",
@@ -3958,7 +3972,8 @@
               "sampling_mode.seed": 0,
               "sampling_mode.presence_penalty": 0,
               "thinking": false,
-              "use_default_template": true
+              "use_default_template": true,
+              "mtp": "auto"
             },
             "color": "#232",
             "bgcolor": "#353"
@@ -4007,9 +4022,9 @@
             ],
             "title": "CLIP Text Encode (Positive Prompt)",
             "properties": {
+              "Node name for S&R": "CLIPTextEncode",
               "cnr_id": "comfy-core",
-              "ver": "0.3.28",
-              "Node name for S&R": "CLIPTextEncode"
+              "ver": "0.3.28"
             },
             "widgets_values": [
               ""
@@ -4051,16 +4066,16 @@
                 "name": "contains",
                 "type": "BOOLEAN",
                 "links": [
-                  5,
-                  13787
+                  13787,
+                  13923
                 ]
               }
             ],
             "title": "has ltxv api key?",
             "properties": {
+              "Node name for S&R": "StringContains",
               "cnr_id": "comfy-core",
-              "ver": "0.34.0",
-              "Node name for S&R": "StringContains"
+              "ver": "0.34.0"
             },
             "widgets_values": [
               "",
@@ -4131,9 +4146,9 @@
               }
             ],
             "properties": {
+              "Node name for S&R": "LTXVConditioning",
               "cnr_id": "comfy-core",
-              "ver": "0.3.28",
-              "Node name for S&R": "LTXVConditioning"
+              "ver": "0.3.28"
             },
             "widgets_values": [
               24
@@ -4193,9 +4208,9 @@
             ],
             "title": "negative conditioning source - If/Else Switch",
             "properties": {
+              "Node name for S&R": "ComfySwitchNode",
               "cnr_id": "comfy-core",
-              "ver": "0.34.0",
-              "Node name for S&R": "ComfySwitchNode"
+              "ver": "0.34.0"
             },
             "widgets_values": [
               false
@@ -4240,7 +4255,7 @@
                 "widget": {
                   "name": "switch"
                 },
-                "link": 5
+                "link": 13923
               }
             ],
             "outputs": [
@@ -4255,9 +4270,9 @@
             ],
             "title": "positive conditioning source - If/Else Switch",
             "properties": {
+              "Node name for S&R": "ComfySwitchNode",
               "cnr_id": "comfy-core",
-              "ver": "0.34.0",
-              "Node name for S&R": "ComfySwitchNode"
+              "ver": "0.34.0"
             },
             "widgets_values": [
               false
@@ -4286,14 +4301,14 @@
                 "name": "on_false",
                 "shape": 7,
                 "type": "STRING",
-                "link": 2
+                "link": 13921
               },
               {
                 "localized_name": "on_true",
                 "name": "on_true",
                 "shape": 7,
                 "type": "STRING",
-                "link": 4
+                "link": 13924
               },
               {
                 "localized_name": "switch",
@@ -4302,7 +4317,7 @@
                 "widget": {
                   "name": "switch"
                 },
-                "link": 3
+                "link": 13922
               }
             ],
             "outputs": [
@@ -4317,9 +4332,9 @@
               }
             ],
             "properties": {
+              "Node name for S&R": "ComfySwitchNode",
               "cnr_id": "comfy-core",
-              "ver": "0.34.0",
-              "Node name for S&R": "ComfySwitchNode"
+              "ver": "0.34.0"
             },
             "widgets_values": [
               false
@@ -4392,9 +4407,9 @@
             ],
             "title": "🅛🅣🅧 Gemma API Text Encode - POSITIVE",
             "properties": {
+              "Node name for S&R": "GemmaAPITextEncode",
               "aux_id": "LightricksResearch/ComfyUI-LTXVideo-Internal",
-              "ver": "65bfc50105d620a6a21675e022d229f947c6eb57",
-              "Node name for S&R": "GemmaAPITextEncode"
+              "ver": "65bfc50105d620a6a21675e022d229f947c6eb57"
             },
             "widgets_values": [
               "",
@@ -4464,9 +4479,9 @@
             ],
             "title": "🅛🅣🅧 Gemma API Text Encode - NEGATIVE",
             "properties": {
+              "Node name for S&R": "GemmaAPITextEncode",
               "aux_id": "LightricksResearch/ComfyUI-LTXVideo-Internal",
-              "ver": "65bfc50105d620a6a21675e022d229f947c6eb57",
-              "Node name for S&R": "GemmaAPITextEncode"
+              "ver": "65bfc50105d620a6a21675e022d229f947c6eb57"
             },
             "widgets_values": [
               "",
@@ -4544,7 +4559,7 @@
             "target_id": 2612,
             "target_slot": 0,
             "type": "CLIP",
-            "parentId": 9001
+            "parentId": 9025
           },
           {
             "id": 13438,
@@ -4553,7 +4568,7 @@
             "target_id": 2483,
             "target_slot": 0,
             "type": "CLIP",
-            "parentId": 9003
+            "parentId": 9027
           },
           {
             "id": 13487,
@@ -4562,7 +4577,7 @@
             "target_id": 2612,
             "target_slot": 1,
             "type": "STRING",
-            "parentId": 9005
+            "parentId": 9029
           },
           {
             "id": 13615,
@@ -4570,14 +4585,6 @@
             "origin_slot": 7,
             "target_id": 5504,
             "target_slot": 3,
-            "type": "COMBO"
-          },
-          {
-            "id": 13616,
-            "origin_id": -10,
-            "origin_slot": 7,
-            "target_id": 5505,
-            "target_slot": 2,
             "type": "COMBO"
           },
           {
@@ -4621,46 +4628,22 @@
             "type": "BOOLEAN"
           },
           {
-            "id": 13746,
-            "origin_id": -10,
-            "origin_slot": 5,
-            "target_id": 9004,
-            "target_slot": 5,
-            "type": "INT"
-          },
-          {
-            "id": 13754,
-            "origin_id": -10,
-            "origin_slot": 1,
-            "target_id": 9004,
-            "target_slot": 0,
-            "type": "CLIP"
-          },
-          {
-            "id": 13755,
-            "origin_id": -10,
-            "origin_slot": 2,
-            "target_id": 9004,
-            "target_slot": 4,
-            "type": "STRING"
-          },
-          {
-            "id": 2,
+            "id": 13921,
             "origin_id": -10,
             "origin_slot": 2,
             "target_id": 5556,
             "target_slot": 0,
             "type": "STRING",
-            "parentId": 9007
+            "parentId": 9031
           },
           {
-            "id": 3,
+            "id": 13922,
             "origin_id": -10,
             "origin_slot": 3,
             "target_id": 5556,
             "target_slot": 2,
             "type": "BOOLEAN",
-            "parentId": 9009
+            "parentId": 9033
           },
           {
             "id": 13782,
@@ -4677,10 +4660,10 @@
             "target_id": 5557,
             "target_slot": 0,
             "type": "STRING",
-            "parentId": 9011
+            "parentId": 9035
           },
           {
-            "id": 5,
+            "id": 13923,
             "origin_id": 5557,
             "origin_slot": 0,
             "target_id": 5558,
@@ -4694,7 +4677,7 @@
             "target_id": 5558,
             "target_slot": 1,
             "type": "CONDITIONING",
-            "parentId": 9013
+            "parentId": 9037
           },
           {
             "id": 13786,
@@ -4719,7 +4702,7 @@
             "target_id": 5560,
             "target_slot": 1,
             "type": "CONDITIONING",
-            "parentId": 9015
+            "parentId": 9039
           },
           {
             "id": 13789,
@@ -4736,7 +4719,7 @@
             "target_id": -20,
             "target_slot": 1,
             "type": "CONDITIONING",
-            "parentId": 9017
+            "parentId": 9041
           },
           {
             "id": 13791,
@@ -4753,7 +4736,7 @@
             "target_id": -20,
             "target_slot": 0,
             "type": "STRING",
-            "parentId": 9019
+            "parentId": 9043
           },
           {
             "id": 13793,
@@ -4762,20 +4745,52 @@
             "target_id": 1241,
             "target_slot": 2,
             "type": "FLOAT",
-            "parentId": 9021
+            "parentId": 9045
           },
           {
-            "id": 4,
+            "id": 13924,
             "origin_id": 9004,
             "origin_slot": 0,
             "target_id": 5556,
             "target_slot": 1,
             "type": "STRING"
+          },
+          {
+            "id": 13754,
+            "origin_id": -10,
+            "origin_slot": 1,
+            "target_id": 9004,
+            "target_slot": 0,
+            "type": "CLIP"
+          },
+          {
+            "id": 13755,
+            "origin_id": -10,
+            "origin_slot": 2,
+            "target_id": 9004,
+            "target_slot": 5,
+            "type": "STRING"
+          },
+          {
+            "id": 13746,
+            "origin_id": -10,
+            "origin_slot": 5,
+            "target_id": 9004,
+            "target_slot": 6,
+            "type": "INT"
+          },
+          {
+            "id": 13616,
+            "origin_id": -10,
+            "origin_slot": 7,
+            "target_id": 5505,
+            "target_slot": 2,
+            "type": "COMBO"
           }
         ],
         "reroutes": [
           {
-            "id": 9000,
+            "id": 9024,
             "pos": [
               268,
               934.1857542723956
@@ -4785,8 +4800,8 @@
             ]
           },
           {
-            "id": 9001,
-            "parentId": 9000,
+            "id": 9025,
+            "parentId": 9024,
             "pos": [
               1171.2408203125,
               934.1857542723956
@@ -4796,7 +4811,7 @@
             ]
           },
           {
-            "id": 9002,
+            "id": 9026,
             "pos": [
               268,
               952.1857542723956
@@ -4806,8 +4821,8 @@
             ]
           },
           {
-            "id": 9003,
-            "parentId": 9002,
+            "id": 9027,
+            "parentId": 9026,
             "pos": [
               1171.2408203125,
               952.1857542723956
@@ -4817,7 +4832,7 @@
             ]
           },
           {
-            "id": 9004,
+            "id": 9028,
             "pos": [
               268,
               970.1857542723956
@@ -4827,8 +4842,8 @@
             ]
           },
           {
-            "id": 9005,
-            "parentId": 9004,
+            "id": 9029,
+            "parentId": 9028,
             "pos": [
               1171.2408203125,
               970.1857542723956
@@ -4838,49 +4853,49 @@
             ]
           },
           {
-            "id": 9006,
+            "id": 9030,
             "pos": [
               268,
               988.1857542723956
             ],
             "linkIds": [
-              2
+              13921
             ]
           },
           {
-            "id": 9007,
-            "parentId": 9006,
+            "id": 9031,
+            "parentId": 9030,
             "pos": [
               821.2408203125,
               988.1857542723956
             ],
             "linkIds": [
-              2
+              13921
             ]
           },
           {
-            "id": 9008,
+            "id": 9032,
             "pos": [
               268,
               1006.1857542723956
             ],
             "linkIds": [
-              3
+              13922
             ]
           },
           {
-            "id": 9009,
-            "parentId": 9008,
+            "id": 9033,
+            "parentId": 9032,
             "pos": [
               821.2408203125,
               1006.1857542723956
             ],
             "linkIds": [
-              3
+              13922
             ]
           },
           {
-            "id": 9010,
+            "id": 9034,
             "pos": [
               268,
               1024.1857542723956
@@ -4890,8 +4905,8 @@
             ]
           },
           {
-            "id": 9011,
-            "parentId": 9010,
+            "id": 9035,
+            "parentId": 9034,
             "pos": [
               1532.7228515625002,
               1024.1857542723956
@@ -4901,7 +4916,7 @@
             ]
           },
           {
-            "id": 9012,
+            "id": 9036,
             "pos": [
               721.6919921875,
               1042.1857542723956
@@ -4911,8 +4926,8 @@
             ]
           },
           {
-            "id": 9013,
-            "parentId": 9012,
+            "id": 9037,
+            "parentId": 9036,
             "pos": [
               1822.7228515625002,
               1042.1857542723956
@@ -4922,7 +4937,7 @@
             ]
           },
           {
-            "id": 9014,
+            "id": 9038,
             "pos": [
               721.6919921875,
               1060.1857542723956
@@ -4932,8 +4947,8 @@
             ]
           },
           {
-            "id": 9015,
-            "parentId": 9014,
+            "id": 9039,
+            "parentId": 9038,
             "pos": [
               1822.7228515625002,
               1060.1857542723956
@@ -4943,7 +4958,7 @@
             ]
           },
           {
-            "id": 9016,
+            "id": 9040,
             "pos": [
               2188.4939453125003,
               1078.1857542723956
@@ -4953,8 +4968,8 @@
             ]
           },
           {
-            "id": 9017,
-            "parentId": 9016,
+            "id": 9041,
+            "parentId": 9040,
             "pos": [
               2237.6277343750003,
               1078.1857542723956
@@ -4964,7 +4979,7 @@
             ]
           },
           {
-            "id": 9018,
+            "id": 9042,
             "pos": [
               1127.2408203125,
               1096.1857542723956
@@ -4974,8 +4989,8 @@
             ]
           },
           {
-            "id": 9019,
-            "parentId": 9018,
+            "id": 9043,
+            "parentId": 9042,
             "pos": [
               2237.6277343750003,
               1096.1857542723956
@@ -4985,7 +5000,7 @@
             ]
           },
           {
-            "id": 9020,
+            "id": 9044,
             "pos": [
               268,
               1114.1857542723956
@@ -4995,8 +5010,8 @@
             ]
           },
           {
-            "id": 9021,
-            "parentId": 9020,
+            "id": 9045,
+            "parentId": 9044,
             "pos": [
               1532.7228515625002,
               1114.1857542723956
@@ -5012,10 +5027,10 @@
         "id": "f9337bd7-ca7a-4a59-99f1-65b664bed7e7",
         "version": 1,
         "state": {
-          "lastGroupId": 158,
-          "lastNodeId": 9313,
-          "lastLinkId": 13808,
-          "lastRerouteId": 9038
+          "lastGroupId": 163,
+          "lastNodeId": 9316,
+          "lastLinkId": 14005,
+          "lastRerouteId": 9179
         },
         "revision": 0,
         "config": {},
@@ -5044,7 +5059,7 @@
             "name": "model",
             "type": "MODEL",
             "linkIds": [
-              1
+              13925
             ],
             "localized_name": "model",
             "pos": [
@@ -5057,7 +5072,7 @@
             "name": "positive",
             "type": "CONDITIONING",
             "linkIds": [
-              2
+              13926
             ],
             "localized_name": "positive",
             "pos": [
@@ -5070,7 +5085,7 @@
             "name": "negative",
             "type": "CONDITIONING",
             "linkIds": [
-              3
+              13927
             ],
             "localized_name": "negative",
             "pos": [
@@ -5083,7 +5098,7 @@
             "name": "latent_image",
             "type": "LATENT",
             "linkIds": [
-              4
+              13928
             ],
             "localized_name": "latent_image",
             "pos": [
@@ -5096,7 +5111,7 @@
             "name": "noise_seed",
             "type": "INT",
             "linkIds": [
-              5
+              13931
             ],
             "label": "noise seed",
             "pos": [
@@ -5109,7 +5124,7 @@
             "name": "cfg",
             "type": "FLOAT",
             "linkIds": [
-              13
+              13932
             ],
             "label": "guider cfg",
             "pos": [
@@ -5122,7 +5137,7 @@
             "name": "sampler_name",
             "type": "COMBO",
             "linkIds": [
-              8
+              13938
             ],
             "pos": [
               250,
@@ -5134,7 +5149,7 @@
             "name": "tile_width",
             "type": "INT",
             "linkIds": [
-              14
+              13933
             ],
             "label": "tile_width",
             "pos": [
@@ -5147,7 +5162,7 @@
             "name": "tile_height",
             "type": "INT",
             "linkIds": [
-              6
+              13934
             ],
             "label": "tile_height",
             "pos": [
@@ -5160,7 +5175,7 @@
             "name": "overlap_frac",
             "type": "FLOAT",
             "linkIds": [
-              15
+              13935
             ],
             "label": "overlap_frac",
             "pos": [
@@ -5173,7 +5188,7 @@
             "name": "tile_frames",
             "type": "INT",
             "linkIds": [
-              16
+              13936
             ],
             "label": "tile_frames",
             "pos": [
@@ -5186,7 +5201,7 @@
             "name": "vae",
             "type": "VAE",
             "linkIds": [
-              7
+              13937
             ],
             "label": "vae",
             "pos": [
@@ -5199,7 +5214,7 @@
             "name": "audio_latent",
             "type": "LATENT",
             "linkIds": [
-              10
+              13940
             ],
             "label": "audio_latent",
             "pos": [
@@ -5214,7 +5229,7 @@
             "name": "video_latent",
             "type": "LATENT",
             "linkIds": [
-              9
+              13939
             ],
             "pos": [
               1619.9463328320699,
@@ -5226,7 +5241,7 @@
             "name": "audio_latent",
             "type": "LATENT",
             "linkIds": [
-              17
+              13941
             ],
             "pos": [
               1619.9463328320699,
@@ -5258,7 +5273,7 @@
                 "widget": {
                   "name": "sampler_name"
                 },
-                "link": 8
+                "link": 13938
               }
             ],
             "outputs": [
@@ -5267,14 +5282,14 @@
                 "name": "SAMPLER",
                 "type": "SAMPLER",
                 "links": [
-                  12
+                  13930
                 ]
               }
             ],
             "properties": {
+              "Node name for S&R": "KSamplerSelect",
               "cnr_id": "comfy-core",
-              "ver": "0.14.1",
-              "Node name for S&R": "KSamplerSelect"
+              "ver": "0.14.1"
             },
             "widgets_values": [
               "euler"
@@ -5304,14 +5319,14 @@
                 "name": "SIGMAS",
                 "type": "SIGMAS",
                 "links": [
-                  11
+                  13929
                 ]
               }
             ],
             "properties": {
+              "Node name for S&R": "ManualSigmas",
               "cnr_id": "comfy-core",
-              "ver": "0.14.1",
-              "Node name for S&R": "ManualSigmas"
+              "ver": "0.14.1"
             },
             "widgets_values": [
               "1.0, 0.99375, 0.9875, 0.98125, 0.975, 0.909375, 0.725, 0.421875, 0.0"
@@ -5365,44 +5380,44 @@
                 "localized_name": "model",
                 "name": "model",
                 "type": "MODEL",
-                "link": 1
+                "link": 13925
               },
               {
                 "localized_name": "positive",
                 "name": "positive",
                 "type": "CONDITIONING",
-                "link": 2
+                "link": 13926
               },
               {
                 "localized_name": "negative",
                 "name": "negative",
                 "type": "CONDITIONING",
-                "link": 3
+                "link": 13927
               },
               {
                 "localized_name": "latents",
                 "name": "latents",
                 "type": "LATENT",
-                "link": 4
+                "link": 13928
               },
               {
                 "localized_name": "sigmas",
                 "name": "sigmas",
                 "type": "SIGMAS",
-                "link": 11
+                "link": 13929
               },
               {
                 "localized_name": "sampler",
                 "name": "sampler",
                 "type": "SAMPLER",
-                "link": 12
+                "link": 13930
               },
               {
                 "localized_name": "vae",
                 "name": "vae",
                 "shape": 7,
                 "type": "VAE",
-                "link": 7
+                "link": 13937
               },
               {
                 "localized_name": "seed",
@@ -5411,7 +5426,7 @@
                 "widget": {
                   "name": "seed"
                 },
-                "link": 5
+                "link": 13931
               },
               {
                 "localized_name": "cfg",
@@ -5420,7 +5435,7 @@
                 "widget": {
                   "name": "cfg"
                 },
-                "link": 13
+                "link": 13932
               },
               {
                 "localized_name": "tile_width",
@@ -5429,7 +5444,7 @@
                 "widget": {
                   "name": "tile_width"
                 },
-                "link": 14
+                "link": 13933
               },
               {
                 "localized_name": "tile_height",
@@ -5438,7 +5453,7 @@
                 "widget": {
                   "name": "tile_height"
                 },
-                "link": 6
+                "link": 13934
               },
               {
                 "localized_name": "overlap_frac",
@@ -5447,7 +5462,7 @@
                 "widget": {
                   "name": "overlap_frac"
                 },
-                "link": 15
+                "link": 13935
               },
               {
                 "localized_name": "tile_frames",
@@ -5456,7 +5471,7 @@
                 "widget": {
                   "name": "tile_frames"
                 },
-                "link": 16
+                "link": 13936
               }
             ],
             "outputs": [
@@ -5465,14 +5480,14 @@
                 "name": "output",
                 "type": "LATENT",
                 "links": [
-                  9
+                  13939
                 ]
               }
             ],
             "properties": {
+              "Node name for S&R": "LTXVTiledFusionSampler",
               "aux_id": "LightricksResearch/ComfyUI-LTXVideo-Internal",
-              "ver": "65bfc50105d620a6a21675e022d229f947c6eb57",
-              "Node name for S&R": "LTXVTiledFusionSampler"
+              "ver": "65bfc50105d620a6a21675e022d229f947c6eb57"
             },
             "widgets_values": [
               42,
@@ -5518,7 +5533,7 @@
                 "localized_name": "samples",
                 "name": "samples",
                 "type": "LATENT",
-                "link": 10
+                "link": 13940
               }
             ],
             "outputs": [
@@ -5527,15 +5542,15 @@
                 "name": "LATENT",
                 "type": "LATENT",
                 "links": [
-                  17
+                  13941
                 ]
               }
             ],
             "title": "Pass audio latent",
             "properties": {
+              "Node name for S&R": "RepeatLatentBatch",
               "cnr_id": "comfy-core",
-              "ver": "0.34.0",
-              "Node name for S&R": "RepeatLatentBatch"
+              "ver": "0.34.0"
             },
             "widgets_values": [
               1
@@ -5561,43 +5576,43 @@
         ],
         "links": [
           {
-            "id": 1,
+            "id": 13925,
             "origin_id": -10,
             "origin_slot": 0,
             "target_id": 9100,
             "target_slot": 0,
             "type": "MODEL",
-            "parentId": 9001
+            "parentId": 9047
           },
           {
-            "id": 2,
+            "id": 13926,
             "origin_id": -10,
             "origin_slot": 1,
             "target_id": 9100,
             "target_slot": 1,
             "type": "CONDITIONING",
-            "parentId": 9003
+            "parentId": 9049
           },
           {
-            "id": 3,
+            "id": 13927,
             "origin_id": -10,
             "origin_slot": 2,
             "target_id": 9100,
             "target_slot": 2,
             "type": "CONDITIONING",
-            "parentId": 9005
+            "parentId": 9051
           },
           {
-            "id": 4,
+            "id": 13928,
             "origin_id": -10,
             "origin_slot": 3,
             "target_id": 9100,
             "target_slot": 3,
             "type": "LATENT",
-            "parentId": 9007
+            "parentId": 9053
           },
           {
-            "id": 11,
+            "id": 13929,
             "origin_id": 4984,
             "origin_slot": 0,
             "target_id": 9100,
@@ -5605,7 +5620,7 @@
             "type": "SIGMAS"
           },
           {
-            "id": 12,
+            "id": 13930,
             "origin_id": 4831,
             "origin_slot": 0,
             "target_id": 9100,
@@ -5613,70 +5628,61 @@
             "type": "SAMPLER"
           },
           {
-            "id": 5,
+            "id": 13931,
             "origin_id": -10,
             "origin_slot": 4,
             "target_id": 9100,
             "target_slot": 7,
             "type": "INT",
-            "parentId": 9009
+            "parentId": 9055
           },
           {
-            "id": 13,
+            "id": 13932,
             "origin_id": -10,
             "origin_slot": 5,
             "target_id": 9100,
             "target_slot": 8,
             "type": "FLOAT",
-            "parentId": 9011
+            "parentId": 9057
           },
           {
-            "id": 14,
+            "id": 13933,
             "origin_id": -10,
             "origin_slot": 7,
             "target_id": 9100,
             "target_slot": 9,
             "type": "INT",
-            "parentId": 9013
+            "parentId": 9059
           },
           {
-            "id": 6,
+            "id": 13934,
             "origin_id": -10,
             "origin_slot": 8,
             "target_id": 9100,
             "target_slot": 10,
             "type": "INT",
-            "parentId": 9015
+            "parentId": 9061
           },
           {
-            "id": 15,
+            "id": 13935,
             "origin_id": -10,
             "origin_slot": 9,
             "target_id": 9100,
             "target_slot": 11,
             "type": "FLOAT",
-            "parentId": 9017
+            "parentId": 9063
           },
           {
-            "id": 16,
-            "origin_id": -10,
-            "origin_slot": 10,
-            "target_id": 9100,
-            "target_slot": 12,
-            "type": "INT",
-            "parentId": 9019
-          },
-          {
-            "id": 7,
+            "id": 13937,
             "origin_id": -10,
             "origin_slot": 11,
             "target_id": 9100,
             "target_slot": 6,
             "type": "VAE",
-            "parentId": 9021
+            "parentId": 9067
           },
           {
-            "id": 8,
+            "id": 13938,
             "origin_id": -10,
             "origin_slot": 6,
             "target_id": 4831,
@@ -5684,304 +5690,313 @@
             "type": "COMBO"
           },
           {
-            "id": 9,
+            "id": 13939,
             "origin_id": 9100,
             "origin_slot": 0,
             "target_id": -20,
             "target_slot": 0,
             "type": "LATENT",
-            "parentId": 9023
+            "parentId": 9069
           },
           {
-            "id": 10,
+            "id": 13940,
             "origin_id": -10,
             "origin_slot": 12,
             "target_id": 9104,
             "target_slot": 0,
             "type": "LATENT",
-            "parentId": 9025
+            "parentId": 9071
           },
           {
-            "id": 17,
+            "id": 13941,
             "origin_id": 9104,
             "origin_slot": 0,
             "target_id": -20,
             "target_slot": 1,
             "type": "LATENT"
+          },
+          {
+            "id": 13936,
+            "origin_id": -10,
+            "origin_slot": 10,
+            "target_id": 9100,
+            "target_slot": 12,
+            "type": "INT",
+            "parentId": 9065
           }
         ],
         "reroutes": [
           {
-            "id": 9000,
+            "id": 9046,
             "pos": [
               268,
               654
             ],
             "linkIds": [
-              1
+              13925
             ]
           },
           {
-            "id": 9001,
-            "parentId": 9000,
+            "id": 9047,
+            "parentId": 9046,
             "pos": [
               891.9463328320699,
               654
             ],
             "linkIds": [
-              1
+              13925
             ]
           },
           {
-            "id": 9002,
+            "id": 9048,
             "pos": [
               268,
               672
             ],
             "linkIds": [
-              2
+              13926
             ]
           },
           {
-            "id": 9003,
-            "parentId": 9002,
+            "id": 9049,
+            "parentId": 9048,
             "pos": [
               891.9463328320699,
               672
             ],
             "linkIds": [
-              2
+              13926
             ]
           },
           {
-            "id": 9004,
+            "id": 9050,
             "pos": [
               268,
               690
             ],
             "linkIds": [
-              3
+              13927
             ]
           },
           {
-            "id": 9005,
-            "parentId": 9004,
+            "id": 9051,
+            "parentId": 9050,
             "pos": [
               891.9463328320699,
               690
             ],
             "linkIds": [
-              3
+              13927
             ]
           },
           {
-            "id": 9006,
+            "id": 9052,
             "pos": [
               268,
               708
             ],
             "linkIds": [
-              4
+              13928
             ]
           },
           {
-            "id": 9007,
-            "parentId": 9006,
+            "id": 9053,
+            "parentId": 9052,
             "pos": [
               891.9463328320699,
               708
             ],
             "linkIds": [
-              4
+              13928
             ]
           },
           {
-            "id": 9008,
+            "id": 9054,
             "pos": [
               268,
               726
             ],
             "linkIds": [
-              5
+              13931
             ]
           },
           {
-            "id": 9009,
-            "parentId": 9008,
+            "id": 9055,
+            "parentId": 9054,
             "pos": [
               891.9463328320699,
               726
             ],
             "linkIds": [
-              5
+              13931
             ]
           },
           {
-            "id": 9010,
+            "id": 9056,
             "pos": [
               268,
               744
             ],
             "linkIds": [
-              13
+              13932
             ]
           },
           {
-            "id": 9011,
-            "parentId": 9010,
+            "id": 9057,
+            "parentId": 9056,
             "pos": [
               891.9463328320699,
               744
             ],
             "linkIds": [
-              13
+              13932
             ]
           },
           {
-            "id": 9012,
+            "id": 9058,
             "pos": [
               268,
               762
             ],
             "linkIds": [
-              14
+              13933
             ]
           },
           {
-            "id": 9013,
-            "parentId": 9012,
+            "id": 9059,
+            "parentId": 9058,
             "pos": [
               891.9463328320699,
               762
             ],
             "linkIds": [
-              14
+              13933
             ]
           },
           {
-            "id": 9014,
+            "id": 9060,
             "pos": [
               268,
               780
             ],
             "linkIds": [
-              6
+              13934
             ]
           },
           {
-            "id": 9015,
-            "parentId": 9014,
+            "id": 9061,
+            "parentId": 9060,
             "pos": [
               891.9463328320699,
               780
             ],
             "linkIds": [
-              6
+              13934
             ]
           },
           {
-            "id": 9016,
+            "id": 9062,
             "pos": [
               268,
               798
             ],
             "linkIds": [
-              15
+              13935
             ]
           },
           {
-            "id": 9017,
-            "parentId": 9016,
+            "id": 9063,
+            "parentId": 9062,
             "pos": [
               891.9463328320699,
               798
             ],
             "linkIds": [
-              15
+              13935
             ]
           },
           {
-            "id": 9018,
+            "id": 9064,
             "pos": [
               268,
               816
             ],
             "linkIds": [
-              16
+              13936
             ]
           },
           {
-            "id": 9019,
-            "parentId": 9018,
+            "id": 9065,
+            "parentId": 9064,
             "pos": [
               891.9463328320699,
               816
             ],
             "linkIds": [
-              16
+              13936
             ]
           },
           {
-            "id": 9020,
+            "id": 9066,
             "pos": [
               268,
               834
             ],
             "linkIds": [
-              7
+              13937
             ]
           },
           {
-            "id": 9021,
-            "parentId": 9020,
+            "id": 9067,
+            "parentId": 9066,
             "pos": [
               891.9463328320699,
               834
             ],
             "linkIds": [
-              7
+              13937
             ]
           },
           {
-            "id": 9022,
+            "id": 9068,
             "pos": [
               1267.9463328320699,
               852
             ],
             "linkIds": [
-              9
+              13939
             ]
           },
           {
-            "id": 9023,
-            "parentId": 9022,
+            "id": 9069,
+            "parentId": 9068,
             "pos": [
               1601.9463328320699,
               852
             ],
             "linkIds": [
-              9
+              13939
             ]
           },
           {
-            "id": 9024,
+            "id": 9070,
             "pos": [
               268,
               870
             ],
             "linkIds": [
-              10
+              13940
             ]
           },
           {
-            "id": 9025,
-            "parentId": 9024,
+            "id": 9071,
+            "parentId": 9070,
             "pos": [
               1311.9463328320699,
               870
             ],
             "linkIds": [
-              10
+              13940
             ]
           }
         ],
@@ -5991,10 +6006,10 @@
         "id": "bee43e38-9234-4e41-86ff-63874164f482",
         "version": 1,
         "state": {
-          "lastGroupId": 158,
-          "lastNodeId": 9313,
-          "lastLinkId": 13808,
-          "lastRerouteId": 9038
+          "lastGroupId": 163,
+          "lastNodeId": 9316,
+          "lastLinkId": 14005,
+          "lastRerouteId": 9179
         },
         "revision": 0,
         "config": {},
@@ -6202,9 +6217,9 @@
               }
             ],
             "properties": {
+              "Node name for S&R": "LTXVAudioVAEDecode",
               "cnr_id": "comfy-core",
-              "ver": "0.3.64",
-              "Node name for S&R": "LTXVAudioVAEDecode"
+              "ver": "0.3.64"
             }
           },
           {
@@ -6216,7 +6231,7 @@
             ],
             "size": [
               270,
-              126
+              150
             ],
             "flags": {},
             "order": 1,
@@ -6266,19 +6281,21 @@
               }
             ],
             "properties": {
+              "Node name for S&R": "CreateVideo",
               "cnr_id": "comfy-core",
-              "ver": "0.14.1",
-              "Node name for S&R": "CreateVideo"
+              "ver": "0.14.1"
             },
             "widgets_values": [
               30,
               8,
-              "sRGB"
+              "sRGB",
+              "none"
             ],
             "widgets_values_named": {
               "fps": 30,
               "bit_depth": 8,
-              "color_space": "sRGB"
+              "color_space": "sRGB",
+              "codec": "none"
             }
           },
           {
@@ -6356,9 +6373,9 @@
               }
             ],
             "properties": {
+              "Node name for S&R": "VAEDecodeTiled",
               "cnr_id": "comfy-core",
-              "ver": "0.34.0",
-              "Node name for S&R": "VAEDecodeTiled"
+              "ver": "0.34.0"
             },
             "widgets_values": [
               512,
@@ -6420,7 +6437,7 @@
             "target_id": 4849,
             "target_slot": 2,
             "type": "FLOAT",
-            "parentId": 9001
+            "parentId": 9073
           },
           {
             "id": 13112,
@@ -6437,7 +6454,7 @@
             "target_id": 4849,
             "target_slot": 3,
             "type": "INT",
-            "parentId": 9003
+            "parentId": 9075
           },
           {
             "id": 13710,
@@ -6498,7 +6515,7 @@
         ],
         "reroutes": [
           {
-            "id": 9000,
+            "id": 9072,
             "pos": [
               268,
               390
@@ -6508,8 +6525,8 @@
             ]
           },
           {
-            "id": 9001,
-            "parentId": 9000,
+            "id": 9073,
+            "parentId": 9072,
             "pos": [
               662,
               390
@@ -6519,7 +6536,7 @@
             ]
           },
           {
-            "id": 9002,
+            "id": 9074,
             "pos": [
               268,
               408
@@ -6529,8 +6546,8 @@
             ]
           },
           {
-            "id": 9003,
-            "parentId": 9002,
+            "id": 9075,
+            "parentId": 9074,
             "pos": [
               662,
               408
@@ -6546,10 +6563,10 @@
         "id": "c4a8f261-5b93-4e17-8d2a-6f01b3e97c45",
         "version": 1,
         "state": {
-          "lastGroupId": 158,
-          "lastNodeId": 9313,
-          "lastLinkId": 13808,
-          "lastRerouteId": 9038
+          "lastGroupId": 163,
+          "lastNodeId": 9316,
+          "lastLinkId": 14005,
+          "lastRerouteId": 9179
         },
         "revision": 0,
         "config": {},
@@ -6557,19 +6574,19 @@
         "inputNode": {
           "id": -10,
           "bounding": [
-            40,
-            206,
-            210,
-            72
+            -94.64116003230372,
+            380.5815157341756,
+            128,
+            68
           ]
         },
         "outputNode": {
           "id": -20,
           "bounding": [
-            1096,
-            206,
-            190,
-            182
+            1328.0145074362194,
+            310.65612991137976,
+            128,
+            168
           ]
         },
         "inputs": [
@@ -6578,11 +6595,11 @@
             "name": "video",
             "type": "VIDEO",
             "linkIds": [
-              10
+              13942
             ],
             "pos": [
-              250,
-              234
+              9.358839967696284,
+              404.5815157341756
             ]
           }
         ],
@@ -6592,11 +6609,11 @@
             "name": "image",
             "type": "IMAGE",
             "linkIds": [
-              2
+              13949
             ],
             "pos": [
-              1096,
-              234
+              1352.0145074362194,
+              334.65612991137976
             ]
           },
           {
@@ -6604,11 +6621,11 @@
             "name": "width",
             "type": "INT",
             "linkIds": [
-              13
+              13943
             ],
             "pos": [
-              1096,
-              256
+              1352.0145074362194,
+              354.65612991137976
             ]
           },
           {
@@ -6616,11 +6633,11 @@
             "name": "height",
             "type": "INT",
             "linkIds": [
-              14
+              13944
             ],
             "pos": [
-              1096,
-              278
+              1352.0145074362194,
+              374.65612991137976
             ]
           },
           {
@@ -6628,11 +6645,11 @@
             "name": "length",
             "type": "INT",
             "linkIds": [
-              15
+              13945
             ],
             "pos": [
-              1096,
-              300
+              1352.0145074362194,
+              394.65612991137976
             ]
           },
           {
@@ -6640,11 +6657,11 @@
             "name": "fps",
             "type": "FLOAT",
             "linkIds": [
-              16
+              13946
             ],
             "pos": [
-              1096,
-              322
+              1352.0145074362194,
+              414.65612991137976
             ]
           },
           {
@@ -6652,12 +6669,12 @@
             "name": "audio",
             "type": "AUDIO",
             "linkIds": [
-              18
+              14001
             ],
             "label": "audio",
             "pos": [
-              1096,
-              344
+              1352.0145074362194,
+              434.65612991137976
             ]
           }
         ],
@@ -6667,22 +6684,22 @@
             "id": 5029,
             "type": "GetImageSize",
             "pos": [
-              806,
-              206
+              773.5688732626718,
+              207.6570279003995
             ],
             "size": [
               210,
               136
             ],
             "flags": {},
-            "order": 1,
+            "order": 4,
             "mode": 0,
             "inputs": [
               {
                 "localized_name": "image",
                 "name": "image",
                 "type": "IMAGE",
-                "link": 1
+                "link": 13948
               }
             ],
             "outputs": [
@@ -6691,7 +6708,7 @@
                 "name": "width",
                 "type": "INT",
                 "links": [
-                  13
+                  13943
                 ]
               },
               {
@@ -6699,7 +6716,7 @@
                 "name": "height",
                 "type": "INT",
                 "links": [
-                  14
+                  13944
                 ]
               },
               {
@@ -6707,36 +6724,37 @@
                 "name": "batch_size",
                 "type": "INT",
                 "links": [
-                  15
+                  13945,
+                  14005
                 ]
               }
             ],
             "properties": {
+              "Node name for S&R": "GetImageSize",
               "cnr_id": "comfy-core",
-              "ver": "0.16.0",
-              "Node name for S&R": "GetImageSize"
+              "ver": "0.16.0"
             }
           },
           {
             "id": 9006,
             "type": "GetVideoComponents",
             "pos": [
-              330,
-              206
+              307.074323278948,
+              204.10159703885432
             ],
             "size": [
               374.163671875,
               106
             ],
             "flags": {},
-            "order": 2,
+            "order": 5,
             "mode": 0,
             "inputs": [
               {
                 "localized_name": "video",
                 "name": "video",
                 "type": "VIDEO",
-                "link": 10
+                "link": 13942
               }
             ],
             "outputs": [
@@ -6745,8 +6763,8 @@
                 "name": "images",
                 "type": "IMAGE",
                 "links": [
-                  1,
-                  2
+                  13948,
+                  13949
                 ]
               },
               {
@@ -6754,7 +6772,7 @@
                 "name": "audio",
                 "type": "AUDIO",
                 "links": [
-                  18
+                  14003
                 ]
               },
               {
@@ -6762,7 +6780,8 @@
                 "name": "fps",
                 "type": "FLOAT",
                 "links": [
-                  16
+                  13946,
+                  14004
                 ]
               },
               {
@@ -6779,17 +6798,17 @@
               }
             ],
             "properties": {
+              "Node name for S&R": "GetVideoComponents",
               "cnr_id": "comfy-core",
-              "ver": "0.3.75",
-              "Node name for S&R": "GetVideoComponents"
+              "ver": "0.3.75"
             }
           },
           {
             "id": 9001,
             "type": "MarkdownNote",
             "pos": [
-              330,
-              80
+              317.3569102880857,
+              -98.27345326985683
             ],
             "size": [
               396,
@@ -6810,17 +6829,201 @@
             },
             "color": "#432",
             "bgcolor": "#653"
+          },
+          {
+            "id": 9314,
+            "type": "ComfyMathExpression",
+            "pos": [
+              228.87755743638812,
+              640.0497870082171
+            ],
+            "size": [
+              270,
+              148
+            ],
+            "flags": {},
+            "order": 1,
+            "mode": 0,
+            "inputs": [
+              {
+                "label": "a",
+                "localized_name": "a",
+                "name": "values.a",
+                "type": "FLOAT,INT,BOOLEAN",
+                "link": 14005
+              },
+              {
+                "localized_name": "b",
+                "name": "values.b",
+                "shape": 7,
+                "type": "FLOAT,INT,BOOLEAN",
+                "link": 14004
+              },
+              {
+                "localized_name": "c",
+                "name": "values.c",
+                "shape": 7,
+                "type": "FLOAT,INT,BOOLEAN",
+                "link": null
+              }
+            ],
+            "outputs": [
+              {
+                "localized_name": "FLOAT",
+                "name": "FLOAT",
+                "type": "FLOAT",
+                "links": [
+                  13999
+                ]
+              },
+              {
+                "localized_name": "INT",
+                "name": "INT",
+                "type": "INT",
+                "links": []
+              },
+              {
+                "localized_name": "BOOL",
+                "name": "BOOL",
+                "type": "BOOLEAN",
+                "links": []
+              }
+            ],
+            "title": "audio duration = frames / fps",
+            "properties": {
+              "Node name for S&R": "ComfyMathExpression",
+              "cnr_id": "comfy-core"
+            },
+            "widgets_values": [
+              "a / b"
+            ],
+            "widgets_values_named": {
+              "expression": "a / b"
+            }
+          },
+          {
+            "id": 9315,
+            "type": "EmptyAudio",
+            "pos": [
+              537.5704397584304,
+              647.4774884636826
+            ],
+            "size": [
+              270,
+              110
+            ],
+            "flags": {},
+            "order": 2,
+            "mode": 0,
+            "inputs": [
+              {
+                "localized_name": "duration",
+                "name": "duration",
+                "type": "FLOAT",
+                "widget": {
+                  "name": "duration"
+                },
+                "link": 13999
+              }
+            ],
+            "outputs": [
+              {
+                "localized_name": "AUDIO",
+                "name": "AUDIO",
+                "type": "AUDIO",
+                "links": [
+                  14000
+                ]
+              }
+            ],
+            "title": "silence fallback",
+            "properties": {
+              "Node name for S&R": "EmptyAudio",
+              "cnr_id": "comfy-core"
+            },
+            "widgets_values": [
+              60,
+              44100,
+              2
+            ],
+            "widgets_values_named": {
+              "duration": 60,
+              "sample_rate": 44100,
+              "channels": 2
+            }
+          },
+          {
+            "id": 9316,
+            "type": "AudioMerge",
+            "pos": [
+              842.9736729046585,
+              641.2142460425019
+            ],
+            "size": [
+              270,
+              110
+            ],
+            "flags": {},
+            "order": 6,
+            "mode": 0,
+            "inputs": [
+              {
+                "localized_name": "audio1",
+                "name": "audio1",
+                "type": "AUDIO",
+                "link": 14003
+              },
+              {
+                "localized_name": "audio2",
+                "name": "audio2",
+                "type": "AUDIO",
+                "link": 14000
+              }
+            ],
+            "outputs": [
+              {
+                "localized_name": "AUDIO",
+                "name": "AUDIO",
+                "type": "AUDIO",
+                "links": [
+                  14001
+                ]
+              }
+            ],
+            "title": "use source audio, else silence",
+            "properties": {
+              "Node name for S&R": "AudioMerge",
+              "cnr_id": "comfy-core"
+            },
+            "widgets_values": [
+              "add"
+            ],
+            "widgets_values_named": {
+              "merge_method": "add"
+            }
           }
         ],
         "groups": [
           {
-            "id": 1,
+            "id": 159,
             "title": "Source Video",
             "bounding": [
-              306,
-              36,
-              734,
-              330
+              281.36390306952944,
+              123.03223205838545,
+              729.5416915852866,
+              245.41271072536887
+            ],
+            "color": "#3f789e",
+            "flags": {}
+          },
+          {
+            "id": 163,
+            "title": "Add silent sound for input video without sound",
+            "bounding": [
+              193.72637842930936,
+              536.17868663662,
+              941.5866593575402,
+              274.3619503493783
             ],
             "color": "#3f789e",
             "flags": {}
@@ -6828,7 +7031,7 @@
         ],
         "links": [
           {
-            "id": 10,
+            "id": 13942,
             "origin_id": -10,
             "origin_slot": 0,
             "target_id": 9006,
@@ -6836,7 +7039,7 @@
             "type": "VIDEO"
           },
           {
-            "id": 13,
+            "id": 13943,
             "origin_id": 5029,
             "origin_slot": 0,
             "target_id": -20,
@@ -6844,7 +7047,7 @@
             "type": "INT"
           },
           {
-            "id": 14,
+            "id": 13944,
             "origin_id": 5029,
             "origin_slot": 1,
             "target_id": -20,
@@ -6852,7 +7055,7 @@
             "type": "INT"
           },
           {
-            "id": 15,
+            "id": 13945,
             "origin_id": 5029,
             "origin_slot": 2,
             "target_id": -20,
@@ -6860,125 +7063,152 @@
             "type": "INT"
           },
           {
-            "id": 16,
+            "id": 13946,
             "origin_id": 9006,
             "origin_slot": 2,
             "target_id": -20,
             "target_slot": 4,
             "type": "FLOAT",
-            "parentId": 9001
+            "parentId": 9077
           },
           {
-            "id": 18,
-            "origin_id": 9006,
-            "origin_slot": 1,
-            "target_id": -20,
-            "target_slot": 5,
-            "type": "AUDIO",
-            "parentId": 9003
-          },
-          {
-            "id": 1,
+            "id": 13948,
             "origin_id": 9006,
             "origin_slot": 0,
             "target_id": 5029,
             "target_slot": 0,
-            "type": "IMAGE",
-            "parentId": 9005
+            "type": "IMAGE"
           },
           {
-            "id": 2,
+            "id": 13949,
             "origin_id": 9006,
             "origin_slot": 0,
             "target_id": -20,
             "target_slot": 0,
             "type": "IMAGE",
-            "parentId": 9007
+            "parentId": 9083
+          },
+          {
+            "id": 13999,
+            "origin_id": 9314,
+            "origin_slot": 0,
+            "target_id": 9315,
+            "target_slot": 0,
+            "type": "FLOAT"
+          },
+          {
+            "id": 14000,
+            "origin_id": 9315,
+            "origin_slot": 0,
+            "target_id": 9316,
+            "target_slot": 1,
+            "type": "AUDIO"
+          },
+          {
+            "id": 14001,
+            "origin_id": 9316,
+            "origin_slot": 0,
+            "target_id": -20,
+            "target_slot": 5,
+            "type": "AUDIO"
+          },
+          {
+            "id": 14003,
+            "origin_id": 9006,
+            "origin_slot": 1,
+            "target_id": 9316,
+            "target_slot": 0,
+            "type": "AUDIO"
+          },
+          {
+            "id": 14004,
+            "origin_id": 9006,
+            "origin_slot": 2,
+            "target_id": 9314,
+            "target_slot": 1,
+            "type": "FLOAT"
+          },
+          {
+            "id": 14005,
+            "origin_id": 5029,
+            "origin_slot": 2,
+            "target_id": 9314,
+            "target_slot": 0,
+            "type": "INT"
+          }
+        ],
+        "floatingLinks": [
+          {
+            "id": 14002,
+            "origin_id": -1,
+            "origin_slot": -1,
+            "target_id": -20,
+            "target_slot": 5,
+            "type": "AUDIO",
+            "parentId": 9079
           }
         ],
         "reroutes": [
           {
-            "id": 9000,
+            "id": 9076,
             "pos": [
               722.163671875,
               428
             ],
             "linkIds": [
-              16
+              13946
             ]
           },
           {
-            "id": 9001,
-            "parentId": 9000,
+            "id": 9077,
+            "parentId": 9076,
             "pos": [
               1078,
               428
             ],
             "linkIds": [
-              16
+              13946
             ]
           },
           {
-            "id": 9002,
+            "id": 9078,
             "pos": [
               722.163671875,
               446
             ],
-            "linkIds": [
-              18
-            ]
+            "linkIds": []
           },
           {
-            "id": 9003,
-            "parentId": 9002,
+            "id": 9079,
+            "parentId": 9078,
             "pos": [
               1078,
               446
             ],
-            "linkIds": [
-              18
-            ]
+            "linkIds": [],
+            "floating": {
+              "slotType": "input"
+            }
           },
           {
-            "id": 9004,
-            "pos": [
-              722.163671875,
-              464
-            ],
-            "linkIds": [
-              1
-            ]
-          },
-          {
-            "id": 9005,
-            "parentId": 9004,
-            "pos": [
-              788,
-              464
-            ],
-            "linkIds": [
-              1
-            ]
-          },
-          {
-            "id": 9006,
+            "id": 9082,
             "pos": [
               722.163671875,
               482
             ],
             "linkIds": [
-              2
+              13949
             ]
           },
           {
-            "id": 9007,
-            "parentId": 9006,
+            "id": 9083,
+            "parentId": 9082,
             "pos": [
               1078,
               482
             ],
             "linkIds": [
-              2
+              13949
             ]
           }
         ],
@@ -6988,10 +7218,10 @@
         "id": "d92e6f38-7a14-4c85-b3e0-9f52a1d68b74",
         "version": 1,
         "state": {
-          "lastGroupId": 158,
-          "lastNodeId": 9313,
-          "lastLinkId": 13808,
-          "lastRerouteId": 9038
+          "lastGroupId": 163,
+          "lastNodeId": 9316,
+          "lastLinkId": 14005,
+          "lastRerouteId": 9179
         },
         "revision": 0,
         "config": {},
@@ -7020,7 +7250,7 @@
             "name": "latent_downscale_factor",
             "type": "FLOAT",
             "linkIds": [
-              15
+              13955
             ],
             "label": "latent_downscale_factor",
             "pos": [
@@ -7034,7 +7264,7 @@
             "type": "INT",
             "linkIds": [
               61,
-              19
+              13961
             ],
             "label": "length",
             "pos": [
@@ -7047,7 +7277,7 @@
             "name": "fps",
             "type": "FLOAT",
             "linkIds": [
-              21
+              13956
             ],
             "label": "fps",
             "pos": [
@@ -7099,7 +7329,7 @@
             "name": "positive",
             "type": "CONDITIONING",
             "linkIds": [
-              8
+              13952
             ],
             "label": "positive",
             "pos": [
@@ -7112,7 +7342,7 @@
             "name": "negative",
             "type": "CONDITIONING",
             "linkIds": [
-              9
+              13953
             ],
             "label": "negative",
             "pos": [
@@ -7125,7 +7355,7 @@
             "name": "vae",
             "type": "VAE",
             "linkIds": [
-              11
+              13954
             ],
             "label": "vae",
             "pos": [
@@ -7219,7 +7449,7 @@
             "name": "frozen_audio",
             "type": "LATENT",
             "linkIds": [
-              2
+              13957
             ],
             "label": "frozen_audio",
             "pos": [
@@ -7457,8 +7687,8 @@
                 "name": "tile_frames",
                 "type": "INT",
                 "links": [
-                  7,
-                  75
+                  75,
+                  13960
                 ]
               },
               {
@@ -7480,9 +7710,9 @@
             ],
             "title": "Get Tiling Sizes",
             "properties": {
+              "Node name for S&R": "LTXVGetTilingSizes",
               "aux_id": "LightricksResearch/ComfyUI-LTXVideo-Internal",
-              "ver": "65bfc50105d620a6a21675e022d229f947c6eb57",
-              "Node name for S&R": "LTXVGetTilingSizes"
+              "ver": "65bfc50105d620a6a21675e022d229f947c6eb57"
             },
             "widgets_values": [
               1920,
@@ -7524,13 +7754,13 @@
                 "localized_name": "positive",
                 "name": "positive",
                 "type": "CONDITIONING",
-                "link": 8
+                "link": 13952
               },
               {
                 "localized_name": "negative",
                 "name": "negative",
                 "type": "CONDITIONING",
-                "link": 9
+                "link": 13953
               },
               {
                 "localized_name": "frame_rate",
@@ -7539,7 +7769,7 @@
                 "widget": {
                   "name": "frame_rate"
                 },
-                "link": 21
+                "link": 13956
               }
             ],
             "outputs": [
@@ -7549,8 +7779,8 @@
                 "type": "CONDITIONING",
                 "slot_index": 0,
                 "links": [
-                  4,
-                  29
+                  29,
+                  13950
                 ]
               },
               {
@@ -7559,15 +7789,15 @@
                 "type": "CONDITIONING",
                 "slot_index": 1,
                 "links": [
-                  5,
-                  30
+                  30,
+                  13951
                 ]
               }
             ],
             "properties": {
+              "Node name for S&R": "LTXVConditioning",
               "cnr_id": "comfy-core",
-              "ver": "0.3.28",
-              "Node name for S&R": "LTXVConditioning"
+              "ver": "0.3.28"
             },
             "widgets_values": [
               24
@@ -7616,7 +7846,7 @@
                 "widget": {
                   "name": "length"
                 },
-                "link": 19
+                "link": 13961
               }
             ],
             "outputs": [
@@ -7625,14 +7855,14 @@
                 "name": "LATENT",
                 "type": "LATENT",
                 "links": [
-                  1
+                  13958
                 ]
               }
             ],
             "properties": {
+              "Node name for S&R": "EmptyLTXVLatentVideo",
               "cnr_id": "comfy-core",
-              "ver": "0.3.43",
-              "Node name for S&R": "EmptyLTXVLatentVideo"
+              "ver": "0.3.43"
             },
             "widgets_values": [
               960,
@@ -7693,15 +7923,15 @@
                 "name": "IMAGE",
                 "type": "IMAGE",
                 "links": [
-                  16
+                  13959
                 ]
               }
             ],
             "title": "Resize guide to canvas",
             "properties": {
+              "Node name for S&R": "ImageScale",
               "cnr_id": "comfy-core",
-              "ver": "0.34.0",
-              "Node name for S&R": "ImageScale"
+              "ver": "0.34.0"
             },
             "widgets_values": [
               "lanczos",
@@ -7735,31 +7965,31 @@
                 "localized_name": "positive",
                 "name": "positive",
                 "type": "CONDITIONING",
-                "link": 4
+                "link": 13950
               },
               {
                 "localized_name": "negative",
                 "name": "negative",
                 "type": "CONDITIONING",
-                "link": 5
+                "link": 13951
               },
               {
                 "localized_name": "vae",
                 "name": "vae",
                 "type": "VAE",
-                "link": 11
+                "link": 13954
               },
               {
                 "localized_name": "latent",
                 "name": "latent",
                 "type": "LATENT",
-                "link": 1
+                "link": 13958
               },
               {
                 "localized_name": "image",
                 "name": "image",
                 "type": "IMAGE",
-                "link": 16
+                "link": 13959
               },
               {
                 "localized_name": "latent_downscale_factor",
@@ -7768,7 +7998,7 @@
                 "widget": {
                   "name": "latent_downscale_factor"
                 },
-                "link": 15
+                "link": 13955
               },
               {
                 "localized_name": "tile_frames",
@@ -7778,7 +8008,7 @@
                 "widget": {
                   "name": "tile_frames"
                 },
-                "link": 7
+                "link": 13960
               }
             ],
             "outputs": [
@@ -7808,9 +8038,9 @@
               }
             ],
             "properties": {
+              "Node name for S&R": "LTXAddVideoICLoRAGuide",
               "aux_id": "LightricksResearch/ComfyUI-LTXVideo-Internal",
-              "ver": "65bfc50105d620a6a21675e022d229f947c6eb57",
-              "Node name for S&R": "LTXAddVideoICLoRAGuide"
+              "ver": "65bfc50105d620a6a21675e022d229f947c6eb57"
             },
             "widgets_values": [
               0,
@@ -7874,9 +8104,9 @@
               }
             ],
             "properties": {
+              "Node name for S&R": "VAEEncodeAudio",
               "cnr_id": "comfy-core",
-              "ver": "0.34.0",
-              "Node name for S&R": "VAEEncodeAudio"
+              "ver": "0.34.0"
             }
           },
           {
@@ -7931,21 +8161,21 @@
                 "name": "frozen_audio",
                 "type": "LATENT",
                 "links": [
-                  2
+                  13957
                 ]
               }
             ],
             "title": "freeze the source audio",
             "properties": {
+              "Node name for S&R": "LTXVSetAudioRefTokens",
               "aux_id": "LightricksResearch/ComfyUI-LTXVideo-Internal",
-              "ver": "65bfc50105d620a6a21675e022d229f947c6eb57",
-              "Node name for S&R": "LTXVSetAudioRefTokens"
+              "ver": "65bfc50105d620a6a21675e022d229f947c6eb57"
             }
           }
         ],
         "groups": [
           {
-            "id": 1,
+            "id": 160,
             "title": "Preprocess",
             "bounding": [
               306,
@@ -7959,25 +8189,25 @@
         ],
         "links": [
           {
-            "id": 4,
+            "id": 13950,
             "origin_id": 9005,
             "origin_slot": 0,
             "target_id": 5012,
             "target_slot": 0,
             "type": "CONDITIONING",
-            "parentId": 9001
+            "parentId": 9085
           },
           {
-            "id": 5,
+            "id": 13951,
             "origin_id": 9005,
             "origin_slot": 1,
             "target_id": 5012,
             "target_slot": 1,
             "type": "CONDITIONING",
-            "parentId": 9003
+            "parentId": 9087
           },
           {
-            "id": 8,
+            "id": 13952,
             "origin_id": -10,
             "origin_slot": 6,
             "target_id": 9005,
@@ -7985,7 +8215,7 @@
             "type": "CONDITIONING"
           },
           {
-            "id": 9,
+            "id": 13953,
             "origin_id": -10,
             "origin_slot": 7,
             "target_id": 9005,
@@ -7993,25 +8223,16 @@
             "type": "CONDITIONING"
           },
           {
-            "id": 11,
+            "id": 13954,
             "origin_id": -10,
             "origin_slot": 8,
             "target_id": 5012,
             "target_slot": 2,
             "type": "VAE",
-            "parentId": 9005
+            "parentId": 9089
           },
           {
-            "id": 15,
-            "origin_id": -10,
-            "origin_slot": 0,
-            "target_id": 5012,
-            "target_slot": 5,
-            "type": "FLOAT",
-            "parentId": 9007
-          },
-          {
-            "id": 21,
+            "id": 13956,
             "origin_id": -10,
             "origin_slot": 2,
             "target_id": 9005,
@@ -8083,22 +8304,151 @@
             "type": "CONDITIONING"
           },
           {
-            "id": 2,
+            "id": 13957,
             "origin_id": 9008,
             "origin_slot": 2,
             "target_id": -20,
             "target_slot": 3,
             "type": "LATENT",
-            "parentId": 9009
+            "parentId": 9093
           },
           {
-            "id": 1,
+            "id": 13958,
             "origin_id": 3059,
             "origin_slot": 0,
             "target_id": 5012,
             "target_slot": 3,
             "type": "LATENT",
-            "parentId": 9011
+            "parentId": 9095
+          },
+          {
+            "id": 53,
+            "origin_id": -10,
+            "origin_slot": 10,
+            "target_id": 9200,
+            "target_slot": 0,
+            "type": "IMAGE"
+          },
+          {
+            "id": 54,
+            "origin_id": 9200,
+            "origin_slot": 0,
+            "target_id": 3059,
+            "target_slot": 0,
+            "type": "INT"
+          },
+          {
+            "id": 55,
+            "origin_id": 9200,
+            "origin_slot": 1,
+            "target_id": 3059,
+            "target_slot": 1,
+            "type": "INT"
+          },
+          {
+            "id": 58,
+            "origin_id": -10,
+            "origin_slot": 10,
+            "target_id": 9201,
+            "target_slot": 0,
+            "type": "IMAGE",
+            "parentId": 9097
+          },
+          {
+            "id": 13959,
+            "origin_id": 9201,
+            "origin_slot": 0,
+            "target_id": 5012,
+            "target_slot": 4,
+            "type": "IMAGE"
+          },
+          {
+            "id": 13961,
+            "origin_id": -10,
+            "origin_slot": 1,
+            "target_id": 3059,
+            "target_slot": 2,
+            "type": "INT"
+          },
+          {
+            "id": 70,
+            "origin_id": 9200,
+            "origin_slot": 2,
+            "target_id": -20,
+            "target_slot": 4,
+            "type": "INT",
+            "parentId": 9101
+          },
+          {
+            "id": 71,
+            "origin_id": 9200,
+            "origin_slot": 3,
+            "target_id": -20,
+            "target_slot": 5,
+            "type": "INT",
+            "parentId": 9103
+          },
+          {
+            "id": 74,
+            "origin_id": 9200,
+            "origin_slot": 6,
+            "target_id": -20,
+            "target_slot": 6,
+            "type": "FLOAT",
+            "parentId": 9105
+          },
+          {
+            "id": 75,
+            "origin_id": 9200,
+            "origin_slot": 7,
+            "target_id": -20,
+            "target_slot": 7,
+            "type": "INT",
+            "parentId": 9107
+          },
+          {
+            "id": 72,
+            "origin_id": 9200,
+            "origin_slot": 4,
+            "target_id": -20,
+            "target_slot": 8,
+            "type": "INT",
+            "parentId": 9109
+          },
+          {
+            "id": 73,
+            "origin_id": 9200,
+            "origin_slot": 5,
+            "target_id": -20,
+            "target_slot": 9,
+            "type": "INT",
+            "parentId": 9111
+          },
+          {
+            "id": 76,
+            "origin_id": 9200,
+            "origin_slot": 8,
+            "target_id": -20,
+            "target_slot": 10,
+            "type": "BOOLEAN",
+            "parentId": 9113
+          },
+          {
+            "id": 77,
+            "origin_id": 9200,
+            "origin_slot": 9,
+            "target_id": -20,
+            "target_slot": 11,
+            "type": "STRING",
+            "parentId": 9115
+          },
+          {
+            "id": 61,
+            "origin_id": -10,
+            "origin_slot": 1,
+            "target_id": 9200,
+            "target_slot": 1,
+            "type": "INT"
           },
           {
             "id": 50,
@@ -8125,38 +8475,6 @@
             "type": "COMBO"
           },
           {
-            "id": 53,
-            "origin_id": -10,
-            "origin_slot": 10,
-            "target_id": 9200,
-            "target_slot": 0,
-            "type": "IMAGE"
-          },
-          {
-            "id": 61,
-            "origin_id": -10,
-            "origin_slot": 1,
-            "target_id": 9200,
-            "target_slot": 1,
-            "type": "INT"
-          },
-          {
-            "id": 54,
-            "origin_id": 9200,
-            "origin_slot": 0,
-            "target_id": 3059,
-            "target_slot": 0,
-            "type": "INT"
-          },
-          {
-            "id": 55,
-            "origin_id": 9200,
-            "origin_slot": 1,
-            "target_id": 3059,
-            "target_slot": 1,
-            "type": "INT"
-          },
-          {
             "id": 56,
             "origin_id": 9200,
             "origin_slot": 0,
@@ -8173,241 +8491,153 @@
             "type": "INT"
           },
           {
-            "id": 58,
+            "id": 13955,
             "origin_id": -10,
-            "origin_slot": 10,
-            "target_id": 9201,
-            "target_slot": 0,
-            "type": "IMAGE",
-            "parentId": 9013
-          },
-          {
-            "id": 16,
-            "origin_id": 9201,
             "origin_slot": 0,
             "target_id": 5012,
-            "target_slot": 4,
-            "type": "IMAGE"
+            "target_slot": 5,
+            "type": "FLOAT",
+            "parentId": 9091
           },
           {
-            "id": 7,
+            "id": 13960,
             "origin_id": 9200,
             "origin_slot": 7,
             "target_id": 5012,
             "target_slot": 6,
             "type": "INT",
-            "parentId": 9015
-          },
-          {
-            "id": 19,
-            "origin_id": -10,
-            "origin_slot": 1,
-            "target_id": 3059,
-            "target_slot": 2,
-            "type": "INT"
-          },
-          {
-            "id": 70,
-            "origin_id": 9200,
-            "origin_slot": 2,
-            "target_id": -20,
-            "target_slot": 4,
-            "type": "INT",
-            "parentId": 9017
-          },
-          {
-            "id": 71,
-            "origin_id": 9200,
-            "origin_slot": 3,
-            "target_id": -20,
-            "target_slot": 5,
-            "type": "INT",
-            "parentId": 9019
-          },
-          {
-            "id": 74,
-            "origin_id": 9200,
-            "origin_slot": 6,
-            "target_id": -20,
-            "target_slot": 6,
-            "type": "FLOAT",
-            "parentId": 9021
-          },
-          {
-            "id": 75,
-            "origin_id": 9200,
-            "origin_slot": 7,
-            "target_id": -20,
-            "target_slot": 7,
-            "type": "INT",
-            "parentId": 9023
-          },
-          {
-            "id": 72,
-            "origin_id": 9200,
-            "origin_slot": 4,
-            "target_id": -20,
-            "target_slot": 8,
-            "type": "INT",
-            "parentId": 9025
-          },
-          {
-            "id": 73,
-            "origin_id": 9200,
-            "origin_slot": 5,
-            "target_id": -20,
-            "target_slot": 9,
-            "type": "INT",
-            "parentId": 9027
-          },
-          {
-            "id": 76,
-            "origin_id": 9200,
-            "origin_slot": 8,
-            "target_id": -20,
-            "target_slot": 10,
-            "type": "BOOLEAN",
-            "parentId": 9029
-          },
-          {
-            "id": 77,
-            "origin_id": 9200,
-            "origin_slot": 9,
-            "target_id": -20,
-            "target_slot": 11,
-            "type": "STRING",
-            "parentId": 9031
+            "parentId": 9099
           }
         ],
         "reroutes": [
           {
-            "id": 9000,
+            "id": 9084,
             "pos": [
               618.1809911778764,
               958
             ],
             "linkIds": [
-              4
+              13950
             ]
           },
           {
-            "id": 9001,
-            "parentId": 9000,
+            "id": 9085,
+            "parentId": 9084,
             "pos": [
               1055.4432958653765,
               958
             ],
             "linkIds": [
-              4
+              13950
             ]
           },
           {
-            "id": 9002,
+            "id": 9086,
             "pos": [
               618.1809911778764,
               976
             ],
             "linkIds": [
-              5
+              13951
             ]
           },
           {
-            "id": 9003,
-            "parentId": 9002,
+            "id": 9087,
+            "parentId": 9086,
             "pos": [
               1055.4432958653765,
               976
             ],
             "linkIds": [
-              5
+              13951
             ]
           },
           {
-            "id": 9004,
+            "id": 9088,
             "pos": [
               268,
               994
             ],
             "linkIds": [
-              11
+              13954
             ]
           },
           {
-            "id": 9005,
-            "parentId": 9004,
+            "id": 9089,
+            "parentId": 9088,
             "pos": [
               1055.4432958653765,
               994
             ],
             "linkIds": [
-              11
+              13954
             ]
           },
           {
-            "id": 9006,
+            "id": 9090,
             "pos": [
               268,
               1012
             ],
             "linkIds": [
-              15
+              13955
             ]
           },
           {
-            "id": 9007,
-            "parentId": 9006,
+            "id": 9091,
+            "parentId": 9090,
             "pos": [
               1055.4432958653765,
               1012
             ],
             "linkIds": [
-              15
+              13955
             ]
           },
           {
-            "id": 9008,
+            "id": 9092,
             "pos": [
               1011.4432958653764,
               1030
             ],
             "linkIds": [
-              2
+              13957
             ]
           },
           {
-            "id": 9009,
-            "parentId": 9008,
+            "id": 9093,
+            "parentId": 9092,
             "pos": [
               1452.3296239903766,
               1030
             ],
             "linkIds": [
-              2
+              13957
             ]
           },
           {
-            "id": 9010,
+            "id": 9094,
             "pos": [
               618.1809911778764,
               1048
             ],
             "linkIds": [
-              1
+              13958
             ]
           },
           {
-            "id": 9011,
-            "parentId": 9010,
+            "id": 9095,
+            "parentId": 9094,
             "pos": [
               1055.4432958653765,
               1048
             ],
             "linkIds": [
-              1
+              13958
             ]
           },
           {
-            "id": 9012,
+            "id": 9096,
             "pos": [
               268,
               1066
@@ -8417,8 +8647,8 @@
             ]
           },
           {
-            "id": 9013,
-            "parentId": 9012,
+            "id": 9097,
+            "parentId": 9096,
             "pos": [
               662.1809911778764,
               1066
@@ -8428,28 +8658,28 @@
             ]
           },
           {
-            "id": 9014,
+            "id": 9098,
             "pos": [
               618,
               1084
             ],
             "linkIds": [
-              7
+              13960
             ]
           },
           {
-            "id": 9015,
-            "parentId": 9014,
+            "id": 9099,
+            "parentId": 9098,
             "pos": [
               1055.4432958653765,
               1084
             ],
             "linkIds": [
-              7
+              13960
             ]
           },
           {
-            "id": 9016,
+            "id": 9100,
             "pos": [
               618,
               1102
@@ -8459,8 +8689,8 @@
             ]
           },
           {
-            "id": 9017,
-            "parentId": 9016,
+            "id": 9101,
+            "parentId": 9100,
             "pos": [
               1452.3296239903766,
               1102
@@ -8470,7 +8700,7 @@
             ]
           },
           {
-            "id": 9018,
+            "id": 9102,
             "pos": [
               618,
               1120
@@ -8480,8 +8710,8 @@
             ]
           },
           {
-            "id": 9019,
-            "parentId": 9018,
+            "id": 9103,
+            "parentId": 9102,
             "pos": [
               1452.3296239903766,
               1120
@@ -8491,7 +8721,7 @@
             ]
           },
           {
-            "id": 9020,
+            "id": 9104,
             "pos": [
               618,
               1138
@@ -8501,8 +8731,8 @@
             ]
           },
           {
-            "id": 9021,
-            "parentId": 9020,
+            "id": 9105,
+            "parentId": 9104,
             "pos": [
               1452.3296239903766,
               1138
@@ -8512,7 +8742,7 @@
             ]
           },
           {
-            "id": 9022,
+            "id": 9106,
             "pos": [
               618,
               1156
@@ -8522,8 +8752,8 @@
             ]
           },
           {
-            "id": 9023,
-            "parentId": 9022,
+            "id": 9107,
+            "parentId": 9106,
             "pos": [
               1452.3296239903766,
               1156
@@ -8533,7 +8763,7 @@
             ]
           },
           {
-            "id": 9024,
+            "id": 9108,
             "pos": [
               618,
               1174
@@ -8543,8 +8773,8 @@
             ]
           },
           {
-            "id": 9025,
-            "parentId": 9024,
+            "id": 9109,
+            "parentId": 9108,
             "pos": [
               1452.3296239903766,
               1174
@@ -8554,7 +8784,7 @@
             ]
           },
           {
-            "id": 9026,
+            "id": 9110,
             "pos": [
               618,
               1192
@@ -8564,8 +8794,8 @@
             ]
           },
           {
-            "id": 9027,
-            "parentId": 9026,
+            "id": 9111,
+            "parentId": 9110,
             "pos": [
               1452.3296239903766,
               1192
@@ -8575,7 +8805,7 @@
             ]
           },
           {
-            "id": 9028,
+            "id": 9112,
             "pos": [
               618,
               1210
@@ -8585,8 +8815,8 @@
             ]
           },
           {
-            "id": 9029,
-            "parentId": 9028,
+            "id": 9113,
+            "parentId": 9112,
             "pos": [
               1452.3296239903766,
               1210
@@ -8596,7 +8826,7 @@
             ]
           },
           {
-            "id": 9030,
+            "id": 9114,
             "pos": [
               618,
               1228
@@ -8606,8 +8836,8 @@
             ]
           },
           {
-            "id": 9031,
-            "parentId": 9030,
+            "id": 9115,
+            "parentId": 9114,
             "pos": [
               1452.3296239903766,
               1228
@@ -8623,10 +8853,10 @@
         "id": "2449b2d3-ef34-45f8-833d-a4ebca19b39e",
         "version": 1,
         "state": {
-          "lastGroupId": 158,
-          "lastNodeId": 9313,
-          "lastLinkId": 13808,
-          "lastRerouteId": 9038
+          "lastGroupId": 163,
+          "lastNodeId": 9316,
+          "lastLinkId": 14005,
+          "lastRerouteId": 9179
         },
         "revision": 0,
         "config": {},
@@ -8681,7 +8911,7 @@
             "name": "negative",
             "type": "CONDITIONING",
             "linkIds": [
-              9
+              13964
             ],
             "label": "negative",
             "pos": [
@@ -8694,7 +8924,7 @@
             "name": "vae",
             "type": "VAE",
             "linkIds": [
-              11,
+              13965,
               85,
               88
             ],
@@ -8709,7 +8939,7 @@
             "name": "audio_vae",
             "type": "VAE",
             "linkIds": [
-              27
+              13972
             ],
             "label": "audio_vae",
             "pos": [
@@ -8722,7 +8952,7 @@
             "name": "latent_downscale_factor",
             "type": "FLOAT",
             "linkIds": [
-              15
+              13966
             ],
             "label": "latent_downscale_factor",
             "pos": [
@@ -8735,7 +8965,7 @@
             "name": "source_image",
             "type": "IMAGE",
             "linkIds": [
-              58
+              13978
             ],
             "label": "source_image",
             "pos": [
@@ -8748,7 +8978,7 @@
             "name": "fps",
             "type": "FLOAT",
             "linkIds": [
-              21
+              13967
             ],
             "label": "fps",
             "pos": [
@@ -8761,7 +8991,7 @@
             "name": "audio",
             "type": "AUDIO",
             "linkIds": [
-              26
+              13971
             ],
             "label": "audio",
             "pos": [
@@ -8774,7 +9004,7 @@
             "name": "tile_frames",
             "type": "INT",
             "linkIds": [
-              2
+              13977
             ],
             "label": "tile_frames",
             "pos": [
@@ -8800,7 +9030,7 @@
             "name": "output_width",
             "type": "INT",
             "linkIds": [
-              56
+              13979
             ],
             "label": "output_width",
             "pos": [
@@ -8813,7 +9043,7 @@
             "name": "output_height",
             "type": "INT",
             "linkIds": [
-              57
+              13980
             ],
             "label": "output_height",
             "pos": [
@@ -8855,7 +9085,7 @@
             "name": "positive",
             "type": "CONDITIONING",
             "linkIds": [
-              23
+              13968
             ],
             "label": "positive",
             "pos": [
@@ -8868,7 +9098,7 @@
             "name": "negative",
             "type": "CONDITIONING",
             "linkIds": [
-              24
+              13969
             ],
             "label": "negative",
             "pos": [
@@ -8881,7 +9111,7 @@
             "name": "latent",
             "type": "LATENT",
             "linkIds": [
-              25
+              13970
             ],
             "label": "latent",
             "pos": [
@@ -8894,7 +9124,7 @@
             "name": "frozen_audio",
             "type": "LATENT",
             "linkIds": [
-              1
+              13976
             ],
             "label": "frozen_audio",
             "pos": [
@@ -8948,9 +9178,9 @@
             ],
             "title": "Stage 2 prompt encode",
             "properties": {
+              "Node name for S&R": "CLIPTextEncode",
               "cnr_id": "comfy-core",
-              "ver": "0.34.0",
-              "Node name for S&R": "CLIPTextEncode"
+              "ver": "0.34.0"
             },
             "widgets_values": [
               ""
@@ -8984,7 +9214,7 @@
                 "localized_name": "negative",
                 "name": "negative",
                 "type": "CONDITIONING",
-                "link": 9
+                "link": 13964
               },
               {
                 "localized_name": "frame_rate",
@@ -8993,7 +9223,7 @@
                 "widget": {
                   "name": "frame_rate"
                 },
-                "link": 21
+                "link": 13967
               }
             ],
             "outputs": [
@@ -9003,8 +9233,8 @@
                 "type": "CONDITIONING",
                 "slot_index": 0,
                 "links": [
-                  4,
-                  29
+                  13962,
+                  13974
                 ]
               },
               {
@@ -9013,15 +9243,15 @@
                 "type": "CONDITIONING",
                 "slot_index": 1,
                 "links": [
-                  5,
-                  30
+                  13963,
+                  13975
                 ]
               }
             ],
             "properties": {
+              "Node name for S&R": "LTXVConditioning",
               "cnr_id": "comfy-core",
-              "ver": "0.3.28",
-              "Node name for S&R": "LTXVConditioning"
+              "ver": "0.3.28"
             },
             "widgets_values": [
               24
@@ -9077,9 +9307,9 @@
             ],
             "title": "Latent upscale ×2",
             "properties": {
+              "Node name for S&R": "LTXVLatentUpsampler",
               "cnr_id": "comfy-core",
-              "ver": "0.34.0",
-              "Node name for S&R": "LTXVLatentUpsampler"
+              "ver": "0.34.0"
             }
           },
           {
@@ -9128,9 +9358,9 @@
             ],
             "title": "Latent upscale ×2 (8K)",
             "properties": {
+              "Node name for S&R": "LTXVLatentUpsampler",
               "cnr_id": "comfy-core",
-              "ver": "0.34.0",
-              "Node name for S&R": "LTXVLatentUpsampler"
+              "ver": "0.34.0"
             }
           },
           {
@@ -9184,9 +9414,9 @@
             ],
             "title": "4K or 8K latent",
             "properties": {
+              "Node name for S&R": "ComfySwitchNode",
               "cnr_id": "comfy-core",
-              "ver": "0.34.0",
-              "Node name for S&R": "ComfySwitchNode"
+              "ver": "0.34.0"
             },
             "widgets_values": [
               false
@@ -9214,7 +9444,7 @@
                 "localized_name": "image",
                 "name": "image",
                 "type": "IMAGE",
-                "link": 58
+                "link": 13978
               },
               {
                 "localized_name": "width",
@@ -9223,7 +9453,7 @@
                 "widget": {
                   "name": "width"
                 },
-                "link": 56
+                "link": 13979
               },
               {
                 "localized_name": "height",
@@ -9232,7 +9462,7 @@
                 "widget": {
                   "name": "height"
                 },
-                "link": 57
+                "link": 13980
               }
             ],
             "outputs": [
@@ -9241,15 +9471,15 @@
                 "name": "IMAGE",
                 "type": "IMAGE",
                 "links": [
-                  16
+                  13981
                 ]
               }
             ],
             "title": "Resize original to stage 2",
             "properties": {
+              "Node name for S&R": "ImageScale",
               "cnr_id": "comfy-core",
-              "ver": "0.34.0",
-              "Node name for S&R": "ImageScale"
+              "ver": "0.34.0"
             },
             "widgets_values": [
               "lanczos",
@@ -9283,19 +9513,19 @@
                 "localized_name": "positive",
                 "name": "positive",
                 "type": "CONDITIONING",
-                "link": 4
+                "link": 13962
               },
               {
                 "localized_name": "negative",
                 "name": "negative",
                 "type": "CONDITIONING",
-                "link": 5
+                "link": 13963
               },
               {
                 "localized_name": "vae",
                 "name": "vae",
                 "type": "VAE",
-                "link": 11
+                "link": 13965
               },
               {
                 "localized_name": "latent",
@@ -9307,7 +9537,7 @@
                 "localized_name": "image",
                 "name": "image",
                 "type": "IMAGE",
-                "link": 16
+                "link": 13981
               },
               {
                 "localized_name": "latent_downscale_factor",
@@ -9316,7 +9546,7 @@
                 "widget": {
                   "name": "latent_downscale_factor"
                 },
-                "link": 15
+                "link": 13966
               },
               {
                 "localized_name": "tile_frames",
@@ -9326,7 +9556,7 @@
                 "widget": {
                   "name": "tile_frames"
                 },
-                "link": 2
+                "link": 13977
               }
             ],
             "outputs": [
@@ -9335,7 +9565,7 @@
                 "name": "positive",
                 "type": "CONDITIONING",
                 "links": [
-                  23
+                  13968
                 ]
               },
               {
@@ -9343,7 +9573,7 @@
                 "name": "negative",
                 "type": "CONDITIONING",
                 "links": [
-                  24
+                  13969
                 ]
               },
               {
@@ -9351,14 +9581,14 @@
                 "name": "latent",
                 "type": "LATENT",
                 "links": [
-                  25
+                  13970
                 ]
               }
             ],
             "properties": {
+              "Node name for S&R": "LTXAddVideoICLoRAGuide",
               "aux_id": "LightricksResearch/ComfyUI-LTXVideo-Internal",
-              "ver": "65bfc50105d620a6a21675e022d229f947c6eb57",
-              "Node name for S&R": "LTXAddVideoICLoRAGuide"
+              "ver": "65bfc50105d620a6a21675e022d229f947c6eb57"
             },
             "widgets_values": [
               0,
@@ -9402,13 +9632,13 @@
                 "localized_name": "audio",
                 "name": "audio",
                 "type": "AUDIO",
-                "link": 26
+                "link": 13971
               },
               {
                 "localized_name": "vae",
                 "name": "vae",
                 "type": "VAE",
-                "link": 27
+                "link": 13972
               }
             ],
             "outputs": [
@@ -9417,14 +9647,14 @@
                 "name": "LATENT",
                 "type": "LATENT",
                 "links": [
-                  28
+                  13973
                 ]
               }
             ],
             "properties": {
+              "Node name for S&R": "VAEEncodeAudio",
               "cnr_id": "comfy-core",
-              "ver": "0.34.0",
-              "Node name for S&R": "VAEEncodeAudio"
+              "ver": "0.34.0"
             }
           },
           {
@@ -9446,19 +9676,19 @@
                 "localized_name": "positive",
                 "name": "positive",
                 "type": "CONDITIONING",
-                "link": 29
+                "link": 13974
               },
               {
                 "localized_name": "negative",
                 "name": "negative",
                 "type": "CONDITIONING",
-                "link": 30
+                "link": 13975
               },
               {
                 "localized_name": "audio_latent",
                 "name": "audio_latent",
                 "type": "LATENT",
-                "link": 28
+                "link": 13973
               }
             ],
             "outputs": [
@@ -9479,21 +9709,21 @@
                 "name": "frozen_audio",
                 "type": "LATENT",
                 "links": [
-                  1
+                  13976
                 ]
               }
             ],
             "title": "freeze the source audio",
             "properties": {
+              "Node name for S&R": "LTXVSetAudioRefTokens",
               "aux_id": "LightricksResearch/ComfyUI-LTXVideo-Internal",
-              "ver": "65bfc50105d620a6a21675e022d229f947c6eb57",
-              "Node name for S&R": "LTXVSetAudioRefTokens"
+              "ver": "65bfc50105d620a6a21675e022d229f947c6eb57"
             }
           }
         ],
         "groups": [
           {
-            "id": 1,
+            "id": 161,
             "title": "Preprocess - stage 2",
             "bounding": [
               306,
@@ -9507,25 +9737,25 @@
         ],
         "links": [
           {
-            "id": 4,
+            "id": 13962,
             "origin_id": 9304,
             "origin_slot": 0,
             "target_id": 9306,
             "target_slot": 0,
             "type": "CONDITIONING",
-            "parentId": 9001
+            "parentId": 9117
           },
           {
-            "id": 5,
+            "id": 13963,
             "origin_id": 9304,
             "origin_slot": 1,
             "target_id": 9306,
             "target_slot": 1,
             "type": "CONDITIONING",
-            "parentId": 9003
+            "parentId": 9119
           },
           {
-            "id": 9,
+            "id": 13964,
             "origin_id": -10,
             "origin_slot": 2,
             "target_id": 9304,
@@ -9533,25 +9763,16 @@
             "type": "CONDITIONING"
           },
           {
-            "id": 11,
+            "id": 13965,
             "origin_id": -10,
             "origin_slot": 3,
             "target_id": 9306,
             "target_slot": 2,
             "type": "VAE",
-            "parentId": 9005
+            "parentId": 9121
           },
           {
-            "id": 15,
-            "origin_id": -10,
-            "origin_slot": 5,
-            "target_id": 9306,
-            "target_slot": 5,
-            "type": "FLOAT",
-            "parentId": 9007
-          },
-          {
-            "id": 21,
+            "id": 13967,
             "origin_id": -10,
             "origin_slot": 7,
             "target_id": 9304,
@@ -9559,7 +9780,7 @@
             "type": "FLOAT"
           },
           {
-            "id": 23,
+            "id": 13968,
             "origin_id": 9306,
             "origin_slot": 0,
             "target_id": -20,
@@ -9567,7 +9788,7 @@
             "type": "CONDITIONING"
           },
           {
-            "id": 24,
+            "id": 13969,
             "origin_id": 9306,
             "origin_slot": 1,
             "target_id": -20,
@@ -9575,7 +9796,7 @@
             "type": "CONDITIONING"
           },
           {
-            "id": 25,
+            "id": 13970,
             "origin_id": 9306,
             "origin_slot": 2,
             "target_id": -20,
@@ -9583,7 +9804,7 @@
             "type": "LATENT"
           },
           {
-            "id": 26,
+            "id": 13971,
             "origin_id": -10,
             "origin_slot": 8,
             "target_id": 9307,
@@ -9591,7 +9812,7 @@
             "type": "AUDIO"
           },
           {
-            "id": 27,
+            "id": 13972,
             "origin_id": -10,
             "origin_slot": 4,
             "target_id": 9307,
@@ -9599,79 +9820,52 @@
             "type": "VAE"
           },
           {
-            "id": 28,
+            "id": 13973,
             "origin_id": 9307,
             "origin_slot": 0,
             "target_id": 9308,
             "target_slot": 2,
             "type": "LATENT",
-            "parentId": 9009
+            "parentId": 9125
           },
           {
-            "id": 29,
+            "id": 13974,
             "origin_id": 9304,
             "origin_slot": 0,
             "target_id": 9308,
             "target_slot": 0,
             "type": "CONDITIONING",
-            "parentId": 9011
+            "parentId": 9127
           },
           {
-            "id": 30,
+            "id": 13975,
             "origin_id": 9304,
             "origin_slot": 1,
             "target_id": 9308,
             "target_slot": 1,
             "type": "CONDITIONING",
-            "parentId": 9013
+            "parentId": 9129
           },
           {
-            "id": 1,
+            "id": 13976,
             "origin_id": 9308,
             "origin_slot": 2,
             "target_id": -20,
             "target_slot": 3,
             "type": "LATENT",
-            "parentId": 9015
+            "parentId": 9131
           },
           {
-            "id": 2,
-            "origin_id": -10,
-            "origin_slot": 9,
-            "target_id": 9306,
-            "target_slot": 6,
-            "type": "INT",
-            "parentId": 9017
-          },
-          {
-            "id": 58,
+            "id": 13978,
             "origin_id": -10,
             "origin_slot": 6,
             "target_id": 9305,
             "target_slot": 0,
             "type": "IMAGE",
-            "parentId": 9019
+            "parentId": 9135
           },
           {
-            "id": 56,
-            "origin_id": -10,
-            "origin_slot": 11,
-            "target_id": 9305,
-            "target_slot": 1,
-            "type": "INT",
-            "parentId": 9021
-          },
-          {
-            "id": 57,
-            "origin_id": -10,
-            "origin_slot": 12,
-            "target_id": 9305,
-            "target_slot": 2,
-            "type": "INT",
-            "parentId": 9023
-          },
-          {
-            "id": 16,
+            "id": 13981,
             "origin_id": 9305,
             "origin_slot": 0,
             "target_id": 9306,
@@ -9709,7 +9903,7 @@
             "target_id": 9300,
             "target_slot": 0,
             "type": "LATENT",
-            "parentId": 9025
+            "parentId": 9141
           },
           {
             "id": 84,
@@ -9718,7 +9912,7 @@
             "target_id": 9300,
             "target_slot": 1,
             "type": "LATENT_UPSCALE_MODEL",
-            "parentId": 9027
+            "parentId": 9143
           },
           {
             "id": 85,
@@ -9727,7 +9921,7 @@
             "target_id": 9300,
             "target_slot": 2,
             "type": "VAE",
-            "parentId": 9029
+            "parentId": 9145
           },
           {
             "id": 86,
@@ -9744,7 +9938,7 @@
             "target_id": 9301,
             "target_slot": 1,
             "type": "LATENT_UPSCALE_MODEL",
-            "parentId": 9031
+            "parentId": 9147
           },
           {
             "id": 88,
@@ -9753,7 +9947,7 @@
             "target_id": 9301,
             "target_slot": 2,
             "type": "VAE",
-            "parentId": 9033
+            "parentId": 9149
           },
           {
             "id": 89,
@@ -9778,7 +9972,7 @@
             "target_id": 9302,
             "target_slot": 2,
             "type": "BOOLEAN",
-            "parentId": 9035
+            "parentId": 9151
           },
           {
             "id": 92,
@@ -9787,264 +9981,300 @@
             "target_id": 9306,
             "target_slot": 3,
             "type": "LATENT",
-            "parentId": 9037
+            "parentId": 9153
+          },
+          {
+            "id": 13979,
+            "origin_id": -10,
+            "origin_slot": 11,
+            "target_id": 9305,
+            "target_slot": 1,
+            "type": "INT",
+            "parentId": 9137
+          },
+          {
+            "id": 13980,
+            "origin_id": -10,
+            "origin_slot": 12,
+            "target_id": 9305,
+            "target_slot": 2,
+            "type": "INT",
+            "parentId": 9139
+          },
+          {
+            "id": 13966,
+            "origin_id": -10,
+            "origin_slot": 5,
+            "target_id": 9306,
+            "target_slot": 5,
+            "type": "FLOAT",
+            "parentId": 9123
+          },
+          {
+            "id": 13977,
+            "origin_id": -10,
+            "origin_slot": 9,
+            "target_id": 9306,
+            "target_slot": 6,
+            "type": "INT",
+            "parentId": 9133
           }
         ],
         "reroutes": [
           {
-            "id": 9000,
+            "id": 9116,
             "pos": [
               618.1809911778764,
               580
             ],
             "linkIds": [
-              4
+              13962
             ]
           },
           {
-            "id": 9001,
-            "parentId": 9000,
+            "id": 9117,
+            "parentId": 9116,
             "pos": [
               1405.4432958653765,
               580
             ],
             "linkIds": [
-              4
+              13962
             ]
           },
           {
-            "id": 9002,
+            "id": 9118,
             "pos": [
               618.1809911778764,
               598
             ],
             "linkIds": [
-              5
+              13963
             ]
           },
           {
-            "id": 9003,
-            "parentId": 9002,
+            "id": 9119,
+            "parentId": 9118,
             "pos": [
               1405.4432958653765,
               598
             ],
             "linkIds": [
-              5
+              13963
             ]
           },
           {
-            "id": 9004,
+            "id": 9120,
             "pos": [
               268,
               616
             ],
             "linkIds": [
-              11
+              13965
             ]
           },
           {
-            "id": 9005,
-            "parentId": 9004,
+            "id": 9121,
+            "parentId": 9120,
             "pos": [
               1405.4432958653765,
               616
             ],
             "linkIds": [
-              11
+              13965
             ]
           },
           {
-            "id": 9006,
+            "id": 9122,
             "pos": [
               268,
               634
             ],
             "linkIds": [
-              15
+              13966
             ]
           },
           {
-            "id": 9007,
-            "parentId": 9006,
+            "id": 9123,
+            "parentId": 9122,
             "pos": [
               1405.4432958653765,
               634
             ],
             "linkIds": [
-              15
+              13966
             ]
           },
           {
-            "id": 9008,
+            "id": 9124,
             "pos": [
               618.1809911778764,
               652
             ],
             "linkIds": [
-              28
+              13973
             ]
           },
           {
-            "id": 9009,
-            "parentId": 9008,
+            "id": 9125,
+            "parentId": 9124,
             "pos": [
               1012.1809911778764,
               652
             ],
             "linkIds": [
-              28
+              13973
             ]
           },
           {
-            "id": 9010,
+            "id": 9126,
             "pos": [
               618.1809911778764,
               670
             ],
             "linkIds": [
-              29
+              13974
             ]
           },
           {
-            "id": 9011,
-            "parentId": 9010,
+            "id": 9127,
+            "parentId": 9126,
             "pos": [
               1012.1809911778764,
               670
             ],
             "linkIds": [
-              29
+              13974
             ]
           },
           {
-            "id": 9012,
+            "id": 9128,
             "pos": [
               618.1809911778764,
               688
             ],
             "linkIds": [
-              30
+              13975
             ]
           },
           {
-            "id": 9013,
-            "parentId": 9012,
+            "id": 9129,
+            "parentId": 9128,
             "pos": [
               1012.1809911778764,
               688
             ],
             "linkIds": [
-              30
+              13975
             ]
           },
           {
-            "id": 9014,
+            "id": 9130,
             "pos": [
               1361.4432958653765,
               706
             ],
             "linkIds": [
-              1
+              13976
             ]
           },
           {
-            "id": 9015,
-            "parentId": 9014,
+            "id": 9131,
+            "parentId": 9130,
             "pos": [
               1802.3296239903766,
               706
             ],
             "linkIds": [
-              1
+              13976
             ]
           },
           {
-            "id": 9016,
+            "id": 9132,
             "pos": [
               268,
               724
             ],
             "linkIds": [
-              2
+              13977
             ]
           },
           {
-            "id": 9017,
-            "parentId": 9016,
+            "id": 9133,
+            "parentId": 9132,
             "pos": [
               1405.4432958653765,
               724
             ],
             "linkIds": [
-              2
+              13977
             ]
           },
           {
-            "id": 9018,
+            "id": 9134,
             "pos": [
               268,
               742
             ],
             "linkIds": [
-              58
+              13978
             ]
           },
           {
-            "id": 9019,
-            "parentId": 9018,
+            "id": 9135,
+            "parentId": 9134,
             "pos": [
               1012.1809911778764,
               742
             ],
             "linkIds": [
-              58
+              13978
             ]
           },
           {
-            "id": 9020,
+            "id": 9136,
             "pos": [
               268,
               760
             ],
             "linkIds": [
-              56
+              13979
             ]
           },
           {
-            "id": 9021,
-            "parentId": 9020,
+            "id": 9137,
+            "parentId": 9136,
             "pos": [
               1012.1809911778764,
               760
             ],
             "linkIds": [
-              56
+              13979
             ]
           },
           {
-            "id": 9022,
+            "id": 9138,
             "pos": [
               268,
               778
             ],
             "linkIds": [
-              57
+              13980
             ]
           },
           {
-            "id": 9023,
-            "parentId": 9022,
+            "id": 9139,
+            "parentId": 9138,
             "pos": [
               1012.1809911778764,
               778
             ],
             "linkIds": [
-              57
+              13980
             ]
           },
           {
-            "id": 9024,
+            "id": 9140,
             "pos": [
               268,
               796
@@ -10054,8 +10284,8 @@
             ]
           },
           {
-            "id": 9025,
-            "parentId": 9024,
+            "id": 9141,
+            "parentId": 9140,
             "pos": [
               662.1809911778764,
               796
@@ -10065,7 +10295,7 @@
             ]
           },
           {
-            "id": 9026,
+            "id": 9142,
             "pos": [
               268,
               814
@@ -10075,8 +10305,8 @@
             ]
           },
           {
-            "id": 9027,
-            "parentId": 9026,
+            "id": 9143,
+            "parentId": 9142,
             "pos": [
               662.1809911778764,
               814
@@ -10086,7 +10316,7 @@
             ]
           },
           {
-            "id": 9028,
+            "id": 9144,
             "pos": [
               268,
               832
@@ -10096,8 +10326,8 @@
             ]
           },
           {
-            "id": 9029,
-            "parentId": 9028,
+            "id": 9145,
+            "parentId": 9144,
             "pos": [
               662.1809911778764,
               832
@@ -10107,7 +10337,7 @@
             ]
           },
           {
-            "id": 9030,
+            "id": 9146,
             "pos": [
               268,
               850
@@ -10117,8 +10347,8 @@
             ]
           },
           {
-            "id": 9031,
-            "parentId": 9030,
+            "id": 9147,
+            "parentId": 9146,
             "pos": [
               662.1809911778764,
               850
@@ -10128,7 +10358,7 @@
             ]
           },
           {
-            "id": 9032,
+            "id": 9148,
             "pos": [
               268,
               868
@@ -10138,8 +10368,8 @@
             ]
           },
           {
-            "id": 9033,
-            "parentId": 9032,
+            "id": 9149,
+            "parentId": 9148,
             "pos": [
               662.1809911778764,
               868
@@ -10149,7 +10379,7 @@
             ]
           },
           {
-            "id": 9034,
+            "id": 9150,
             "pos": [
               268,
               886
@@ -10159,8 +10389,8 @@
             ]
           },
           {
-            "id": 9035,
-            "parentId": 9034,
+            "id": 9151,
+            "parentId": 9150,
             "pos": [
               662.1809911778764,
               886
@@ -10170,7 +10400,7 @@
             ]
           },
           {
-            "id": 9036,
+            "id": 9152,
             "pos": [
               968.1809911778764,
               904
@@ -10180,8 +10410,8 @@
             ]
           },
           {
-            "id": 9037,
-            "parentId": 9036,
+            "id": 9153,
+            "parentId": 9152,
             "pos": [
               1405.4432958653765,
               904
@@ -10197,10 +10427,10 @@
         "id": "8deebd57-c969-4460-8f46-12a98501e2c3",
         "version": 1,
         "state": {
-          "lastGroupId": 158,
-          "lastNodeId": 9313,
-          "lastLinkId": 13808,
-          "lastRerouteId": 9038
+          "lastGroupId": 163,
+          "lastNodeId": 9316,
+          "lastLinkId": 14005,
+          "lastRerouteId": 9179
         },
         "revision": 0,
         "config": {},
@@ -10229,7 +10459,7 @@
             "name": "model",
             "type": "MODEL",
             "linkIds": [
-              1
+              13982
             ],
             "localized_name": "model",
             "pos": [
@@ -10242,7 +10472,7 @@
             "name": "positive",
             "type": "CONDITIONING",
             "linkIds": [
-              2
+              13983
             ],
             "localized_name": "positive",
             "pos": [
@@ -10255,7 +10485,7 @@
             "name": "negative",
             "type": "CONDITIONING",
             "linkIds": [
-              3
+              13984
             ],
             "localized_name": "negative",
             "pos": [
@@ -10268,7 +10498,7 @@
             "name": "latent_image",
             "type": "LATENT",
             "linkIds": [
-              4
+              13985
             ],
             "localized_name": "latent_image",
             "pos": [
@@ -10281,7 +10511,7 @@
             "name": "noise_seed",
             "type": "INT",
             "linkIds": [
-              5
+              13988
             ],
             "label": "noise seed",
             "pos": [
@@ -10294,7 +10524,7 @@
             "name": "cfg",
             "type": "FLOAT",
             "linkIds": [
-              13
+              13989
             ],
             "label": "guider cfg",
             "pos": [
@@ -10307,7 +10537,7 @@
             "name": "sampler_name",
             "type": "COMBO",
             "linkIds": [
-              8
+              13995
             ],
             "pos": [
               250,
@@ -10319,7 +10549,7 @@
             "name": "tile_width",
             "type": "INT",
             "linkIds": [
-              14
+              13990
             ],
             "label": "tile_width",
             "pos": [
@@ -10332,7 +10562,7 @@
             "name": "tile_height",
             "type": "INT",
             "linkIds": [
-              6
+              13991
             ],
             "label": "tile_height",
             "pos": [
@@ -10345,7 +10575,7 @@
             "name": "overlap_frac",
             "type": "FLOAT",
             "linkIds": [
-              15
+              13992
             ],
             "label": "overlap_frac",
             "pos": [
@@ -10358,7 +10588,7 @@
             "name": "tile_frames",
             "type": "INT",
             "linkIds": [
-              16
+              13993
             ],
             "label": "tile_frames",
             "pos": [
@@ -10371,7 +10601,7 @@
             "name": "vae",
             "type": "VAE",
             "linkIds": [
-              7
+              13994
             ],
             "label": "vae",
             "pos": [
@@ -10384,7 +10614,7 @@
             "name": "audio_latent",
             "type": "LATENT",
             "linkIds": [
-              10
+              13997
             ],
             "label": "audio_latent",
             "pos": [
@@ -10399,7 +10629,7 @@
             "name": "video_latent",
             "type": "LATENT",
             "linkIds": [
-              9
+              13996
             ],
             "pos": [
               1619.9463328320699,
@@ -10411,7 +10641,7 @@
             "name": "audio_latent",
             "type": "LATENT",
             "linkIds": [
-              17
+              13998
             ],
             "pos": [
               1619.9463328320699,
@@ -10443,7 +10673,7 @@
                 "widget": {
                   "name": "sampler_name"
                 },
-                "link": 8
+                "link": 13995
               }
             ],
             "outputs": [
@@ -10452,14 +10682,14 @@
                 "name": "SAMPLER",
                 "type": "SAMPLER",
                 "links": [
-                  12
+                  13987
                 ]
               }
             ],
             "properties": {
+              "Node name for S&R": "KSamplerSelect",
               "cnr_id": "comfy-core",
-              "ver": "0.14.1",
-              "Node name for S&R": "KSamplerSelect"
+              "ver": "0.14.1"
             },
             "widgets_values": [
               "euler"
@@ -10489,14 +10719,14 @@
                 "name": "SIGMAS",
                 "type": "SIGMAS",
                 "links": [
-                  11
+                  13986
                 ]
               }
             ],
             "properties": {
+              "Node name for S&R": "ManualSigmas",
               "cnr_id": "comfy-core",
-              "ver": "0.14.1",
-              "Node name for S&R": "ManualSigmas"
+              "ver": "0.14.1"
             },
             "widgets_values": [
               "0.909375, 0.725, 0.421875, 0.0"
@@ -10550,44 +10780,44 @@
                 "localized_name": "model",
                 "name": "model",
                 "type": "MODEL",
-                "link": 1
+                "link": 13982
               },
               {
                 "localized_name": "positive",
                 "name": "positive",
                 "type": "CONDITIONING",
-                "link": 2
+                "link": 13983
               },
               {
                 "localized_name": "negative",
                 "name": "negative",
                 "type": "CONDITIONING",
-                "link": 3
+                "link": 13984
               },
               {
                 "localized_name": "latents",
                 "name": "latents",
                 "type": "LATENT",
-                "link": 4
+                "link": 13985
               },
               {
                 "localized_name": "sigmas",
                 "name": "sigmas",
                 "type": "SIGMAS",
-                "link": 11
+                "link": 13986
               },
               {
                 "localized_name": "sampler",
                 "name": "sampler",
                 "type": "SAMPLER",
-                "link": 12
+                "link": 13987
               },
               {
                 "localized_name": "vae",
                 "name": "vae",
                 "shape": 7,
                 "type": "VAE",
-                "link": 7
+                "link": 13994
               },
               {
                 "localized_name": "seed",
@@ -10596,7 +10826,7 @@
                 "widget": {
                   "name": "seed"
                 },
-                "link": 5
+                "link": 13988
               },
               {
                 "localized_name": "cfg",
@@ -10605,7 +10835,7 @@
                 "widget": {
                   "name": "cfg"
                 },
-                "link": 13
+                "link": 13989
               },
               {
                 "localized_name": "tile_width",
@@ -10614,7 +10844,7 @@
                 "widget": {
                   "name": "tile_width"
                 },
-                "link": 14
+                "link": 13990
               },
               {
                 "localized_name": "tile_height",
@@ -10623,7 +10853,7 @@
                 "widget": {
                   "name": "tile_height"
                 },
-                "link": 6
+                "link": 13991
               },
               {
                 "localized_name": "overlap_frac",
@@ -10632,7 +10862,7 @@
                 "widget": {
                   "name": "overlap_frac"
                 },
-                "link": 15
+                "link": 13992
               },
               {
                 "localized_name": "tile_frames",
@@ -10641,7 +10871,7 @@
                 "widget": {
                   "name": "tile_frames"
                 },
-                "link": 16
+                "link": 13993
               }
             ],
             "outputs": [
@@ -10650,14 +10880,14 @@
                 "name": "output",
                 "type": "LATENT",
                 "links": [
-                  9
+                  13996
                 ]
               }
             ],
             "properties": {
+              "Node name for S&R": "LTXVTiledFusionSampler",
               "aux_id": "LightricksResearch/ComfyUI-LTXVideo-Internal",
-              "ver": "65bfc50105d620a6a21675e022d229f947c6eb57",
-              "Node name for S&R": "LTXVTiledFusionSampler"
+              "ver": "65bfc50105d620a6a21675e022d229f947c6eb57"
             },
             "widgets_values": [
               42,
@@ -10703,7 +10933,7 @@
                 "localized_name": "samples",
                 "name": "samples",
                 "type": "LATENT",
-                "link": 10
+                "link": 13997
               }
             ],
             "outputs": [
@@ -10712,15 +10942,15 @@
                 "name": "LATENT",
                 "type": "LATENT",
                 "links": [
-                  17
+                  13998
                 ]
               }
             ],
             "title": "Pass audio latent",
             "properties": {
+              "Node name for S&R": "RepeatLatentBatch",
               "cnr_id": "comfy-core",
-              "ver": "0.34.0",
-              "Node name for S&R": "RepeatLatentBatch"
+              "ver": "0.34.0"
             },
             "widgets_values": [
               1
@@ -10732,7 +10962,7 @@
         ],
         "groups": [
           {
-            "id": 147,
+            "id": 162,
             "title": "Generate",
             "bounding": [
               306,
@@ -10746,43 +10976,43 @@
         ],
         "links": [
           {
-            "id": 1,
+            "id": 13982,
             "origin_id": -10,
             "origin_slot": 0,
             "target_id": 9312,
             "target_slot": 0,
             "type": "MODEL",
-            "parentId": 9001
+            "parentId": 9155
           },
           {
-            "id": 2,
+            "id": 13983,
             "origin_id": -10,
             "origin_slot": 1,
             "target_id": 9312,
             "target_slot": 1,
             "type": "CONDITIONING",
-            "parentId": 9003
+            "parentId": 9157
           },
           {
-            "id": 3,
+            "id": 13984,
             "origin_id": -10,
             "origin_slot": 2,
             "target_id": 9312,
             "target_slot": 2,
             "type": "CONDITIONING",
-            "parentId": 9005
+            "parentId": 9159
           },
           {
-            "id": 4,
+            "id": 13985,
             "origin_id": -10,
             "origin_slot": 3,
             "target_id": 9312,
             "target_slot": 3,
             "type": "LATENT",
-            "parentId": 9007
+            "parentId": 9161
           },
           {
-            "id": 11,
+            "id": 13986,
             "origin_id": 9310,
             "origin_slot": 0,
             "target_id": 9312,
@@ -10790,7 +11020,7 @@
             "type": "SIGMAS"
           },
           {
-            "id": 12,
+            "id": 13987,
             "origin_id": 9309,
             "origin_slot": 0,
             "target_id": 9312,
@@ -10798,70 +11028,61 @@
             "type": "SAMPLER"
           },
           {
-            "id": 5,
+            "id": 13988,
             "origin_id": -10,
             "origin_slot": 4,
             "target_id": 9312,
             "target_slot": 7,
             "type": "INT",
-            "parentId": 9009
+            "parentId": 9163
           },
           {
-            "id": 13,
+            "id": 13989,
             "origin_id": -10,
             "origin_slot": 5,
             "target_id": 9312,
             "target_slot": 8,
             "type": "FLOAT",
-            "parentId": 9011
+            "parentId": 9165
           },
           {
-            "id": 14,
+            "id": 13990,
             "origin_id": -10,
             "origin_slot": 7,
             "target_id": 9312,
             "target_slot": 9,
             "type": "INT",
-            "parentId": 9013
+            "parentId": 9167
           },
           {
-            "id": 6,
+            "id": 13991,
             "origin_id": -10,
             "origin_slot": 8,
             "target_id": 9312,
             "target_slot": 10,
             "type": "INT",
-            "parentId": 9015
+            "parentId": 9169
           },
           {
-            "id": 15,
+            "id": 13992,
             "origin_id": -10,
             "origin_slot": 9,
             "target_id": 9312,
             "target_slot": 11,
             "type": "FLOAT",
-            "parentId": 9017
+            "parentId": 9171
           },
           {
-            "id": 16,
-            "origin_id": -10,
-            "origin_slot": 10,
-            "target_id": 9312,
-            "target_slot": 12,
-            "type": "INT",
-            "parentId": 9019
-          },
-          {
-            "id": 7,
+            "id": 13994,
             "origin_id": -10,
             "origin_slot": 11,
             "target_id": 9312,
             "target_slot": 6,
             "type": "VAE",
-            "parentId": 9021
+            "parentId": 9175
           },
           {
-            "id": 8,
+            "id": 13995,
             "origin_id": -10,
             "origin_slot": 6,
             "target_id": 9309,
@@ -10869,304 +11090,313 @@
             "type": "COMBO"
           },
           {
-            "id": 9,
+            "id": 13996,
             "origin_id": 9312,
             "origin_slot": 0,
             "target_id": -20,
             "target_slot": 0,
             "type": "LATENT",
-            "parentId": 9023
+            "parentId": 9177
           },
           {
-            "id": 10,
+            "id": 13997,
             "origin_id": -10,
             "origin_slot": 12,
             "target_id": 9313,
             "target_slot": 0,
             "type": "LATENT",
-            "parentId": 9025
+            "parentId": 9179
           },
           {
-            "id": 17,
+            "id": 13998,
             "origin_id": 9313,
             "origin_slot": 0,
             "target_id": -20,
             "target_slot": 1,
             "type": "LATENT"
+          },
+          {
+            "id": 13993,
+            "origin_id": -10,
+            "origin_slot": 10,
+            "target_id": 9312,
+            "target_slot": 12,
+            "type": "INT",
+            "parentId": 9173
           }
         ],
         "reroutes": [
           {
-            "id": 9000,
+            "id": 9154,
             "pos": [
               268,
               654
             ],
             "linkIds": [
-              1
+              13982
             ]
           },
           {
-            "id": 9001,
-            "parentId": 9000,
+            "id": 9155,
+            "parentId": 9154,
             "pos": [
               891.9463328320699,
               654
             ],
             "linkIds": [
-              1
+              13982
             ]
           },
           {
-            "id": 9002,
+            "id": 9156,
             "pos": [
               268,
               672
             ],
             "linkIds": [
-              2
+              13983
             ]
           },
           {
-            "id": 9003,
-            "parentId": 9002,
+            "id": 9157,
+            "parentId": 9156,
             "pos": [
               891.9463328320699,
               672
             ],
             "linkIds": [
-              2
+              13983
             ]
           },
           {
-            "id": 9004,
+            "id": 9158,
             "pos": [
               268,
               690
             ],
             "linkIds": [
-              3
+              13984
             ]
           },
           {
-            "id": 9005,
-            "parentId": 9004,
+            "id": 9159,
+            "parentId": 9158,
             "pos": [
               891.9463328320699,
               690
             ],
             "linkIds": [
-              3
+              13984
             ]
           },
           {
-            "id": 9006,
+            "id": 9160,
             "pos": [
               268,
               708
             ],
             "linkIds": [
-              4
+              13985
             ]
           },
           {
-            "id": 9007,
-            "parentId": 9006,
+            "id": 9161,
+            "parentId": 9160,
             "pos": [
               891.9463328320699,
               708
             ],
             "linkIds": [
-              4
+              13985
             ]
           },
           {
-            "id": 9008,
+            "id": 9162,
             "pos": [
               268,
               726
             ],
             "linkIds": [
-              5
+              13988
             ]
           },
           {
-            "id": 9009,
-            "parentId": 9008,
+            "id": 9163,
+            "parentId": 9162,
             "pos": [
               891.9463328320699,
               726
             ],
             "linkIds": [
-              5
+              13988
             ]
           },
           {
-            "id": 9010,
+            "id": 9164,
             "pos": [
               268,
               744
             ],
             "linkIds": [
-              13
+              13989
             ]
           },
           {
-            "id": 9011,
-            "parentId": 9010,
+            "id": 9165,
+            "parentId": 9164,
             "pos": [
               891.9463328320699,
               744
             ],
             "linkIds": [
-              13
+              13989
             ]
           },
           {
-            "id": 9012,
+            "id": 9166,
             "pos": [
               268,
               762
             ],
             "linkIds": [
-              14
+              13990
             ]
           },
           {
-            "id": 9013,
-            "parentId": 9012,
+            "id": 9167,
+            "parentId": 9166,
             "pos": [
               891.9463328320699,
               762
             ],
             "linkIds": [
-              14
+              13990
             ]
           },
           {
-            "id": 9014,
+            "id": 9168,
             "pos": [
               268,
               780
             ],
             "linkIds": [
-              6
+              13991
             ]
           },
           {
-            "id": 9015,
-            "parentId": 9014,
+            "id": 9169,
+            "parentId": 9168,
             "pos": [
               891.9463328320699,
               780
             ],
             "linkIds": [
-              6
+              13991
             ]
           },
           {
-            "id": 9016,
+            "id": 9170,
             "pos": [
               268,
               798
             ],
             "linkIds": [
-              15
+              13992
             ]
           },
           {
-            "id": 9017,
-            "parentId": 9016,
+            "id": 9171,
+            "parentId": 9170,
             "pos": [
               891.9463328320699,
               798
             ],
             "linkIds": [
-              15
+              13992
             ]
           },
           {
-            "id": 9018,
+            "id": 9172,
             "pos": [
               268,
               816
             ],
             "linkIds": [
-              16
+              13993
             ]
           },
           {
-            "id": 9019,
-            "parentId": 9018,
+            "id": 9173,
+            "parentId": 9172,
             "pos": [
               891.9463328320699,
               816
             ],
             "linkIds": [
-              16
+              13993
             ]
           },
           {
-            "id": 9020,
+            "id": 9174,
             "pos": [
               268,
               834
             ],
             "linkIds": [
-              7
+              13994
             ]
           },
           {
-            "id": 9021,
-            "parentId": 9020,
+            "id": 9175,
+            "parentId": 9174,
             "pos": [
               891.9463328320699,
               834
             ],
             "linkIds": [
-              7
+              13994
             ]
           },
           {
-            "id": 9022,
+            "id": 9176,
             "pos": [
               1267.9463328320699,
               852
             ],
             "linkIds": [
-              9
+              13996
             ]
           },
           {
-            "id": 9023,
-            "parentId": 9022,
+            "id": 9177,
+            "parentId": 9176,
             "pos": [
               1601.9463328320699,
               852
             ],
             "linkIds": [
-              9
+              13996
             ]
           },
           {
-            "id": 9024,
+            "id": 9178,
             "pos": [
               268,
               870
             ],
             "linkIds": [
-              10
+              13997
             ]
           },
           {
-            "id": 9025,
-            "parentId": 9024,
+            "id": 9179,
+            "parentId": 9178,
             "pos": [
               1311.9463328320699,
               870
             ],
             "linkIds": [
-              10
+              13997
             ]
           }
         ],
@@ -11176,7 +11406,7 @@
   },
   "config": {},
   "extra": {
-    "frontendVersion": "1.51.9",
+    "frontendVersion": "1.53.6",
     "VHS_latentpreview": false,
     "VHS_latentpreviewrate": 0,
     "VHS_MetadataImage": true,
@@ -11843,10 +12073,10 @@
       }
     ],
     "ds": {
-      "scale": 0.5796528423694802,
+      "scale": 0.4790519358425457,
       "offset": [
-        3860.8989830994806,
-        -2276.6690926380115
+        4514.6191862080605,
+        -2301.3589794683057
       ]
     },
     "linkExtensions": [
