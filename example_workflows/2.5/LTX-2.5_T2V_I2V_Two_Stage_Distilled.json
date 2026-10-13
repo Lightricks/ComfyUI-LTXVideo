@@ -536,7 +536,7 @@
         "ver": "0.3.56"
       },
       "widgets_values": [
-        "",
+        "example.png",
         "image"
       ],
       "color": "#232",
