@@ -1,0 +1,141 @@
+name: Publish to Comfy Registry
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+    paths:
+      - pyproject.toml
+
+concurrency:
+  group: publish-comfy-registry
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: github.repository_owner == 'Lightricks'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+    steps:
+      - name: Check out the release commit
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ github.event_name == 'push' && github.sha || 'master' }}
+          fetch-depth: 0
+          fetch-tags: true
+          lfs: true
+
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.12"
+
+      - name: Read the version
+        id: version
+        run: |
+          set -euo pipefail
+          version=$(python3 -c '
+          import sys
+          import tomllib
+          with open("pyproject.toml", "rb") as handle:
+              version = tomllib.load(handle).get("project", {}).get("version")
+          parts = str(version).split(".")
+          if len(parts) != 3 or any(not part.isdigit() for part in parts):
+              print(f"version is not X.Y.Z: {version!r}", file=sys.stderr)
+              raise SystemExit(1)
+          print(version)
+          ')
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
+
+      - name: Check the published version
+        id: registry
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          set -euo pipefail
+          node=$(curl -fsS https://api.comfy.org/nodes/ComfyUI-LTXVideo)
+          published=$(printf '%s\n' "$node" | python3 -c '
+          import json
+          import sys
+          node = json.load(sys.stdin)
+          latest = node.get("latest_version")
+          if latest is None:
+              raise SystemExit(0)
+          if not isinstance(latest, dict):
+              print("latest_version is not a JSON object", file=sys.stderr)
+              raise SystemExit(1)
+          version = latest.get("version")
+          if version is None:
+              raise SystemExit(0)
+          parts = str(version).split(".")
+          if len(parts) != 3 or any(not part.isdigit() for part in parts):
+              print(f"latest_version.version is not X.Y.Z: {version!r}", file=sys.stderr)
+              raise SystemExit(1)
+          print(version)
+          ')
+          if [ "$published" = "$VERSION" ]; then
+            echo "Registry already has ${VERSION}."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Publish to the registry
+        if: steps.registry.outputs.skip != 'true'
+        env:
+          REGISTRY_ACCESS_TOKEN: ${{ secrets.REGISTRY_ACCESS_TOKEN }}
+        run: |
+          set -euo pipefail
+          python3 -m pip install "comfy-cli==1.22.0"
+          comfy --skip-prompt --no-enable-telemetry env
+          comfy node publish --token "$REGISTRY_ACCESS_TOKEN"
+
+      - name: Tag and release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          set -euo pipefail
+          version="$VERSION"
+          tag="v${version}"
+          if git rev-parse -q --verify "refs/tags/${tag}" >/dev/null; then
+            echo "Tag ${tag} already exists."
+          else
+            git tag "${tag}"
+            git push origin "refs/tags/${tag}"
+          fi
+          if gh release view "${tag}" >/dev/null 2>&1; then
+            echo "Release ${tag} already exists."
+            exit 0
+          fi
+          previous=$(
+            git tag --list "v*" | python3 -c '
+          import sys
+          current = tuple(int(part) for part in sys.argv[1].split("."))
+          lower = []
+          for tag in sys.stdin:
+              tag = tag.strip()
+              if not tag.startswith("v"):
+                  continue
+              parts = tag[1:].split(".")
+              if len(parts) != 3 or any(not part.isdigit() for part in parts):
+                  continue
+              parsed = tuple(int(part) for part in parts)
+              if parsed < current:
+                  lower.append((parsed, tag))
+          if lower:
+              print(max(lower)[1])
+          ' "$version"
+          )
+          if [ -z "$previous" ]; then
+            notes="Initial release."
+          else
+            notes=$(git log --pretty=format:"%h %s" "${previous}..HEAD")
+            if [ -z "$notes" ]; then
+              notes="No commits since ${previous}."
+            fi
+          fi
+          gh release create "${tag}" --title "${tag}" --notes "${notes}"
