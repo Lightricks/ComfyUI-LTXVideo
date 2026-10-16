@@ -13,6 +13,17 @@ from comfy.model_patcher import ModelPatcher
 from .nodes_registry import comfy_node
 
 
+def _attn_tensor(t):
+    """Return the tensor itself when ComfyUI wraps it in an AttentionTensorContainer.
+
+    ComfyUI >= 0.40 passes attention inputs wrapped in a single-owner
+    AttentionTensorContainer, so the skipped-attention shortcuts below must unwrap
+    it. On older ComfyUI `t` is already a tensor and is returned unchanged.
+    """
+    take = getattr(t, "take", None)
+    return take() if callable(take) and not isinstance(t, torch.Tensor) else t
+
+
 def stg(
     noise_pred_pos,
     noise_pred_neg,
@@ -144,14 +155,14 @@ class PatchAttention(contextlib.AbstractContextManager):
     def stg_attention(self, q, k, v, heads, *args, **kwargs):
         self.current_idx += 1
         if self.current_idx in self.attn_idx:
-            return v
+            return _attn_tensor(v)
         else:
             return self.original_attention(q, k, v, heads, *args, **kwargs)
 
     def stg_attention_masked(self, q, k, v, heads, *args, **kwargs):
         self.current_idx += 1
         if self.current_idx in self.attn_idx:
-            return v
+            return _attn_tensor(v)
         else:
             return self.original_attention_masked(q, k, v, heads, *args, **kwargs)
 
