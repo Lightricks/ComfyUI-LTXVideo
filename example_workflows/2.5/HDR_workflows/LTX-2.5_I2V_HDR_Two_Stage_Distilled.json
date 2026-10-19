@@ -1,8 +1,8 @@
 {
   "id": "b0f9490f-5bae-434c-8205-c6216ac08d2c",
   "revision": 0,
-  "last_node_id": 5600,
-  "last_link_id": 13868,
+  "last_node_id": 5605,
+  "last_link_id": 13882,
   "nodes": [
     {
       "id": 5529,
@@ -37,12 +37,12 @@
       "id": 5531,
       "type": "MarkdownNote",
       "pos": [
-        -1260.4597847527684,
-        2876.9038975734984
+        -1307.1033005936974,
+        2874.587226942385
       ],
       "size": [
-        406.796875,
-        300.0625
+        389.48124253917354,
+        302.50141515355745
       ],
       "flags": {
         "collapsed": false
@@ -54,10 +54,10 @@
       "title": "Decode",
       "properties": {},
       "widgets_values": [
-        "## Decode\n\nMake sure to adjust the number of tiles and overlap to fit your hardware.\n(fewer tiles will result in faster execution, but will require more memory).\n\n### Recommended settings\n\n| node settings (pixels)                     | resolved latent geometry        |\n| ------------------------------------------ | ------------------------------- |\n| `512 / 64 / 128 / 32`                      | 16×16, ov 2 | 16f, ov 4         |\n| `768 / 192 / 128 / 32`                     | 24×24, ov 6 | 16f, ov 4         |\n| `1024 / 256 / 128 / 48`                    | 32×32, ov 8 | 16f, ov 6         |\n| `1536 / 384 / 192 / 48`                    | 48×48, ov 12 | 24f, ov 6        |\n| `768 / 192 / spatial-only`                 | 24×24, ov 6 | no temporal split |"
+        "## Decode\n\nMake sure to adjust the number of tiles and overlap to fit your hardware.\n(fewer tiles will result in faster execution, but will require more memory).\n\n### Recommended settings\n\n| node settings (pixels)                     | resolved latent geometry        |\n| ------------------------------------------ | ------------------------------- |\n| `512 / 64 / 128 / 32`                      | 16×16, ov 2 | 16f, ov 4         |\n| `768 / 192 / 128 / 32`                     | 24×24, ov 6 | 16f, ov 4         |\n| `1024 / 256 / 128 / 48`                    | 32×32, ov 8 | 16f, ov 6         |\n| `1536 / 384 / 192 / 48`                    | 48×48, ov 12 | 24f, ov 6        |\n| `768 / 192 / spatial-only`                 | 24×24, ov 6 | no temporal split |\n\n**Convert Image Color Space** ACEScct → `HDR` (Rec.2020 HLG) feeds the video; the ACEScct image goes to the EXR save.\n"
       ],
       "widgets_values_named": {
-        "text": "## Decode\n\nMake sure to adjust the number of tiles and overlap to fit your hardware.\n(fewer tiles will result in faster execution, but will require more memory).\n\n### Recommended settings\n\n| node settings (pixels)                     | resolved latent geometry        |\n| ------------------------------------------ | ------------------------------- |\n| `512 / 64 / 128 / 32`                      | 16×16, ov 2 | 16f, ov 4         |\n| `768 / 192 / 128 / 32`                     | 24×24, ov 6 | 16f, ov 4         |\n| `1024 / 256 / 128 / 48`                    | 32×32, ov 8 | 16f, ov 6         |\n| `1536 / 384 / 192 / 48`                    | 48×48, ov 12 | 24f, ov 6        |\n| `768 / 192 / spatial-only`                 | 24×24, ov 6 | no temporal split |"
+        "text": "## Decode\n\nMake sure to adjust the number of tiles and overlap to fit your hardware.\n(fewer tiles will result in faster execution, but will require more memory).\n\n### Recommended settings\n\n| node settings (pixels)                     | resolved latent geometry        |\n| ------------------------------------------ | ------------------------------- |\n| `512 / 64 / 128 / 32`                      | 16×16, ov 2 | 16f, ov 4         |\n| `768 / 192 / 128 / 32`                     | 24×24, ov 6 | 16f, ov 4         |\n| `1024 / 256 / 128 / 48`                    | 32×32, ov 8 | 16f, ov 6         |\n| `1536 / 384 / 192 / 48`                    | 48×48, ov 12 | 24f, ov 6        |\n| `768 / 192 / spatial-only`                 | 24×24, ov 6 | no temporal split |\n\n**Convert Image Color Space** ACEScct → `HDR` (Rec.2020 HLG) feeds the video; the ACEScct image goes to the EXR save.\n"
       },
       "color": "#432",
       "bgcolor": "#653"
@@ -66,21 +66,21 @@
       "id": 5518,
       "type": "bee43e38-9234-4e41-86ff-63874164f482",
       "pos": [
-        -1260.4597847527684,
-        3234.6204748269606
+        -1277.6879960616106,
+        3241.133350649767
       ],
       "size": [
         319.265625,
         245.796875
       ],
       "flags": {},
-      "order": 20,
+      "order": 16,
       "mode": 0,
       "inputs": [
         {
           "name": "vae",
           "type": "VAE",
-          "link": 13844
+          "link": 13882
         },
         {
           "label": "video_latent",
@@ -102,18 +102,26 @@
       ],
       "outputs": [
         {
+          "label": "ACEScct_image",
           "name": "IMAGE",
           "type": "IMAGE",
           "links": [
-            13846
+            13876
           ]
         },
         {
           "name": "AUDIO",
           "type": "AUDIO",
           "links": [
-            13854,
-            13857
+            13878
+          ]
+        },
+        {
+          "label": "HDR_HLG_image",
+          "name": "IMAGE_1",
+          "type": "IMAGE",
+          "links": [
+            13877
           ]
         }
       ],
@@ -139,8 +147,8 @@
       "id": 5509,
       "type": "PrimitiveStringMultiline",
       "pos": [
-        -3559.5562371930837,
-        3326.6663977802655
+        -3557.156896832392,
+        3339.927482263426
       ],
       "size": [
         343.59375,
@@ -175,45 +183,6 @@
       "bgcolor": "#533"
     },
     {
-      "id": 5511,
-      "type": "PrimitiveFloat",
-      "pos": [
-        -3563.387047603918,
-        3908.395628761551
-      ],
-      "size": [
-        343.59375,
-        62
-      ],
-      "flags": {},
-      "order": 3,
-      "mode": 0,
-      "inputs": [],
-      "outputs": [
-        {
-          "name": "FLOAT",
-          "type": "FLOAT",
-          "links": [
-            13633
-          ]
-        }
-      ],
-      "title": "fps (frames per second)",
-      "properties": {
-        "Node name for S&R": "PrimitiveFloat",
-        "cnr_id": "comfy-core",
-        "ver": "0.25.0"
-      },
-      "widgets_values": [
-        24
-      ],
-      "widgets_values_named": {
-        "value": 24
-      },
-      "color": "#2a363b",
-      "bgcolor": "#3f5159"
-    },
-    {
       "id": 5530,
       "type": "MarkdownNote",
       "pos": [
@@ -227,7 +196,7 @@
       "flags": {
         "collapsed": false
       },
-      "order": 4,
+      "order": 3,
       "mode": 0,
       "inputs": [],
       "outputs": [],
@@ -246,27 +215,27 @@
       "id": 5576,
       "type": "MarkdownNote",
       "pos": [
-        -4286.114557585211,
-        2491.086618331007
+        -4294.451674884059,
+        2466.4111736066952
       ],
       "size": [
-        572.421875,
-        676.078125
+        584.1171097015317,
+        582.0190385261626
       ],
       "flags": {
         "collapsed": false
       },
-      "order": 5,
+      "order": 4,
       "mode": 0,
       "inputs": [],
       "outputs": [],
       "title": "Model Links",
       "properties": {},
       "widgets_values": [
-        "## Model Links\n\n**LTX-2.5 Model Weights**\n\nMake sure to click the \"Agree and Access\" button the first time you download.\n\n- [ Distilled model - ltx-2.5-22b-distilled-transformer-bf16.safetensors ](https://huggingface.co/Lightricks/LTX-2.5/blob/main/diffusion_models/ltx-2.5-22b-distilled-transformer-bf16.safetensors)\n\n- [ Audio VAE - ltx-2.5-audio-vae-bf16.safetensors ](https://huggingface.co/Lightricks/LTX-2.5/blob/main/vae/ltx-2.5-audio-vae-bf16.safetensors)\n\n- Video VAE - one of these:\n  - [ Diffusion decoder ltx-2.5-video-vae-bf16.safetensors ](https://huggingface.co/Lightricks/LTX-2.5/blob/main/vae/ltx-2.5-video-vae-bf16.safetensors) - Best quality\n  - [ Convolutional decoder - ltx-2.5-video-vae-conv-bf16.safetensors ](https://huggingface.co/Lightricks/LTX-2.5/blob/main/vae/ltx-2.5-video-vae-conv-bf16.safetensors) - Lower memory & faster\n\n- [ Upscaler - ltx-2.5-latent-spatial-upscaler-x2-bf16-1.0.safetensors ](https://huggingface.co/Lightricks/LTX-2.5/blob/main/latent_upscale_models/ltx-2.5-latent-spatial-upscaler-x2-bf16-1.0.safetensors)\n\n\n\n**Text Encoder - finetuned for LTX-2.5**\n- [gemma4-12b-with-proj-ltx-2.5-bf16.safetensors](https://huggingface.co/Lightricks/LTX-2.5/blob/main/text_encoders/gemma4-12b-with-proj-ltx-2.5-bf16.safetensors)\n\n**Text Enhancer**\n- [Google Gemma 4 E2B IT](https://huggingface.co/Comfy-Org/gemma-4/blob/main/text_encoders/gemma4_e2b_it_bf16.safetensors)\n\n\n**Model Storage Location**\n\n```\n📂 ComfyUI/\n├── 📂 models/\n│   ├── 📂 text_encoders/\n│   │      ├── gemma4-12b-with-proj-ltx-2.5-bf16.safetensors\n│   │      └── gemma4_e2b_it_bf16.safetensors\n│   ├── 📂 diffusion_models/\n│   │      └── ltx-2.5-22b-distilled-transformer-bf16.safetensors\n│   ├── 📂 vae/\n│   │      └── ltx-2.5-audio-vae-bf16.safetensors\n│   │      └── ltx-2.5-video-vae-conv-bf16.safetensors / ltx-2.5-video-vae-bf16.safetensors\n│   ├── 📂 latent_upscale_models/\n│          └── ltx-2.5-latent-spatial-upscaler-x2-bf16-1.0.safetensors\n```\n\n## Report Issues\nTo report any issues when running this workflow, [go to GitHub](https://github.com/Lightricks/ComfyUI-LTXVideo/issues)\n\n**Native HDR:** use float32 video VAE path (node in graph). EXR plates require OpenImageIO (`pip install openimageio`).\n"
+        "## Model Links\n\n**LTX-2.5 Model Weights**\n\nMake sure to click the \"Agree and Access\" button the first time you download.\n\n- [ Distilled model - ltx-2.5-22b-distilled-transformer-bf16.safetensors ](https://huggingface.co/Lightricks/LTX-2.5/blob/main/diffusion_models/ltx-2.5-22b-distilled-transformer-bf16.safetensors)\n\n- [ Audio VAE - ltx-2.5-audio-vae-bf16.safetensors ](https://huggingface.co/Lightricks/LTX-2.5/blob/main/vae/ltx-2.5-audio-vae-bf16.safetensors)\n\n- Video VAE - one of these:\n  - [ Diffusion decoder ltx-2.5-video-vae-bf16.safetensors ](https://huggingface.co/Lightricks/LTX-2.5/blob/main/vae/ltx-2.5-video-vae-bf16.safetensors) - Best quality\n  - [ Convolutional decoder - ltx-2.5-video-vae-conv-bf16.safetensors ](https://huggingface.co/Lightricks/LTX-2.5/blob/main/vae/ltx-2.5-video-vae-conv-bf16.safetensors) - Lower memory & faster\n\n- [ Upscaler - ltx-2.5-latent-spatial-upscaler-x2-bf16-1.0.safetensors ](https://huggingface.co/Lightricks/LTX-2.5/blob/main/latent_upscale_models/ltx-2.5-latent-spatial-upscaler-x2-bf16-1.0.safetensors)\n\n\n\n**Text Encoder - finetuned for LTX-2.5**\n- [gemma4-12b-with-proj-ltx-2.5-bf16.safetensors](https://huggingface.co/Lightricks/LTX-2.5/blob/main/text_encoders/gemma4-12b-with-proj-ltx-2.5-bf16.safetensors)\n\n**Text Enhancer**\n- [Google Gemma 4 E2B IT](https://huggingface.co/Comfy-Org/gemma-4/blob/main/text_encoders/gemma4_e2b_it_bf16.safetensors)\n\n\n**Model Storage Location**\n\n```\n📂 ComfyUI/\n├── 📂 models/\n│   ├── 📂 text_encoders/\n│   │      ├── gemma4-12b-with-proj-ltx-2.5-bf16.safetensors\n│   │      └── gemma4_e2b_it_bf16.safetensors\n│   ├── 📂 diffusion_models/\n│   │      └── ltx-2.5-22b-distilled-transformer-bf16.safetensors\n│   ├── 📂 vae/\n│   │      └── ltx-2.5-audio-vae-bf16.safetensors\n│   │      └── ltx-2.5-video-vae-conv-bf16.safetensors / ltx-2.5-video-vae-bf16.safetensors\n│   ├── 📂 latent_upscale_models/\n│          └── ltx-2.5-latent-spatial-upscaler-x2-bf16-1.0.safetensors\n```\n\n## Report Issues\nTo report any issues when running this workflow, [go to GitHub](https://github.com/Lightricks/ComfyUI-LTXVideo/issues)\n\n**Native HDR:** use the float32 video VAE (inside **Load Models**). EXR plates require OpenImageIO (`pip install openimageio`).\n"
       ],
       "widgets_values_named": {
-        "text": "## Model Links\n\n**LTX-2.5 Model Weights**\n\nMake sure to click the \"Agree and Access\" button the first time you download.\n\n- [ Distilled model - ltx-2.5-22b-distilled-transformer-bf16.safetensors ](https://huggingface.co/Lightricks/LTX-2.5/blob/main/diffusion_models/ltx-2.5-22b-distilled-transformer-bf16.safetensors)\n\n- [ Audio VAE - ltx-2.5-audio-vae-bf16.safetensors ](https://huggingface.co/Lightricks/LTX-2.5/blob/main/vae/ltx-2.5-audio-vae-bf16.safetensors)\n\n- Video VAE - one of these:\n  - [ Diffusion decoder ltx-2.5-video-vae-bf16.safetensors ](https://huggingface.co/Lightricks/LTX-2.5/blob/main/vae/ltx-2.5-video-vae-bf16.safetensors) - Best quality\n  - [ Convolutional decoder - ltx-2.5-video-vae-conv-bf16.safetensors ](https://huggingface.co/Lightricks/LTX-2.5/blob/main/vae/ltx-2.5-video-vae-conv-bf16.safetensors) - Lower memory & faster\n\n- [ Upscaler - ltx-2.5-latent-spatial-upscaler-x2-bf16-1.0.safetensors ](https://huggingface.co/Lightricks/LTX-2.5/blob/main/latent_upscale_models/ltx-2.5-latent-spatial-upscaler-x2-bf16-1.0.safetensors)\n\n\n\n**Text Encoder - finetuned for LTX-2.5**\n- [gemma4-12b-with-proj-ltx-2.5-bf16.safetensors](https://huggingface.co/Lightricks/LTX-2.5/blob/main/text_encoders/gemma4-12b-with-proj-ltx-2.5-bf16.safetensors)\n\n**Text Enhancer**\n- [Google Gemma 4 E2B IT](https://huggingface.co/Comfy-Org/gemma-4/blob/main/text_encoders/gemma4_e2b_it_bf16.safetensors)\n\n\n**Model Storage Location**\n\n```\n📂 ComfyUI/\n├── 📂 models/\n│   ├── 📂 text_encoders/\n│   │      ├── gemma4-12b-with-proj-ltx-2.5-bf16.safetensors\n│   │      └── gemma4_e2b_it_bf16.safetensors\n│   ├── 📂 diffusion_models/\n│   │      └── ltx-2.5-22b-distilled-transformer-bf16.safetensors\n│   ├── 📂 vae/\n│   │      └── ltx-2.5-audio-vae-bf16.safetensors\n│   │      └── ltx-2.5-video-vae-conv-bf16.safetensors / ltx-2.5-video-vae-bf16.safetensors\n│   ├── 📂 latent_upscale_models/\n│          └── ltx-2.5-latent-spatial-upscaler-x2-bf16-1.0.safetensors\n```\n\n## Report Issues\nTo report any issues when running this workflow, [go to GitHub](https://github.com/Lightricks/ComfyUI-LTXVideo/issues)\n\n**Native HDR:** use float32 video VAE path (node in graph). EXR plates require OpenImageIO (`pip install openimageio`).\n"
+        "text": "## Model Links\n\n**LTX-2.5 Model Weights**\n\nMake sure to click the \"Agree and Access\" button the first time you download.\n\n- [ Distilled model - ltx-2.5-22b-distilled-transformer-bf16.safetensors ](https://huggingface.co/Lightricks/LTX-2.5/blob/main/diffusion_models/ltx-2.5-22b-distilled-transformer-bf16.safetensors)\n\n- [ Audio VAE - ltx-2.5-audio-vae-bf16.safetensors ](https://huggingface.co/Lightricks/LTX-2.5/blob/main/vae/ltx-2.5-audio-vae-bf16.safetensors)\n\n- Video VAE - one of these:\n  - [ Diffusion decoder ltx-2.5-video-vae-bf16.safetensors ](https://huggingface.co/Lightricks/LTX-2.5/blob/main/vae/ltx-2.5-video-vae-bf16.safetensors) - Best quality\n  - [ Convolutional decoder - ltx-2.5-video-vae-conv-bf16.safetensors ](https://huggingface.co/Lightricks/LTX-2.5/blob/main/vae/ltx-2.5-video-vae-conv-bf16.safetensors) - Lower memory & faster\n\n- [ Upscaler - ltx-2.5-latent-spatial-upscaler-x2-bf16-1.0.safetensors ](https://huggingface.co/Lightricks/LTX-2.5/blob/main/latent_upscale_models/ltx-2.5-latent-spatial-upscaler-x2-bf16-1.0.safetensors)\n\n\n\n**Text Encoder - finetuned for LTX-2.5**\n- [gemma4-12b-with-proj-ltx-2.5-bf16.safetensors](https://huggingface.co/Lightricks/LTX-2.5/blob/main/text_encoders/gemma4-12b-with-proj-ltx-2.5-bf16.safetensors)\n\n**Text Enhancer**\n- [Google Gemma 4 E2B IT](https://huggingface.co/Comfy-Org/gemma-4/blob/main/text_encoders/gemma4_e2b_it_bf16.safetensors)\n\n\n**Model Storage Location**\n\n```\n📂 ComfyUI/\n├── 📂 models/\n│   ├── 📂 text_encoders/\n│   │      ├── gemma4-12b-with-proj-ltx-2.5-bf16.safetensors\n│   │      └── gemma4_e2b_it_bf16.safetensors\n│   ├── 📂 diffusion_models/\n│   │      └── ltx-2.5-22b-distilled-transformer-bf16.safetensors\n│   ├── 📂 vae/\n│   │      └── ltx-2.5-audio-vae-bf16.safetensors\n│   │      └── ltx-2.5-video-vae-conv-bf16.safetensors / ltx-2.5-video-vae-bf16.safetensors\n│   ├── 📂 latent_upscale_models/\n│          └── ltx-2.5-latent-spatial-upscaler-x2-bf16-1.0.safetensors\n```\n\n## Report Issues\nTo report any issues when running this workflow, [go to GitHub](https://github.com/Lightricks/ComfyUI-LTXVideo/issues)\n\n**Native HDR:** use the float32 video VAE (inside **Load Models**). EXR plates require OpenImageIO (`pip install openimageio`).\n"
       },
       "color": "#432",
       "bgcolor": "#653"
@@ -285,7 +254,7 @@
       "flags": {
         "collapsed": false
       },
-      "order": 6,
+      "order": 5,
       "mode": 0,
       "inputs": [
         {
@@ -357,7 +326,9 @@
           "name": "VAE",
           "type": "VAE",
           "links": [
-            13841
+            13872,
+            13881,
+            13882
           ]
         },
         {
@@ -457,111 +428,6 @@
       }
     },
     {
-      "id": 5512,
-      "type": "PrimitiveFloat",
-      "pos": [
-        -3561.853511157809,
-        4052.2349475123683
-      ],
-      "size": [
-        343.59375,
-        62
-      ],
-      "flags": {},
-      "order": 7,
-      "mode": 0,
-      "inputs": [],
-      "outputs": [
-        {
-          "name": "FLOAT",
-          "type": "FLOAT",
-          "links": [
-            13634
-          ]
-        }
-      ],
-      "title": "duration in seconds (determines frames #)",
-      "properties": {
-        "Node name for S&R": "PrimitiveFloat",
-        "cnr_id": "comfy-core",
-        "ver": "0.25.0"
-      },
-      "widgets_values": [
-        5
-      ],
-      "widgets_values_named": {
-        "value": 5
-      },
-      "color": "#2a363b",
-      "bgcolor": "#3f5159"
-    },
-    {
-      "id": 5593,
-      "type": "MarkdownNote",
-      "pos": [
-        -3959.222780553446,
-        3623.5526311422145
-      ],
-      "size": [
-        360,
-        120
-      ],
-      "flags": {},
-      "order": 8,
-      "mode": 0,
-      "inputs": [],
-      "outputs": [],
-      "title": "Native HDR EXR",
-      "properties": {},
-      "widgets_values": [
-        "## Native HDR I2V\n\nEXR still → ACEScct → float32 VAE → two-stage distilled I2V → EXR + HLG out (same I/O as pipelines `--hdr` on Distilled).\nNot the SDR→HDR IC-LoRA upgrade path.\n"
-      ],
-      "widgets_values_named": {
-        "text": "## Native HDR I2V\n\nEXR still → ACEScct → float32 VAE → two-stage distilled I2V → EXR + HLG out (same I/O as pipelines `--hdr` on Distilled).\nNot the SDR→HDR IC-LoRA upgrade path.\n"
-      },
-      "color": "#432",
-      "bgcolor": "#653"
-    },
-    {
-      "id": 5578,
-      "type": "LTXVVAEForceFloat32",
-      "pos": [
-        -3133.4473963659534,
-        3652.460902145821
-      ],
-      "size": [
-        417.203125,
-        86.109375
-      ],
-      "flags": {},
-      "order": 14,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "vae",
-          "type": "VAE",
-          "link": 13841
-        }
-      ],
-      "outputs": [
-        {
-          "name": "VAE",
-          "type": "VAE",
-          "links": [
-            13842,
-            13844,
-            13855
-          ]
-        }
-      ],
-      "title": "VAE float32 (native HDR)",
-      "properties": {
-        "Node name for S&R": "LTXVVAEForceFloat32"
-      },
-      "color": "#233",
-      "bgcolor": "#355"
-    },
-    {
       "id": 5528,
       "type": "MarkdownNote",
       "pos": [
@@ -575,7 +441,7 @@
       "flags": {
         "collapsed": false
       },
-      "order": 9,
+      "order": 6,
       "mode": 0,
       "inputs": [],
       "outputs": [],
@@ -591,104 +457,6 @@
       "bgcolor": "#653"
     },
     {
-      "id": 5585,
-      "type": "SaveVideo",
-      "pos": [
-        -124.52833294481351,
-        3234.233568140196
-      ],
-      "size": [
-        320,
-        106
-      ],
-      "flags": {},
-      "order": 24,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "video",
-          "type": "VIDEO",
-          "link": 13852
-        }
-      ],
-      "outputs": [
-        {
-          "name": "video",
-          "type": "VIDEO",
-          "links": null
-        }
-      ],
-      "title": "Save video (preview)",
-      "properties": {
-        "Node name for S&R": "SaveVideo",
-        "cnr_id": "comfy-core"
-      },
-      "widgets_values": [
-        "hdr/preview",
-        "auto",
-        "auto",
-        "auto"
-      ],
-      "widgets_values_named": {
-        "filename_prefix": "hdr/preview",
-        "format": "auto",
-        "format.codec": "auto",
-        "codec": "auto"
-      }
-    },
-    {
-      "id": 5586,
-      "type": "LTXVSaveHLG",
-      "pos": [
-        -473.6449577252563,
-        3418.9773064326732
-      ],
-      "size": [
-        320,
-        170
-      ],
-      "flags": {},
-      "order": 23,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "hdr_linear",
-          "type": "IMAGE",
-          "link": 13848
-        },
-        {
-          "name": "audio",
-          "shape": 7,
-          "type": "AUDIO",
-          "link": 13854
-        },
-        {
-          "name": "frame_rate",
-          "type": "FLOAT",
-          "widget": {
-            "name": "frame_rate"
-          },
-          "link": 13851
-        }
-      ],
-      "outputs": [],
-      "properties": {
-        "Node name for S&R": "LTXVSaveHLG"
-      },
-      "widgets_values": [
-        24,
-        "hdr/ltxv_hlg",
-        "acescg"
-      ],
-      "widgets_values_named": {
-        "frame_rate": 24,
-        "filename_prefix": "hdr/ltxv_hlg",
-        "linear_primaries": "acescg"
-      },
-      "color": "#233",
-      "bgcolor": "#355"
-    },
-    {
       "id": 5516,
       "type": "f9337bd7-ca7a-4a59-99f1-65b664bed7e7",
       "pos": [
@@ -700,7 +468,7 @@
         261.015625
       ],
       "flags": {},
-      "order": 18,
+      "order": 14,
       "mode": 0,
       "inputs": [
         {
@@ -786,7 +554,7 @@
         310
       ],
       "flags": {},
-      "order": 19,
+      "order": 15,
       "mode": 0,
       "inputs": [
         {
@@ -803,7 +571,7 @@
         {
           "name": "vae",
           "type": "VAE",
-          "link": 13855
+          "link": 13872
         },
         {
           "name": "image",
@@ -887,105 +655,44 @@
       "id": 5532,
       "type": "MarkdownNote",
       "pos": [
-        -792.5376444678003,
-        3081.236023755434
+        -816.1957965455863,
+        3041.3032532483558
       ],
       "size": [
         523.046875,
-        114.03125
+        123
       ],
       "flags": {
         "collapsed": false
       },
-      "order": 10,
+      "order": 7,
       "mode": 0,
       "inputs": [],
       "outputs": [],
       "title": "Save video",
       "properties": {},
       "widgets_values": [
-        "## Save HDR\n\n1. **LTXVHDRDecodePostprocess** (`transfer=acescct`) — EXR + `hdr_linear`.\n2. **LTXVSaveHLG** — BT.2020/HLG 10-bit master (muxes Decode **AUDIO**).\n3. Preview: CreateVideo → SaveVideo from `hdr_linear` + Decode AUDIO.\n"
+        "## Save HDR\n\n1. **Save EXR (ACEScg)** — `LTXVHDRDecodePostprocess` with `save_exr` on and `exr_color_space` = `acescg`; writes the ACEScg EXR sequence to `output/hdr_exr`. Its image outputs are not used.\n2. **HLG video**: Create Video (`HDR`, generated audio) → Save Video (10-bit; auto = H.264, AV1 also available). Core HLG uses 1.0 = 203 nits and clips above 1000 nits.\n"
       ],
       "widgets_values_named": {
-        "text": "## Save HDR\n\n1. **LTXVHDRDecodePostprocess** (`transfer=acescct`) — EXR + `hdr_linear`.\n2. **LTXVSaveHLG** — BT.2020/HLG 10-bit master (muxes Decode **AUDIO**).\n3. Preview: CreateVideo → SaveVideo from `hdr_linear` + Decode AUDIO.\n"
+        "text": "## Save HDR\n\n1. **Save EXR (ACEScg)** — `LTXVHDRDecodePostprocess` with `save_exr` on and `exr_color_space` = `acescg`; writes the ACEScg EXR sequence to `output/hdr_exr`. Its image outputs are not used.\n2. **HLG video**: Create Video (`HDR`, generated audio) → Save Video (10-bit; auto = H.264, AV1 also available). Core HLG uses 1.0 = 203 nits and clips above 1000 nits.\n"
       },
       "color": "#432",
       "bgcolor": "#653"
     },
     {
-      "id": 5583,
-      "type": "LTXVHDRDecodePostprocess",
-      "pos": [
-        -869.5796231613673,
-        3244.094400684741
-      ],
-      "size": [
-        340,
-        295
-      ],
-      "flags": {},
-      "order": 21,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "image",
-          "type": "IMAGE",
-          "link": 13846
-        }
-      ],
-      "outputs": [
-        {
-          "name": "tonemapped",
-          "type": "IMAGE",
-          "links": [
-            13868
-          ]
-        },
-        {
-          "name": "hdr_linear",
-          "type": "IMAGE",
-          "links": [
-            13848
-          ]
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "LTXVHDRDecodePostprocess"
-      },
-      "widgets_values": [
-        "acescct",
-        0,
-        true,
-        "acescg",
-        "output/hdr_exr",
-        "frame",
-        true
-      ],
-      "widgets_values_named": {
-        "transfer": "acescct",
-        "exposure": 0,
-        "save_exr": true,
-        "exr_color_space": "acescg",
-        "output_dir": "output/hdr_exr",
-        "filename_prefix": "frame",
-        "half_precision": true
-      },
-      "color": "#233",
-      "bgcolor": "#355"
-    },
-    {
       "id": 5544,
       "type": "PreviewAny",
       "pos": [
-        -3135.5848671645426,
-        3832.259290401888
+        -3151.6115455681443,
+        3566.8657585055366
       ],
       "size": [
         407.5,
         257.9375
       ],
       "flags": {},
-      "order": 16,
+      "order": 12,
       "mode": 0,
       "inputs": [
         {
@@ -1011,78 +718,18 @@
       "bgcolor": "#353"
     },
     {
-      "id": 5584,
-      "type": "CreateVideo",
-      "pos": [
-        -460.4597847527683,
-        3234.6204748269606
-      ],
-      "size": [
-        270,
-        150
-      ],
-      "flags": {},
-      "order": 22,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "images",
-          "type": "IMAGE",
-          "link": 13868
-        },
-        {
-          "name": "audio",
-          "shape": 7,
-          "type": "AUDIO",
-          "link": 13857
-        },
-        {
-          "name": "fps",
-          "type": "FLOAT",
-          "widget": {
-            "name": "fps"
-          },
-          "link": 13856
-        }
-      ],
-      "outputs": [
-        {
-          "name": "VIDEO",
-          "type": "VIDEO",
-          "links": [
-            13852
-          ]
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "CreateVideo"
-      },
-      "widgets_values": [
-        8,
-        "auto",
-        "sRGB",
-        "none"
-      ],
-      "widgets_values_named": {
-        "fps": 8,
-        "bit_depth": "auto",
-        "color_space": "sRGB",
-        "codec": "none"
-      }
-    },
-    {
       "id": 5508,
       "type": "PrimitiveStringMultiline",
       "pos": [
-        -3559.5562371930837,
-        3092.721020219687
+        -3557.9298092337067,
+        3097.36313458893
       ],
       "size": [
         343.59375,
         197.109375
       ],
       "flags": {},
-      "order": 11,
+      "order": 8,
       "mode": 0,
       "inputs": [],
       "outputs": [
@@ -1113,15 +760,15 @@
       "id": 5001,
       "type": "LTXVLoadEXRSequence",
       "pos": [
-        -3561.1031747561606,
-        3493.1095411775505
+        -3558.0019526716974,
+        3505.718522782598
       ],
       "size": [
-        360,
-        334
+        358.18805001806686,
+        288.1586610339991
       ],
       "flags": {},
-      "order": 12,
+      "order": 9,
       "mode": 0,
       "inputs": [],
       "outputs": [
@@ -1196,7 +843,7 @@
       "flags": {
         "collapsed": false
       },
-      "order": 13,
+      "order": 10,
       "mode": 0,
       "inputs": [],
       "outputs": [],
@@ -1215,15 +862,15 @@
       "id": 5014,
       "type": "c28230e9-b195-4ec2-9679-39e1e920f733",
       "pos": [
-        -3126.68049328901,
-        3109.6333005846423
+        -3170.3978617378934,
+        3118.6202043199396
       ],
       "size": [
         418.431640625,
-        470
+        386
       ],
       "flags": {},
-      "order": 15,
+      "order": 11,
       "mode": 0,
       "inputs": [
         {
@@ -1278,7 +925,7 @@
           "widget": {
             "name": "value"
           },
-          "link": 13633
+          "link": null
         },
         {
           "label": "duration in seconds",
@@ -1287,7 +934,7 @@
           "widget": {
             "name": "value_5"
           },
-          "link": 13634
+          "link": null
         },
         {
           "label": "enhancer_seed",
@@ -1359,8 +1006,7 @@
           "type": "FLOAT",
           "links": [
             13640,
-            13851,
-            13856
+            13879
           ]
         },
         {
@@ -1410,7 +1056,7 @@
         266
       ],
       "flags": {},
-      "order": 17,
+      "order": 13,
       "mode": 0,
       "inputs": [
         {
@@ -1444,7 +1090,7 @@
         {
           "name": "vae",
           "type": "VAE",
-          "link": 13842
+          "link": 13881
         },
         {
           "label": "video width",
@@ -1504,6 +1150,172 @@
         "img_compression": 0,
         "strength": 1
       }
+    },
+    {
+      "id": 5603,
+      "type": "LTXVHDRDecodePostprocess",
+      "pos": [
+        -865.8049575945913,
+        3253.2421656169613
+      ],
+      "size": [
+        340,
+        295
+      ],
+      "flags": {},
+      "order": 17,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 13876
+        }
+      ],
+      "outputs": [
+        {
+          "name": "tonemapped",
+          "type": "IMAGE",
+          "links": []
+        },
+        {
+          "name": "hdr_linear",
+          "type": "IMAGE",
+          "links": []
+        }
+      ],
+      "title": "Save EXR (ACEScg)",
+      "properties": {
+        "Node name for S&R": "LTXVHDRDecodePostprocess"
+      },
+      "widgets_values": [
+        "acescct",
+        0,
+        true,
+        "acescg",
+        "output/hdr_exr",
+        "frame",
+        true
+      ],
+      "widgets_values_named": {
+        "transfer": "acescct",
+        "exposure": 0,
+        "save_exr": true,
+        "exr_color_space": "acescg",
+        "output_dir": "output/hdr_exr",
+        "filename_prefix": "frame",
+        "half_precision": true
+      },
+      "color": "#233",
+      "bgcolor": "#355"
+    },
+    {
+      "id": 5604,
+      "type": "CreateVideo",
+      "pos": [
+        -850.7667563077839,
+        3592.119559778101
+      ],
+      "size": [
+        280,
+        150
+      ],
+      "flags": {},
+      "order": 18,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 13877
+        },
+        {
+          "name": "audio",
+          "shape": 7,
+          "type": "AUDIO",
+          "link": 13878
+        },
+        {
+          "name": "fps",
+          "type": "FLOAT",
+          "widget": {
+            "name": "fps"
+          },
+          "link": 13879
+        }
+      ],
+      "outputs": [
+        {
+          "name": "VIDEO",
+          "type": "VIDEO",
+          "links": [
+            13880
+          ]
+        }
+      ],
+      "title": "CreateVideo (HLG)",
+      "properties": {
+        "Node name for S&R": "CreateVideo",
+        "cnr_id": "comfy-core"
+      },
+      "widgets_values": [
+        24,
+        "auto",
+        "HDR",
+        "none"
+      ],
+      "widgets_values_named": {
+        "fps": 24,
+        "bit_depth": "auto",
+        "color_space": "HDR",
+        "codec": "none"
+      }
+    },
+    {
+      "id": 5605,
+      "type": "SaveVideo",
+      "pos": [
+        -492.0446298737707,
+        3261.8374416805814
+      ],
+      "size": [
+        360,
+        296
+      ],
+      "flags": {},
+      "order": 19,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "link": 13880
+        }
+      ],
+      "outputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "links": []
+        }
+      ],
+      "title": "Save video (HLG)",
+      "properties": {
+        "Node name for S&R": "SaveVideo",
+        "cnr_id": "comfy-core"
+      },
+      "widgets_values": [
+        "hdr/hlg",
+        "auto",
+        "auto",
+        "auto"
+      ],
+      "widgets_values_named": {
+        "filename_prefix": "hdr/hlg",
+        "format": "auto",
+        "format.codec": "auto",
+        "codec": "auto"
+      }
     }
   ],
   "links": [
@@ -1522,22 +1334,6 @@
       5014,
       5,
       "STRING"
-    ],
-    [
-      13633,
-      5511,
-      0,
-      5014,
-      6,
-      "FLOAT"
-    ],
-    [
-      13634,
-      5512,
-      0,
-      5014,
-      7,
-      "FLOAT"
     ],
     [
       13638,
@@ -1700,86 +1496,6 @@
       "LATENT_UPSCALE_MODEL"
     ],
     [
-      13841,
-      5575,
-      1,
-      5578,
-      0,
-      "VAE"
-    ],
-    [
-      13842,
-      5578,
-      0,
-      5514,
-      4,
-      "VAE"
-    ],
-    [
-      13848,
-      5583,
-      1,
-      5586,
-      0,
-      "IMAGE"
-    ],
-    [
-      13851,
-      5014,
-      4,
-      5586,
-      2,
-      "FLOAT"
-    ],
-    [
-      13855,
-      5578,
-      0,
-      5517,
-      2,
-      "VAE"
-    ],
-    [
-      13856,
-      5014,
-      4,
-      5584,
-      2,
-      "FLOAT"
-    ],
-    [
-      13846,
-      5518,
-      0,
-      5583,
-      0,
-      "IMAGE"
-    ],
-    [
-      13854,
-      5518,
-      1,
-      5586,
-      1,
-      "AUDIO"
-    ],
-    [
-      13857,
-      5518,
-      1,
-      5584,
-      1,
-      "AUDIO"
-    ],
-    [
-      13844,
-      5578,
-      0,
-      5518,
-      0,
-      "VAE"
-    ],
-    [
       13734,
       5517,
       0,
@@ -1804,20 +1520,68 @@
       "VAE"
     ],
     [
-      13852,
-      5584,
+      13872,
+      5575,
+      1,
+      5517,
+      2,
+      "VAE"
+    ],
+    [
+      13876,
+      5518,
       0,
-      5585,
+      5603,
+      0,
+      "IMAGE"
+    ],
+    [
+      13877,
+      5518,
+      2,
+      5604,
+      0,
+      "IMAGE"
+    ],
+    [
+      13878,
+      5518,
+      1,
+      5604,
+      1,
+      "AUDIO"
+    ],
+    [
+      13879,
+      5014,
+      4,
+      5604,
+      2,
+      "FLOAT"
+    ],
+    [
+      13880,
+      5604,
+      0,
+      5605,
       0,
       "VIDEO"
     ],
     [
-      13868,
-      5583,
+      13881,
+      5575,
+      1,
+      5514,
+      4,
+      "VAE"
+    ],
+    [
+      13882,
+      5575,
+      1,
+      5518,
       0,
-      5584,
-      0,
-      "IMAGE"
+      "VAE"
     ]
   ],
   "groups": [
@@ -1827,8 +1591,8 @@
       "bounding": [
         -3585.5562371930837,
         3026.721020219687,
-        910.8582745912299,
-        1191.0306527777561
+        857.7658571429038,
+        841.3550019788154
       ],
       "color": "#3f789e",
       "flags": {}
@@ -1844,6 +1608,18 @@
       ],
       "color": "#3f789e",
       "flags": {}
+    },
+    {
+      "id": 159,
+      "title": "Export",
+      "bounding": [
+        -879.5796231613673,
+        3174.094400684741,
+        805.7579274669431,
+        609.546779703509
+      ],
+      "color": "#3f789e",
+      "flags": {}
     }
   ],
   "definitions": {
@@ -1852,10 +1628,10 @@
         "id": "c28230e9-b195-4ec2-9679-39e1e920f733",
         "version": 1,
         "state": {
-          "lastGroupId": 158,
-          "lastNodeId": 5600,
-          "lastLinkId": 13868,
-          "lastRerouteId": 5047
+          "lastGroupId": 159,
+          "lastNodeId": 5605,
+          "lastLinkId": 13882,
+          "lastRerouteId": 5053
         },
         "revision": 0,
         "config": {},
@@ -2162,12 +1938,12 @@
             "widgets_values": [
               "scale longer dimension",
               1536,
-              "lanczos"
+              "bilinear"
             ],
             "widgets_values_named": {
               "resize_type": "scale longer dimension",
               "resize_type.longer_size": 1536,
-              "scale_method": "lanczos"
+              "scale_method": "bilinear"
             },
             "color": "#432",
             "bgcolor": "#653"
@@ -3366,6 +3142,14 @@
             "type": "STRING"
           },
           {
+            "id": 13730,
+            "origin_id": -10,
+            "origin_slot": 8,
+            "target_id": 5546,
+            "target_slot": 6,
+            "type": "INT"
+          },
+          {
             "id": 13859,
             "origin_id": 5017,
             "origin_slot": 0,
@@ -3380,14 +3164,6 @@
             "target_id": 5561,
             "target_slot": 1,
             "type": "FLOAT"
-          },
-          {
-            "id": 13730,
-            "origin_id": -10,
-            "origin_slot": 8,
-            "target_id": 5546,
-            "target_slot": 6,
-            "type": "INT"
           },
           {
             "id": 13616,
@@ -3511,10 +3287,10 @@
         "id": "792f0fd8-129e-48eb-9904-8d1aa82154d1",
         "version": 1,
         "state": {
-          "lastGroupId": 158,
-          "lastNodeId": 5600,
-          "lastLinkId": 13868,
-          "lastRerouteId": 5047
+          "lastGroupId": 159,
+          "lastNodeId": 5605,
+          "lastLinkId": 13882,
+          "lastRerouteId": 5053
         },
         "revision": 0,
         "config": {},
@@ -4201,10 +3977,10 @@
         "id": "f9337bd7-ca7a-4a59-99f1-65b664bed7e7",
         "version": 1,
         "state": {
-          "lastGroupId": 158,
-          "lastNodeId": 5600,
-          "lastLinkId": 13868,
-          "lastRerouteId": 5047
+          "lastGroupId": 159,
+          "lastNodeId": 5605,
+          "lastLinkId": 13882,
+          "lastRerouteId": 5053
         },
         "revision": 0,
         "config": {},
@@ -4846,10 +4622,10 @@
         "id": "bee43e38-9234-4e41-86ff-63874164f482",
         "version": 1,
         "state": {
-          "lastGroupId": 158,
-          "lastNodeId": 5600,
-          "lastLinkId": 13868,
-          "lastRerouteId": 5047
+          "lastGroupId": 159,
+          "lastNodeId": 5605,
+          "lastLinkId": 13882,
+          "lastRerouteId": 5053
         },
         "revision": 0,
         "config": {},
@@ -4985,6 +4761,7 @@
               13860
             ],
             "localized_name": "IMAGE",
+            "label": "ACEScct_image",
             "pos": [
               -989.6521488113667,
               3495.725923686955
@@ -5001,6 +4778,19 @@
             "pos": [
               -989.6521488113667,
               3515.725923686955
+            ]
+          },
+          {
+            "id": "8de6a869-92c8-410f-b921-669b91911128",
+            "name": "IMAGE_1",
+            "type": "IMAGE",
+            "linkIds": [
+              13875
+            ],
+            "label": "HDR_HLG_image",
+            "pos": [
+              -989.6521488113667,
+              3535.725923686955
             ]
           }
         ],
@@ -5120,7 +4910,8 @@
                 "name": "IMAGE",
                 "type": "IMAGE",
                 "links": [
-                  13860
+                  13860,
+                  13874
                 ]
               }
             ],
@@ -5139,6 +4930,54 @@
               "temporal_size": 64,
               "temporal_overlap": 8
             }
+          },
+          {
+            "id": 5602,
+            "type": "ImageColorSpace",
+            "pos": [
+              -1040.9462354838788,
+              3310.8872234873465
+            ],
+            "size": [
+              315,
+              106
+            ],
+            "flags": {},
+            "order": 2,
+            "mode": 0,
+            "inputs": [
+              {
+                "localized_name": "image",
+                "name": "image",
+                "type": "IMAGE",
+                "link": 13874
+              }
+            ],
+            "outputs": [
+              {
+                "localized_name": "IMAGE",
+                "name": "IMAGE",
+                "type": "IMAGE",
+                "links": [
+                  13875
+                ]
+              }
+            ],
+            "title": "ACEScct → HDR (HLG)",
+            "properties": {
+              "Node name for S&R": "ImageColorSpace",
+              "cnr_id": "comfy-core"
+            },
+            "widgets_values": [
+              "HDR ACEScct",
+              "HDR"
+            ],
+            "widgets_values_named": {
+              "source": "HDR ACEScct",
+              "destination": "HDR"
+            },
+            "color": "#233",
+            "bgcolor": "#355"
           }
         ],
         "groups": [
@@ -5235,6 +5074,22 @@
             "target_id": 5538,
             "target_slot": 5,
             "type": "INT"
+          },
+          {
+            "id": 13874,
+            "origin_id": 5538,
+            "origin_slot": 0,
+            "target_id": 5602,
+            "target_slot": 0,
+            "type": "IMAGE"
+          },
+          {
+            "id": 13875,
+            "origin_id": 5602,
+            "origin_slot": 0,
+            "target_id": -20,
+            "target_slot": 2,
+            "type": "IMAGE"
           }
         ],
         "floatingLinks": [
@@ -5305,10 +5160,10 @@
         "id": "cf7c664d-af7e-4a9e-9f19-9f93cfd2476e",
         "version": 1,
         "state": {
-          "lastGroupId": 158,
-          "lastNodeId": 5600,
-          "lastLinkId": 13868,
-          "lastRerouteId": 5047
+          "lastGroupId": 159,
+          "lastNodeId": 5605,
+          "lastLinkId": 13882,
+          "lastRerouteId": 5053
         },
         "revision": 0,
         "config": {},
@@ -6323,10 +6178,10 @@
         "id": "f007aab9-e7ad-4b10-974c-4d7cc55001a9",
         "version": 1,
         "state": {
-          "lastGroupId": 158,
-          "lastNodeId": 5600,
-          "lastLinkId": 13868,
-          "lastRerouteId": 5047
+          "lastGroupId": 159,
+          "lastNodeId": 5605,
+          "lastLinkId": 13882,
+          "lastRerouteId": 5053
         },
         "revision": 0,
         "config": {},
@@ -6449,7 +6304,7 @@
             "name": "VAE",
             "type": "VAE",
             "linkIds": [
-              13800
+              13870
             ],
             "localized_name": "VAE",
             "label": "Video VAE",
@@ -6611,7 +6466,7 @@
                 "name": "VAE",
                 "type": "VAE",
                 "links": [
-                  13800
+                  13869
                 ]
               }
             ],
@@ -6891,6 +6746,45 @@
               "type": "ltxv",
               "device": "default"
             }
+          },
+          {
+            "id": 5601,
+            "type": "LTXVVAEForceFloat32",
+            "pos": [
+              -4673.3109083199,
+              3189.133404489309
+            ],
+            "size": [
+              300,
+              70
+            ],
+            "flags": {},
+            "order": 7,
+            "mode": 0,
+            "inputs": [
+              {
+                "localized_name": "vae",
+                "name": "vae",
+                "type": "VAE",
+                "link": 13869
+              }
+            ],
+            "outputs": [
+              {
+                "localized_name": "VAE",
+                "name": "VAE",
+                "type": "VAE",
+                "links": [
+                  13870
+                ]
+              }
+            ],
+            "title": "VAE float32 (HDR)",
+            "properties": {
+              "Node name for S&R": "LTXVVAEForceFloat32"
+            },
+            "color": "#233",
+            "bgcolor": "#355"
           }
         ],
         "groups": [
@@ -6931,14 +6825,6 @@
             "target_id": 5571,
             "target_slot": 0,
             "type": "COMBO"
-          },
-          {
-            "id": 13800,
-            "origin_id": 5571,
-            "origin_slot": 0,
-            "target_id": -20,
-            "target_slot": 1,
-            "type": "VAE"
           },
           {
             "id": 13863,
@@ -7019,6 +6905,22 @@
             "target_id": -20,
             "target_slot": 6,
             "type": "CLIP"
+          },
+          {
+            "id": 13869,
+            "origin_id": 5571,
+            "origin_slot": 0,
+            "target_id": 5601,
+            "target_slot": 0,
+            "type": "VAE"
+          },
+          {
+            "id": 13870,
+            "origin_id": 5601,
+            "origin_slot": 0,
+            "target_id": -20,
+            "target_slot": 1,
+            "type": "VAE"
           }
         ],
         "extra": {}
@@ -7027,7 +6929,7 @@
   },
   "config": {},
   "extra": {
-    "frontendVersion": "1.53.6",
+    "frontendVersion": "1.55.14",
     "VHS_latentpreview": false,
     "VHS_latentpreviewrate": 0,
     "VHS_MetadataImage": true,
@@ -7044,8 +6946,8 @@
       {
         "id": 5001,
         "pos": [
-          -3674.4449691105788,
-          4373.899757708305
+          -3682.975296757635,
+          4045.2751753090342
         ],
         "linkIds": [
           13823,
@@ -7056,8 +6958,8 @@
         "id": 5002,
         "parentId": 5001,
         "pos": [
-          -2517.6422086847338,
-          4368.007737349459
+          -2526.17253633179,
+          4039.3831549501883
         ],
         "linkIds": [
           13823,
@@ -7068,8 +6970,8 @@
         "id": 5003,
         "parentId": 5002,
         "pos": [
-          -1190.3778769766027,
-          4335.778069473409
+          -1198.9082046236597,
+          4007.153487074139
         ],
         "linkIds": [
           13824
@@ -7078,8 +6980,8 @@
       {
         "id": 5008,
         "pos": [
-          -3665.6409165376094,
-          4321.577946584291
+          -3674.1712441846657,
+          3992.9533641850203
         ],
         "linkIds": [
           13828,
@@ -7090,8 +6992,8 @@
         "id": 5009,
         "parentId": 5008,
         "pos": [
-          -2214.769558779009,
-          4312.342079517551
+          -2223.2998864260653,
+          3983.7174971182803
         ],
         "linkIds": [
           13828,
@@ -7102,8 +7004,8 @@
         "id": 5010,
         "parentId": 5009,
         "pos": [
-          -1761.401331918572,
-          4296.062925402747
+          -1769.931659565629,
+          3967.438343003477
         ],
         "linkIds": [
           13829
@@ -7112,8 +7014,8 @@
       {
         "id": 5011,
         "pos": [
-          -3665.5418379757407,
-          4347.502965094672
+          -3674.072165622797,
+          4018.8783826954013
         ],
         "linkIds": [
           13840
@@ -7123,8 +7025,8 @@
         "id": 5012,
         "parentId": 5011,
         "pos": [
-          -1783.2397635871514,
-          4324.922648056117
+          -1791.7700912342084,
+          3996.298065656847
         ],
         "linkIds": [
           13840
@@ -7167,8 +7069,8 @@
       {
         "id": 5018,
         "pos": [
-          -2676.3679950548817,
-          3504
+          -2679.704660970683,
+          3563.4445783616184
         ],
         "linkIds": [
           13655,
@@ -7179,8 +7081,8 @@
         "id": 5019,
         "parentId": 5018,
         "pos": [
-          -2211.4181244152037,
-          3508.6204748269606
+          -2224.029183056623,
+          3566.1707500605885
         ],
         "linkIds": [
           13655,
@@ -7191,8 +7093,8 @@
         "id": 5020,
         "parentId": 5019,
         "pos": [
-          -1757.996034229879,
-          3508.6204748269606
+          -1768.876257525927,
+          3573.1998647131836
         ],
         "linkIds": [
           13802
@@ -7222,8 +7124,8 @@
       {
         "id": 5025,
         "pos": [
-          -3662.491355928488,
-          4144
+          -3624.644621562911,
+          3894.437188875677
         ],
         "linkIds": [
           13837
@@ -7233,8 +7135,8 @@
         "id": 5026,
         "parentId": 5025,
         "pos": [
-          -3166.8033468662784,
-          4157.704130457274
+          -3203.6923470145834,
+          3901.688787953873
         ],
         "linkIds": [
           13837
@@ -7243,8 +7145,8 @@
       {
         "id": 5027,
         "pos": [
-          -3662.491355928488,
-          4198
+          -3630.4316088248997,
+          3923.398120568191
         ],
         "linkIds": [
           13839
@@ -7254,8 +7156,8 @@
         "id": 5028,
         "parentId": 5027,
         "pos": [
-          -3162.8149398246173,
-          4196.11418682331
+          -3191.985251493045,
+          3931.3169085310283
         ],
         "linkIds": [
           13839
@@ -7264,8 +7166,8 @@
       {
         "id": 5029,
         "pos": [
-          -3662.491355928488,
-          4260
+          -3641.607880156961,
+          3960.4807981357835
         ],
         "linkIds": [
           13838
@@ -7275,103 +7177,79 @@
         "id": 5030,
         "parentId": 5029,
         "pos": [
-          -3174.7996356798817,
-          4260
+          -3173.565944145766,
+          3960.561962052499
         ],
         "linkIds": [
           13838
         ]
       },
       {
-        "id": 5037,
+        "id": 5048,
         "pos": [
-          -3662.4683236335136,
-          4294.7029343632175
+          -2648.1616308471685,
+          3658.892394028949
         ],
         "linkIds": [
-          13841
+          13879
         ]
       },
       {
-        "id": 5038,
-        "parentId": 5037,
+        "id": 5050,
         "pos": [
-          -3171.144975192556,
-          4297.157847054363
+          -3677.518608381742,
+          4078.9387832755824
         ],
         "linkIds": [
-          13841
+          13872,
+          13881,
+          13882
         ]
       },
       {
-        "id": 5042,
-        "parentId": 5043,
+        "id": 5051,
+        "parentId": 5052,
         "pos": [
-          -1345.7027525383564,
-          3706.9914747080397
+          -1729.4505103338233,
+          4052.1087419319256
         ],
         "linkIds": [
-          13844
+          13872,
+          13882
         ]
       },
       {
-        "id": 5043,
+        "id": 5052,
+        "parentId": 5050,
         "pos": [
-          -1764.4648020096513,
-          3714.6609565010854
+          -2551.278239086373,
+          4064.824839121106
         ],
         "linkIds": [
-          13844,
-          13855
+          13872,
+          13881,
+          13882
         ]
       },
       {
-        "id": 5044,
+        "id": 5053,
+        "parentId": 5051,
         "pos": [
-          -2678.908667814226,
-          3661.179368209216
+          -1220.8038185227015,
+          4034.6366855344595
         ],
         "linkIds": [
-          13851,
-          13856
-        ]
-      },
-      {
-        "id": 5045,
-        "parentId": 5044,
-        "pos": [
-          -507.00753055133646,
-          3653.304710366201
-        ],
-        "linkIds": [
-          13851,
-          13856
-        ]
-      },
-      {
-        "id": 5046,
-        "pos": [
-          -902.0286967478261,
-          3548.7510997340073
-        ],
-        "linkIds": [
-          13854,
-          13857
-        ]
-      },
-      {
-        "id": 5047,
-        "parentId": 5046,
-        "pos": [
-          -519.1655250729357,
-          3541.0546468726448
-        ],
-        "linkIds": [
-          13854,
-          13857
+          13882
         ]
       }
     ],
+    "ds": {
+      "scale": 0.2056588979396934,
+      "offset": [
+        6131.193647115985,
+        -584.9829352133224
+      ]
+    },
     "linkExtensions": [
       {
         "id": 13654,
@@ -7422,45 +7300,26 @@
         "parentId": 5012
       },
       {
-        "id": 13841,
-        "parentId": 5038
-      },
-      {
-        "id": 13851,
-        "parentId": 5045
-      },
-      {
-        "id": 13855,
-        "parentId": 5043
-      },
-      {
-        "id": 13856,
-        "parentId": 5045
-      },
-      {
-        "id": 13854,
-        "parentId": 5047
-      },
-      {
-        "id": 13857,
-        "parentId": 5047
-      },
-      {
-        "id": 13844,
-        "parentId": 5042
-      },
-      {
         "id": 13824,
         "parentId": 5003
+      },
+      {
+        "id": 13872,
+        "parentId": 5051
+      },
+      {
+        "id": 13879,
+        "parentId": 5048
+      },
+      {
+        "id": 13881,
+        "parentId": 5052
+      },
+      {
+        "id": 13882,
+        "parentId": 5053
       }
-    ],
-    "ds": {
-      "scale": 0.560421630314949,
-      "offset": [
-        4966.47542800655,
-        -3789.3900074133353
-      ]
-    }
+    ]
   },
   "version": 0.4
 }

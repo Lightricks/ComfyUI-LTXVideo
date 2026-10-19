@@ -7,8 +7,8 @@ matrices / EXR chromaticities come from ``colour-science`` with Bradford CAT
 
 ``colour-science`` is required (same as ``ltx_core.color.primaries``).
 
-Used by HDR Comfy nodes in ``hdr_nodes`` (EXR ↔ VAE, SDR→HDR IC-LoRA ingest
-via ``SDRColorSpace`` / sRGB EOTF → ACEScct). File I/O helpers live in ``hdr_io``.
+Used by HDR Comfy nodes in ``hdr_nodes`` (EXR ↔ VAE ACEScct). SDR→ACEScct ingest
+uses Comfy Convert Image Color Space. File I/O helpers live in ``hdr_io``.
 """
 
 from __future__ import annotations
@@ -33,7 +33,6 @@ _ACESCCT_LOG_B = 9.72
 _CAT = "Bradford"
 _CS_ACESCG = colour.RGB_COLOURSPACES["ACEScg"]
 _CS_REC709 = colour.RGB_COLOURSPACES["ITU-R BT.709"]
-_CS_REC2020 = colour.RGB_COLOURSPACES["ITU-R BT.2020"]
 
 
 def _rgb_to_rgb(src: colour.RGB_Colourspace, dst: colour.RGB_Colourspace) -> Tensor:
@@ -62,8 +61,6 @@ def _exr_chroma(cs: colour.RGB_Colourspace) -> tuple[float, ...]:
 
 _ACESCG_TO_SRGB = _rgb_to_rgb(_CS_ACESCG, _CS_REC709)
 _SRGB_TO_ACESCG = torch.linalg.inv(_ACESCG_TO_SRGB.double()).to(torch.float32)
-_REC709_TO_2020 = _rgb_to_rgb(_CS_REC709, _CS_REC2020)
-_ACESCG_TO_2020 = _rgb_to_rgb(_CS_ACESCG, _CS_REC2020)
 _CHROMA_REC709 = _exr_chroma(_CS_REC709)
 _CHROMA_ACESCG = _exr_chroma(_CS_ACESCG)
 _MATRICES_SOURCE = "colour-science"
@@ -71,8 +68,6 @@ _MATRICES_SOURCE = "colour-science"
 # Public aliases (parity with ``ltx_core.color.primaries`` exports).
 ACESCG_TO_SRGB = _ACESCG_TO_SRGB
 SRGB_TO_ACESCG = _SRGB_TO_ACESCG
-REC709_TO_2020 = _REC709_TO_2020
-ACESCG_TO_2020 = _ACESCG_TO_2020
 
 _CHROMATICITIES = {
     "rec709": _CHROMA_REC709,
@@ -91,11 +86,6 @@ class Primaries(enum.Enum):
         """EXR ``chromaticities`` header (R/G/B/W x,y)."""
         return _CHROMATICITIES[self.value]
 
-    @property
-    def matrix_to_rec2020(self) -> Tensor:
-        """3x3 linear map from this basis to Rec.2020 (for HLG)."""
-        return _REC709_TO_2020 if self is Primaries.REC709 else _ACESCG_TO_2020
-
     def to(self, target: Primaries, video: Tensor) -> Tensor:
         """Convert linear light from this basis into ``target``. Identity when same."""
         if self is target:
@@ -105,10 +95,6 @@ class Primaries(enum.Enum):
         if (self, target) == (Primaries.ACESCG, Primaries.REC709):
             return _apply_matrix(video, _ACESCG_TO_SRGB)
         raise ValueError(f"No primaries conversion from {self!r} to {target!r}.")
-
-    def to_rec2020(self, video: Tensor) -> Tensor:
-        """Linear light in this basis → Rec.2020 (HLG master space)."""
-        return _apply_matrix(video, self.matrix_to_rec2020)
 
 
 class HDRColorSpace(enum.Enum):
@@ -150,13 +136,6 @@ def _apply_matrix(video: Tensor, mat: Tensor) -> Tensor:
     raise ValueError(f"Expected RGB in last or -3 dim; got shape {tuple(video.shape)}")
 
 
-# sRGB EOTF (IEC 61966-2-1) — same constants as ``ltx_core.hdr``.
-_SRGB_A = 0.055
-_SRGB_LINEAR_THRESHOLD = 0.04045
-_SRGB_LINEAR_SLOPE = 12.92
-_SRGB_GAMMA = 2.4
-
-
 def compress_acescct(hdr: Tensor) -> Tensor:
     """Linear HDR [0, ∞) → ACEScct [0, 1]."""
     x = torch.clamp(hdr, min=0.0)
@@ -173,16 +152,6 @@ def decompress_acescct(ct: Tensor) -> Tensor:
     return torch.where(ct > _ACESCCT_Y_BRK, lin_from_log, lin_from_lin)
 
 
-def srgb_eotf_to_linear(srgb_01: Tensor) -> Tensor:
-    """sRGB-encoded [0, 1] → display-linear Rec.709/sRGB (IEC 61966-2-1 EOTF)."""
-    x = torch.clamp(srgb_01.float(), 0.0, 1.0)
-    return torch.where(
-        x <= _SRGB_LINEAR_THRESHOLD,
-        x / _SRGB_LINEAR_SLOPE,
-        torch.pow((x + _SRGB_A) / (1.0 + _SRGB_A), _SRGB_GAMMA),
-    )
-
-
 def to_acescct_working_space(linear_rgb: Tensor, source_primaries: Primaries) -> Tensor:
     """Scene-linear RGB → ACEScct [0, 1] (channel-last or channel-first)."""
     native = source_primaries.to(Primaries.ACESCG, linear_rgb.float())
@@ -197,55 +166,9 @@ def acescct_to_linear(
     return Primaries.ACESCG.to(out_primaries, linear_acescg).clamp(min=0.0)
 
 
-class SDRColorSpace(enum.Enum):
-    """SDR ingest colour space for mapping float RGB into ACEScct.
-
-    Matches pipelines ``SDRColorSpace`` / ``hdr_ic_lora`` IDT:
-
-    * ``srgb_gamma`` — display-referred sRGB (apply EOTF, then ACEScct).
-    * ``srgb`` — scene-linear Rec.709 / sRGB primaries (no EOTF).
-    * ``acescg`` — scene-linear ACEScg → ACEScct.
-    * ``acescct`` — already ACEScct log codes; clamp passthrough.
-    """
-
-    SRGB = "srgb"
-    SRGB_GAMMA = "srgb_gamma"
-    ACESCG = "acescg"
-    ACESCCT = "acescct"
-
-    def to_working_space(self, video: Tensor) -> Tensor:
-        """Map SDR float RGB into ACEScct ``[0, 1]`` (channel-last or channel-first)."""
-        if not video.is_floating_point():
-            raise ValueError(
-                f"SDRColorSpace.to_working_space expects float RGB; got dtype={video.dtype}. "
-                "Normalize integer pixels before calling."
-            )
-        video = video.float()
-        if self is SDRColorSpace.ACESCCT:
-            return video.clamp(0.0, 1.0)
-        if self is SDRColorSpace.SRGB_GAMMA:
-            return to_acescct_working_space(
-                srgb_eotf_to_linear(video), Primaries.REC709
-            )
-        if self is SDRColorSpace.SRGB:
-            return to_acescct_working_space(video, Primaries.REC709)
-        if self is SDRColorSpace.ACESCG:
-            return to_acescct_working_space(video, Primaries.ACESCG)
-        raise ValueError(f"Unsupported SDR color space: {self!r}")
-
-
 def images_to_acescct(images: Tensor, color_space: HDRColorSpace) -> Tensor:
     """Convert loaded EXR frames ``[F,H,W,3]`` into ACEScct ``[0,1]`` for the VAE."""
     images = images.float()
     if color_space.is_log_working:
         return images.clamp(0.0, 1.0)
     return to_acescct_working_space(images, color_space.source_primaries)
-
-
-def sdr_images_to_acescct(images: Tensor, color_space: SDRColorSpace) -> Tensor:
-    """Convert SDR frames ``[F,H,W,C]`` into ACEScct ``[0,1]`` for HDR IC-LoRA."""
-    rgb = images[..., :3]
-    working = color_space.to_working_space(rgb)
-    if images.shape[-1] > 3:
-        return torch.cat([working, images[..., 3:].float()], dim=-1)
-    return working
