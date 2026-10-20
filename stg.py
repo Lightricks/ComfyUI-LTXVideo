@@ -109,6 +109,14 @@ class STGFlag:
     skip_layers: List[int] = None
 
 
+def _unwrap_attention_tensor(v):
+    # ComfyUI wraps q/k/v in AttentionTensorContainer before calling attention.
+    # The skip path returns v as the attention output, so it must be a plain tensor.
+    if isinstance(v, comfy.ldm.modules.attention.AttentionTensorContainer):
+        return v.take()
+    return v
+
+
 # context manager that replaces the attention function in a transformer block
 class PatchAttention(contextlib.AbstractContextManager):
     def __init__(self, attn_idx: Optional[Union[int, List[int]]] = None):
@@ -144,14 +152,14 @@ class PatchAttention(contextlib.AbstractContextManager):
     def stg_attention(self, q, k, v, heads, *args, **kwargs):
         self.current_idx += 1
         if self.current_idx in self.attn_idx:
-            return v
+            return _unwrap_attention_tensor(v)
         else:
             return self.original_attention(q, k, v, heads, *args, **kwargs)
 
     def stg_attention_masked(self, q, k, v, heads, *args, **kwargs):
         self.current_idx += 1
         if self.current_idx in self.attn_idx:
-            return v
+            return _unwrap_attention_tensor(v)
         else:
             return self.original_attention_masked(q, k, v, heads, *args, **kwargs)
 
