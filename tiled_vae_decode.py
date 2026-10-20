@@ -1,8 +1,67 @@
 import logging
+import math
+import os
+import shutil
+import tempfile
+import weakref
 
 import torch
 
+import folder_paths
+
 from .nodes_registry import comfy_node
+
+# Same RAM-safety shape as DaSiWa's RTX Upscaler fix: decoding a long/high-res
+# batch to a single torch.empty(...) output tensor can require tens of GB in
+# one shot. Below this, allocate normally (fast); above it, back the tensor
+# with a memory-mapped temp file so the OS pages it in/out instead of
+# committing it all to RAM at once; above the hard cap, refuse with a clear
+# error instead of risking an OOM freeze.
+_MAX_IN_MEMORY_OUTPUT_BYTES = 8 * 1024 * 1024 * 1024
+_MAX_DISK_BACKED_OUTPUT_BYTES = 64 * 1024 * 1024 * 1024
+_TEMP_DISK_RESERVE_BYTES = 1024 * 1024 * 1024
+
+
+def _remove_temp_file(path):
+    try:
+        os.unlink(path)
+    except OSError:
+        pass
+
+
+def _allocate_decode_output(shape, dtype, device):
+    required_bytes = math.prod(shape) * torch.empty((), dtype=dtype).element_size()
+
+    if device.type != "cpu" or required_bytes <= _MAX_IN_MEMORY_OUTPUT_BYTES:
+        return torch.empty(shape, device=device, dtype=dtype)
+
+    if required_bytes > _MAX_DISK_BACKED_OUTPUT_BYTES:
+        raise RuntimeError(
+            f"LTXV Tiled VAE Decode output requires {required_bytes / 1024 ** 3:.2f} GiB, "
+            f"exceeding the {_MAX_DISK_BACKED_OUTPUT_BYTES / 1024 ** 3:.0f} GiB disk-backed "
+            "safety limit. Reduce frame count or resolution."
+        )
+
+    directory = folder_paths.get_temp_directory()
+    os.makedirs(directory, exist_ok=True)
+    if shutil.disk_usage(directory).free < required_bytes + _TEMP_DISK_RESERVE_BYTES:
+        raise RuntimeError(
+            f"ComfyUI temporary directory '{directory}' lacks space for the projected "
+            f"{required_bytes / 1024 ** 3:.2f} GiB decode output plus a 1 GiB reserve."
+        )
+
+    descriptor, path = tempfile.mkstemp(prefix="ltxv_tiled_decode_", suffix=".mmap", dir=directory)
+    os.close(descriptor)
+    try:
+        output = torch.from_file(path, shared=True, size=math.prod(shape), dtype=dtype).reshape(shape)
+    except Exception:
+        _remove_temp_file(path)
+        raise
+    weakref.finalize(output, _remove_temp_file, path)
+    logging.info(
+        f"[LTXV Tiled VAE Decode] Disk-backed output ({required_bytes / 1024 ** 3:.2f} GiB): {path}"
+    )
+    return output
 
 
 @comfy_node(
@@ -83,22 +142,18 @@ class LTXVTiledVAEDecode:
         elif working_dtype == "float32":
             target_dtype = torch.float32
 
-        output = torch.zeros(
-            (
-                batch,
-                image_frames,
-                output_height,
-                output_width,
-                3,
-            ),
-            device=target_device,
-            dtype=target_dtype,
+        output = _allocate_decode_output(
+            (batch, image_frames, output_height, output_width, 3),
+            target_dtype,
+            torch.device(target_device) if not isinstance(target_device, torch.device) else target_device,
         )
-        weights = torch.zeros(
+        output.zero_()
+        weights = _allocate_decode_output(
             (batch, image_frames, output_height, output_width, 1),
-            device=target_device,
-            dtype=target_dtype,
+            target_dtype,
+            torch.device(target_device) if not isinstance(target_device, torch.device) else target_device,
         )
+        weights.zero_()
 
         # Process each tile
         for v in range(vertical_tiles):
@@ -197,8 +252,15 @@ class LTXVTiledVAEDecode:
                     :, :, out_h_start:out_h_end, out_w_start:out_w_end, :
                 ] += tile_weights.to(target_device, target_dtype)
 
-        # Normalize by weights
-        output /= weights + 1e-8
+        # Normalize by weights. `weights + 1e-8` looks harmless but is NOT
+        # in-place: it allocates a brand-new full-size tensor before the
+        # division even starts, bypassing the disk-backed allocation used
+        # for `output`/`weights` above. For a large batch that's a second
+        # multi-GB buffer via the plain RAM allocator, right at the tail end
+        # of the whole tiled decode - exactly the kind of spike this file's
+        # disk-backed allocation was meant to prevent.
+        weights.add_(1e-8)
+        output /= weights
 
         # Reshape output to match expected format [batch * frames, height, width, channels]
         output = output.view(
@@ -385,16 +447,10 @@ class LTXVSpatioTemporalTiledVAEDecode(LTXVTiledVAEDecode):
             target_dtype = torch.float32
 
         # Initialize output tensor and weight tensor
-        output = torch.empty(
-            (
-                batch,
-                image_frames,
-                output_height,
-                output_width,
-                3,
-            ),
-            device=target_device,
-            dtype=target_dtype,
+        output = _allocate_decode_output(
+            (batch, image_frames, output_height, output_width, 3),
+            target_dtype,
+            torch.device(target_device) if not isinstance(target_device, torch.device) else target_device,
         )
 
         # Process temporal chunks similar to reference function
