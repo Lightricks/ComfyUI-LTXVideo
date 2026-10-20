@@ -16,8 +16,6 @@ from .guiders import GuiderParametersNode, MultimodalGuiderNode
 from .hdr_nodes import (
     LTXVHDRDecodePostprocess,
     LTXVLoadEXRSequence,
-    LTXVSaveHLG,
-    LTXVSDRToHDRWorkingSpace,
     LTXVVAEForceFloat32,
 )
 from .iclora import (
@@ -106,10 +104,8 @@ NODE_CLASS_MAPPINGS = {
     "LTXVInpaintPreprocess": LTXVInpaintPreprocess,
     "LTXVLaplacianPyramidBlend": LTXVLaplacianPyramidBlend,
     "LTXVHDRDecodePostprocess": LTXVHDRDecodePostprocess,
-    "LTXVSDRToHDRWorkingSpace": LTXVSDRToHDRWorkingSpace,
     "LTXVLoadEXRSequence": LTXVLoadEXRSequence,
     "LTXVVAEForceFloat32": LTXVVAEForceFloat32,
-    "LTXVSaveHLG": LTXVSaveHLG,
     "LTXVAudioOnlyModel": LTXVAudioOnlyModel,
     "LTXVAudioOnlyEmptyVideoLatent": LTXVAudioOnlyEmptyVideoLatent,
 }

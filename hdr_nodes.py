@@ -2,9 +2,9 @@
 
 Stage-oriented layout (shared ACEScct working space):
 
-- Ingest: ``LTXVSDRToHDRWorkingSpace``, ``LTXVLoadEXRSequence``
+- Ingest: ``LTXVLoadEXRSequence`` (SDR→ACEScct uses Comfy Convert Image Color Space)
 - Runtime: ``LTXVVAEForceFloat32``
-- Delivery: ``LTXVHDRDecodePostprocess``, ``LTXVSaveHLG``
+- Delivery: ``LTXVHDRDecodePostprocess`` (HLG video uses Comfy Create Video / Save Video)
 
 Color math: ``hdr_color``. File I/O helpers: ``hdr_io``.
 """
@@ -15,20 +15,11 @@ import logging
 import os
 from pathlib import Path
 
-import folder_paths
 import torch
 from torch import Tensor
 
-from .hdr_color import (
-    HDRColorSpace,
-    Primaries,
-    SDRColorSpace,
-    compress_acescct,
-    images_to_acescct,
-    sdr_images_to_acescct,
-)
+from .hdr_color import HDRColorSpace, Primaries, compress_acescct, images_to_acescct
 from .hdr_io import (
-    _encode_hlg_mp4,
     _list_exr_files,
     _read_exr,
     _resolve_path,
@@ -41,7 +32,6 @@ from .nodes_registry import comfy_node
 logger = logging.getLogger("LTXVideo.hdr_nodes")
 
 _EXR_COLOR_SPACE_CHOICES = ["linear", "acescct", "srgb_linear", "acescg"]
-_SDR_COLOR_SPACE_CHOICES = [c.value for c in SDRColorSpace]
 _COLOR_SPACE_CHOICES = [c.value for c in HDRColorSpace]
 
 
@@ -119,48 +109,6 @@ def _linear_to_srgb(x: Tensor) -> Tensor:
 # ---------------------------------------------------------------------------
 
 
-@comfy_node(name="LTXVSDRToHDRWorkingSpace")
-class LTXVSDRToHDRWorkingSpace:
-    """Map SDR float RGB into ACEScct ``[0, 1]`` for HDR IC-LoRA conditioning.
-    Place **before** resize when the source is display sRGB so
-    the EOTF is not applied to bilinear-filtered codes.
-
-    Default ``srgb_gamma`` matches typical ``LoadVideo`` / MP4 decode.
-    """
-
-    @classmethod
-    def INPUT_TYPES(s):
-        return {
-            "required": {
-                "image": ("IMAGE",),
-                "color_space": (
-                    _SDR_COLOR_SPACE_CHOICES,
-                    {
-                        "default": "srgb_gamma",
-                        "tooltip": (
-                            "SDR ingest IDT. srgb_gamma = display sRGB (EOTF then "
-                            "ACEScct); srgb = scene-linear Rec.709; acescg / acescct "
-                            "for float EXR-style plates."
-                        ),
-                    },
-                ),
-            },
-        }
-
-    RETURN_TYPES = ("IMAGE",)
-    RETURN_NAMES = ("acescct",)
-    FUNCTION = "convert"
-    CATEGORY = "Lightricks/HDR"
-    DESCRIPTION = (
-        "SDR → ACEScct working space for HDR IC-LoRA (pipelines SDRColorSpace). "
-        "Wire LoadVideo images through this before resize / IC-LoRA guide."
-    )
-
-    def convert(self, image: torch.Tensor, color_space: str = "srgb_gamma") -> tuple:
-        space = SDRColorSpace(color_space)
-        return (sdr_images_to_acescct(image, space),)
-
-
 def _exr_payload_for_color_space(
     image: Tensor,
     hdr_linear: Tensor,
@@ -219,8 +167,6 @@ class LTXVHDRDecodePostprocess:
     sequence (legacy ``linear``, or tagged ``acescct`` / ``srgb_linear`` /
     ``acescg``).
 
-    For BT.2020/HLG masters, wire ``hdr_linear`` into ``LTXVSaveHLG``.
-
     Outputs:
         tonemapped: SDR preview [0, 1] after Reinhard tonemap + sRGB gamma.
         hdr_linear: Raw linear HDR values [0, inf) for further processing.
@@ -241,8 +187,8 @@ class LTXVHDRDecodePostprocess:
                         "default": "acescct",
                         "tooltip": (
                             "Working-space curve of the VAE decode. "
-                            "Use acescct for SDR→HDR IC-LoRA (after "
-                            "LTXVSDRToHDRWorkingSpace) and for native HDR EXR; "
+                            "Use acescct for SDR→HDR IC-LoRA (after Convert "
+                            "Image Color Space sRGB→HDR ACEScct) and for native HDR EXR; "
                             "logc3 only for legacy LogC3 HDR LoRA checkpoints."
                         ),
                     },
@@ -317,7 +263,7 @@ class LTXVHDRDecodePostprocess:
     DESCRIPTION = (
         "Decompresses VAE-decoded HDR (ACEScct or legacy LogC3), tonemaps for "
         "preview, and optionally writes EXR (linear / ACEScct / sRGB linear / "
-        "ACEScg). Wire hdr_linear into LTXVSaveHLG for a BT.2020/HLG master."
+        "ACEScg)."
     )
 
     def postprocess(
@@ -558,118 +504,3 @@ class LTXVVAEForceFloat32:
                 ) from exc
         logger.info("VAE dtype forced to float32 for native HDR")
         return (vae,)
-
-
-@comfy_node(name="LTXVSaveHLG")
-class LTXVSaveHLG:
-    """Encode scene-linear ``hdr_linear`` frames to a BT.2020 / HLG 10-bit HEVC master.
-
-    Wire the ``hdr_linear`` output of ``LTXVHDRDecodePostprocess`` here (not the
-    tonemapped preview). Matches pipelines ``encode_video`` HLG delivery.
-    """
-
-    @classmethod
-    def INPUT_TYPES(cls):
-        return {
-            "required": {
-                "hdr_linear": (
-                    "IMAGE",
-                    {
-                        "tooltip": (
-                            "Scene-linear HDR from LTXVHDRDecodePostprocess. "
-                            "With transfer=acescct this is ACEScg linear — leave "
-                            "linear_primaries=acescg. For logc3, use rec709."
-                        ),
-                    },
-                ),
-                "frame_rate": (
-                    "FLOAT",
-                    {"default": 24.0, "min": 1.0, "max": 120.0, "step": 0.001},
-                ),
-                "filename_prefix": ("STRING", {"default": "hdr/ltxv_hlg"}),
-            },
-            "optional": {
-                "linear_primaries": (
-                    ["acescg", "rec709"],
-                    {
-                        "default": "acescg",
-                        "tooltip": (
-                            "Primaries of hdr_linear. ACEScct decode "
-                            "(SDR→HDR IC-LoRA or native HDR) → acescg. "
-                            "Legacy LogC3 → rec709."
-                        ),
-                    },
-                ),
-                "audio": (
-                    "AUDIO",
-                    {
-                        "tooltip": (
-                            "Optional track to mux into the HLG MP4 (e.g. Decode AUDIO). "
-                            "Omit for video-only."
-                        ),
-                    },
-                ),
-            },
-        }
-
-    RETURN_TYPES = ()
-    OUTPUT_NODE = True
-    FUNCTION = "save"
-    CATEGORY = "Lightricks/HDR"
-    DESCRIPTION = (
-        "Writes a BT.2020/HLG 10-bit HEVC master from scene-linear hdr_linear "
-        "(from LTXVHDRDecodePostprocess). Maps linear_primaries → Rec.2020 "
-        "directly (no Rec.709 hop), then HLG. Optional AUDIO is muxed as AAC."
-    )
-
-    def save(
-        self,
-        hdr_linear: Tensor,
-        frame_rate: float,
-        filename_prefix: str,
-        linear_primaries: str = "acescg",
-        audio: dict | None = None,
-    ):
-        if hdr_linear.ndim != 4 or hdr_linear.shape[-1] < 3:
-            raise ValueError(f"Expected IMAGE [F,H,W,C]; got {tuple(hdr_linear.shape)}")
-
-        # ACEScg/Rec.709 → Rec.2020 inside HLG encode (Primaries.to_rec2020 /
-        # matrix_to_rec2020). No Rec.709 intermediate that would crush OOG early.
-        linear = hdr_linear[..., :3].float()
-        prim = (linear_primaries or "acescg").lower()
-        if prim == "acescg":
-            src_primaries = Primaries.ACESCG
-        elif prim == "rec709":
-            src_primaries = Primaries.REC709
-        else:
-            raise ValueError(
-                f"Unsupported linear_primaries {linear_primaries!r}; use acescg or rec709."
-            )
-
-        # Even dims for 4:2:0
-        h, w = linear.shape[1], linear.shape[2]
-        if h % 2 or w % 2:
-            linear = linear[:, : h - (h % 2), : w - (w % 2), :]
-
-        full_output_folder, filename, counter, _subfolder, _ = (
-            folder_paths.get_save_image_path(
-                filename_prefix,
-                folder_paths.get_output_directory(),
-                linear.shape[2],
-                linear.shape[1],
-            )
-        )
-        hlg_path = Path(full_output_folder) / f"{filename}_{counter:05d}_hlg.mp4"
-        _encode_hlg_mp4(
-            linear,
-            hlg_path,
-            fps=float(frame_rate),
-            audio=audio,
-            primaries=src_primaries,
-        )
-        logger.info(
-            "Wrote HLG 10-bit master to %s%s",
-            hlg_path,
-            " (with audio)" if audio is not None else "",
-        )
-        return {}
