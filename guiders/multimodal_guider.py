@@ -154,6 +154,9 @@ class MultimodalGuider(comfy.samplers.CFGGuider):
             del model_options["transformer_options"]["v2a_cross_attn"]
         v_noise_pred_pos, a_noise_pred_pos = self.unpack_latents(noise_pred_pos)
 
+        # When cfg=1 or stg=0 we still pass packed predictions through sampler_post_cfg hooks.
+        noise_pred_neg = noise_pred_pos
+        noise_pred_perturbed = noise_pred_pos
         a_noise_pred_neg, v_noise_pred_neg = 0, 0
         a_noise_pred_perturbed, v_noise_pred_perturbed = 0, 0
         a_noise_pred_modality, v_noise_pred_modality = 0, 0
