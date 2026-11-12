@@ -1,8 +1,8 @@
 {
   "id": "ae44066e-0b1b-4cd3-a254-4b5c4055e122",
   "revision": 0,
-  "last_node_id": 9030,
-  "last_link_id": 13976,
+  "last_node_id": 9033,
+  "last_link_id": 13981,
   "nodes": [
     {
       "id": 5433,
@@ -62,12 +62,12 @@
       "id": 5434,
       "type": "MarkdownNote",
       "pos": [
-        -880,
-        2899.03125
+        -878.8862284974043,
+        2872.8167132369367
       ],
       "size": [
         274.25,
-        238
+        252
       ],
       "flags": {},
       "order": 2,
@@ -77,10 +77,10 @@
       "title": "Decode + Blend (stage 2)",
       "properties": {},
       "widgets_values": [
-        "## Decode + Blend (stage 2)\n\nDecodes the high-res latent (video and audio) with the native tiled VAE decode and\ndoes the **final Laplacian-pyramid blend** with the original video for a seamless\ntransition, then assembles the output video.\n\nTiling is exposed on the node: `512 / 64 / 128 / 32` suits most hardware. Fewer,\nlarger tiles run faster but need more memory.\n\n**Convert Image Color Space** ACEScct → `HDR` (Rec.2020 HLG) feeds the video; the ACEScct image goes to the EXR save.\n"
+        "## Decode + Blend (stage 2)\n\nDecodes the high-res latent (video and audio) with the native tiled VAE decode and\ndoes the **final Laplacian-pyramid blend** with the original video for a seamless\ntransition, then assembles the output video.\n\nTiling is exposed on the node: `512 / 64 / 128 / 32` suits most hardware. Fewer,\nlarger tiles run faster but need more memory.\n\n**Convert Image Color Space**:\n- ACEScct → `linear ACEScg` (scene-linear AP1) for the EXR.\n- ACEScg → `HDR` (Rec.2020 HLG) for the video.\n"
       ],
       "widgets_values_named": {
-        "text": "## Decode + Blend (stage 2)\n\nDecodes the high-res latent (video and audio) with the native tiled VAE decode and\ndoes the **final Laplacian-pyramid blend** with the original video for a seamless\ntransition, then assembles the output video.\n\nTiling is exposed on the node: `512 / 64 / 128 / 32` suits most hardware. Fewer,\nlarger tiles run faster but need more memory.\n\n**Convert Image Color Space** ACEScct → `HDR` (Rec.2020 HLG) feeds the video; the ACEScct image goes to the EXR save.\n"
+        "text": "## Decode + Blend (stage 2)\n\nDecodes the high-res latent (video and audio) with the native tiled VAE decode and\ndoes the **final Laplacian-pyramid blend** with the original video for a seamless\ntransition, then assembles the output video.\n\nTiling is exposed on the node: `512 / 64 / 128 / 32` suits most hardware. Fewer,\nlarger tiles run faster but need more memory.\n\n**Convert Image Color Space**:\n- ACEScct → `linear ACEScg` (scene-linear AP1) for the EXR.\n- ACEScg → `HDR` (Rec.2020 HLG) for the video.\n"
       },
       "color": "#432",
       "bgcolor": "#653"
@@ -173,14 +173,6 @@
           "type": "CONDITIONING",
           "links": [
             8
-          ]
-        },
-        {
-          "label": "blend reference",
-          "name": "image",
-          "type": "IMAGE",
-          "links": [
-            29
           ]
         },
         {
@@ -280,11 +272,11 @@
       ],
       "outputs": [
         {
-          "label": "ACEScct_image",
+          "label": "ACEScg_image",
           "name": "IMAGE",
           "type": "IMAGE",
           "links": [
-            13962
+            13980
           ]
         },
         {
@@ -1040,10 +1032,10 @@
       "title": "Save HDR",
       "properties": {},
       "widgets_values": [
-        "## Save HDR\n\n1. **Save EXR (ACEScg)** — `LTXVHDRDecodePostprocess` with `save_exr` on and `exr_color_space` = `acescg`; writes the ACEScg EXR sequence to `output/hdr_exr`. Its image outputs are not used.\n2. **HLG video**: Create Video (`HDR`, EXR sequence audio) → Save Video (10-bit; auto = H.264, AV1 also available). Core HLG uses 1.0 = 203 nits and clips above 1000 nits.\n\nPreprocess **img_compression = 0** (no JPEG/CRF on ACEScct).\nVideo VAE forced **float32** in **Load Models**.\n"
+        "## Save HDR\n\n1. **Save Image (Advanced)** EXR `linear ACEScg` — JPEG thumbs, sun HDR viewer, Download images zip. Needs ComfyUI with ACEScg + `--enable-assets`.\n2. **HLG video**: Create Video (`HDR`, EXR sequence audio) → Save Video (10-bit; auto = H.264, AV1 also available). Core HLG uses 1.0 = 203 nits and clips above 1000 nits.\n\nPreprocess **img_compression = 0** (no JPEG/CRF on ACEScct).\nVideo VAE forced **float32** in **Load Models**.\n"
       ],
       "widgets_values_named": {
-        "text": "## Save HDR\n\n1. **Save EXR (ACEScg)** — `LTXVHDRDecodePostprocess` with `save_exr` on and `exr_color_space` = `acescg`; writes the ACEScg EXR sequence to `output/hdr_exr`. Its image outputs are not used.\n2. **HLG video**: Create Video (`HDR`, EXR sequence audio) → Save Video (10-bit; auto = H.264, AV1 also available). Core HLG uses 1.0 = 203 nits and clips above 1000 nits.\n\nPreprocess **img_compression = 0** (no JPEG/CRF on ACEScct).\nVideo VAE forced **float32** in **Load Models**.\n"
+        "text": "## Save HDR\n\n1. **Save Image (Advanced)** EXR `linear ACEScg` — JPEG thumbs, sun HDR viewer, Download images zip. Needs ComfyUI with ACEScg + `--enable-assets`.\n2. **HLG video**: Create Video (`HDR`, EXR sequence audio) → Save Video (10-bit; auto = H.264, AV1 also available). Core HLG uses 1.0 = 203 nits and clips above 1000 nits.\n\nPreprocess **img_compression = 0** (no JPEG/CRF on ACEScct).\nVideo VAE forced **float32** in **Load Models**.\n"
       },
       "color": "#432",
       "bgcolor": "#653"
@@ -1057,7 +1049,7 @@
       ],
       "size": [
         336.1875,
-        150
+        174
       ],
       "flags": {},
       "order": 14,
@@ -1100,12 +1092,14 @@
         8,
         "auto",
         "sRGB",
+        "none",
         "none"
       ],
       "widgets_values_named": {
         "fps": 8,
         "bit_depth": "auto",
         "color_space": "sRGB",
+        "chroma_subsampling": "none",
         "codec": "none"
       },
       "color": "#233",
@@ -1285,6 +1279,7 @@
           "name": "reference frames (stage 1)",
           "type": "IMAGE",
           "links": [
+            29,
             34
           ]
         },
@@ -1350,8 +1345,8 @@
       "id": 5375,
       "type": "LoadVideo",
       "pos": [
-        -4287.379855289706,
-        3580.3788802739978
+        -4288.414448723397,
+        3646.3078189821485
       ],
       "size": [
         349.29453125,
@@ -1550,73 +1545,15 @@
       "bgcolor": "#353"
     },
     {
-      "id": 9028,
-      "type": "LTXVHDRDecodePostprocess",
-      "pos": [
-        -453.1723874994564,
-        3239.8233726525305
-      ],
-      "size": [
-        340,
-        295
-      ],
-      "flags": {},
-      "order": 23,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "image",
-          "type": "IMAGE",
-          "link": 13962
-        }
-      ],
-      "outputs": [
-        {
-          "name": "tonemapped",
-          "type": "IMAGE",
-          "links": []
-        },
-        {
-          "name": "hdr_linear",
-          "type": "IMAGE",
-          "links": []
-        }
-      ],
-      "title": "Save EXR (ACEScg)",
-      "properties": {
-        "Node name for S&R": "LTXVHDRDecodePostprocess"
-      },
-      "widgets_values": [
-        "acescct",
-        0,
-        true,
-        "acescg",
-        "output/hdr_exr",
-        "frame",
-        true
-      ],
-      "widgets_values_named": {
-        "transfer": "acescct",
-        "exposure": 0,
-        "save_exr": true,
-        "exr_color_space": "acescg",
-        "output_dir": "output/hdr_exr",
-        "filename_prefix": "frame",
-        "half_precision": true
-      },
-      "color": "#233",
-      "bgcolor": "#355"
-    },
-    {
       "id": 9029,
       "type": "CreateVideo",
       "pos": [
-        -433.08424303220863,
-        3585.9368248947694
+        -432.5147938278953,
+        3646.8686399484313
       ],
       "size": [
         280,
-        150
+        174
       ],
       "flags": {},
       "order": 24,
@@ -1660,12 +1597,14 @@
         24,
         "auto",
         "HDR",
+        "none",
         "none"
       ],
       "widgets_values_named": {
         "fps": 24,
         "bit_depth": "auto",
         "color_space": "HDR",
+        "chroma_subsampling": "none",
         "codec": "none"
       }
     },
@@ -1673,8 +1612,8 @@
       "id": 9030,
       "type": "SaveVideo",
       "pos": [
-        -76.65604912053554,
-        3244.051670870314
+        -77.25315679808809,
+        3239.202346277781
       ],
       "size": [
         360,
@@ -1714,6 +1653,54 @@
         "format.codec": "auto",
         "codec": "auto"
       }
+    },
+    {
+      "id": 9032,
+      "type": "SaveImageAdvanced",
+      "pos": [
+        -453.7694951770086,
+        3234.9740480599976
+      ],
+      "size": [
+        320,
+        155
+      ],
+      "flags": {},
+      "order": 23,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 13980
+        }
+      ],
+      "outputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "links": []
+        }
+      ],
+      "title": "Save EXR (ACEScg)",
+      "properties": {
+        "Node name for S&R": "SaveImageAdvanced",
+        "cnr_id": "comfy-core"
+      },
+      "widgets_values": [
+        "hdr/acescg_exr",
+        "exr",
+        "16-bit float",
+        "linear ACEScg"
+      ],
+      "widgets_values_named": {
+        "filename_prefix": "hdr/acescg_exr",
+        "format": "exr",
+        "format.bit_depth": "16-bit float",
+        "format.input_color_space": "linear ACEScg"
+      },
+      "color": "#233",
+      "bgcolor": "#355"
     }
   ],
   "links": [
@@ -1807,8 +1794,8 @@
     ],
     [
       29,
-      5409,
-      2,
+      5408,
+      6,
       9005,
       2,
       "IMAGE"
@@ -1860,14 +1847,6 @@
       5409,
       8,
       "AUDIO"
-    ],
-    [
-      40,
-      5409,
-      3,
-      5410,
-      3,
-      "LATENT"
     ],
     [
       42,
@@ -2022,14 +2001,6 @@
       "VAE"
     ],
     [
-      13962,
-      9006,
-      0,
-      9028,
-      0,
-      "IMAGE"
-    ],
-    [
       13963,
       9006,
       1,
@@ -2108,6 +2079,22 @@
       9030,
       0,
       "VIDEO"
+    ],
+    [
+      13980,
+      9006,
+      0,
+      9032,
+      0,
+      "IMAGE"
+    ],
+    [
+      40,
+      5409,
+      2,
+      5410,
+      3,
+      "LATENT"
     ]
   ],
   "floatingLinks": [
@@ -2171,10 +2158,10 @@
       "id": 158,
       "title": "Export",
       "bounding": [
-        -485.8651698176221,
-        3161.105939638595,
-        799.7465691834605,
-        594.7827865296185
+        -486.46227749517425,
+        3156.256615046062,
+        811.9769415603048,
+        696.0093083555753
       ],
       "color": "#3f789e",
       "flags": {}
@@ -2187,8 +2174,8 @@
         "version": 1,
         "state": {
           "lastGroupId": 158,
-          "lastNodeId": 9030,
-          "lastLinkId": 13976,
+          "lastNodeId": 9033,
+          "lastLinkId": 13981,
           "lastRerouteId": 9105
         },
         "revision": 0,
@@ -2819,7 +2806,7 @@
           },
           {
             "id": 9026,
-            "type": "LTXVVAEForceFloat32",
+            "type": "VAEComputeDtype",
             "pos": [
               -480,
               190
@@ -2851,7 +2838,14 @@
             ],
             "title": "VAE float32 (HDR)",
             "properties": {
-              "Node name for S&R": "LTXVVAEForceFloat32"
+              "Node name for S&R": "VAEComputeDtype",
+              "cnr_id": "comfy-core"
+            },
+            "widgets_values": [
+              "fp32"
+            ],
+            "widgets_values_named": {
+              "dtype": "fp32"
             },
             "color": "#233",
             "bgcolor": "#355"
@@ -3008,8 +3002,8 @@
         "version": 1,
         "state": {
           "lastGroupId": 158,
-          "lastNodeId": 9030,
-          "lastLinkId": 13976,
+          "lastNodeId": 9033,
+          "lastLinkId": 13981,
           "lastRerouteId": 9105
         },
         "revision": 0,
@@ -3018,8 +3012,8 @@
         "inputNode": {
           "id": -10,
           "bounding": [
-            -4530.51076188614,
-            4645.990207335938,
+            -4528.595703125,
+            4704.0625,
             188.595703125,
             308
           ]
@@ -3027,8 +3021,8 @@
         "outputNode": {
           "id": -20,
           "bounding": [
-            -1516.9895139548019,
-            4721.712104505086,
+            -834,
+            4724.0625,
             199.8046875,
             268
           ]
@@ -3365,8 +3359,8 @@
             "id": 5020,
             "type": "GemmaAPITextEncode",
             "pos": [
-              -3384.8637937568033,
-              5588.549611822441
+              -3389,
+              5594.125
             ],
             "size": [
               451,
@@ -3435,8 +3429,8 @@
             "id": 2483,
             "type": "CLIPTextEncode",
             "pos": [
-              -3900,
-              4888
+              -2367,
+              4880
             ],
             "size": [
               451,
@@ -3492,8 +3486,8 @@
             "id": 5406,
             "type": "TextGenerateLTX2Prompt",
             "pos": [
-              -3352.714835732513,
-              4127.819968646612
+              -3900,
+              4260
             ],
             "size": [
               451,
@@ -3613,7 +3607,7 @@
             "id": 5188,
             "type": "ResizeImageMaskNode",
             "pos": [
-              -3900,
+              -3389,
               3352
             ],
             "size": [
@@ -3628,7 +3622,7 @@
                 "localized_name": "input",
                 "name": "input",
                 "type": "IMAGE,MASK",
-                "link": 13802
+                "link": 13981
               }
             ],
             "outputs": [
@@ -3661,8 +3655,8 @@
             "id": 2612,
             "type": "CLIPTextEncode",
             "pos": [
-              -3900,
-              5022
+              -2367,
+              5042
             ],
             "size": [
               451,
@@ -3719,7 +3713,7 @@
             "type": "GetVideoComponents",
             "pos": [
               -3900,
-              6122.136413979002
+              6140.125
             ],
             "size": [
               451,
@@ -3782,8 +3776,8 @@
             "id": 5377,
             "type": "ImageToMask",
             "pos": [
-              -3391.5389666771734,
-              6140.633379541781
+              -3389,
+              6144.125
             ],
             "size": [
               451,
@@ -3827,8 +3821,8 @@
             "id": 5373,
             "type": "ResizeImageMaskNode",
             "pos": [
-              -2379,
-              6122.136413979002
+              -2367,
+              6144.125
             ],
             "size": [
               451,
@@ -3883,8 +3877,8 @@
             "id": 5381,
             "type": "ResizeImageMaskNode",
             "pos": [
-              -1872,
-              6294.136413979002
+              -1856,
+              5966.125
             ],
             "size": [
               451,
@@ -3939,8 +3933,8 @@
             "id": 5382,
             "type": "LTXVDilateVideoMask",
             "pos": [
-              -1365,
-              6294.136413979002
+              -1345,
+              5966.125
             ],
             "size": [
               451,
@@ -4000,8 +3994,8 @@
             "id": 5384,
             "type": "ResizeImageMaskNode",
             "pos": [
-              -2379,
-              5970.136413979002
+              -2367,
+              5966.125
             ],
             "size": [
               451,
@@ -4051,8 +4045,8 @@
             "id": 5371,
             "type": "ResizeImageMaskNode",
             "pos": [
-              -2886,
-              5970.136413979002
+              -2878,
+              5966.125
             ],
             "size": [
               451,
@@ -4103,8 +4097,8 @@
             "id": 5399,
             "type": "ResizeImageMaskNode",
             "pos": [
-              -3393,
-              5970.136413979002
+              -3389,
+              5966.125
             ],
             "size": [
               451,
@@ -4153,8 +4147,8 @@
             "id": 5168,
             "type": "GetVideoComponents",
             "pos": [
-              -3901.4325566101143,
-              5966.013946781519
+              -3900,
+              5966.125
             ],
             "size": [
               451,
@@ -4220,8 +4214,8 @@
             "id": 5379,
             "type": "LTXVDilateVideoMask",
             "pos": [
-              -1872,
-              6122.136413979002
+              -1856,
+              6164.125
             ],
             "size": [
               451,
@@ -4283,8 +4277,8 @@
             "id": 1241,
             "type": "LTXVConditioning",
             "pos": [
-              -3393,
-              4888
+              -1856,
+              4880
             ],
             "size": [
               451,
@@ -4352,8 +4346,8 @@
             "id": 5021,
             "type": "GemmaAPITextEncode",
             "pos": [
-              -3382.9524641772073,
-              5303.104101182043
+              -3389,
+              5316.125
             ],
             "size": [
               451,
@@ -4431,8 +4425,8 @@
             "id": 5022,
             "type": "PrimitiveString",
             "pos": [
-              -3892.8037919107023,
-              5284.737581697243
+              -3900,
+              5316.125
             ],
             "size": [
               451,
@@ -4481,7 +4475,7 @@
             "type": "PrimitiveBoolean",
             "pos": [
               -3900,
-              3504
+              3518
             ],
             "size": [
               451,
@@ -4526,8 +4520,8 @@
             "id": 9019,
             "type": "ComfyNotNode",
             "pos": [
-              -3393,
-              3504
+              -3389,
+              3530
             ],
             "size": [
               451,
@@ -4563,8 +4557,8 @@
             "id": 5609,
             "type": "ComfySwitchNode",
             "pos": [
-              -3393,
-              3790
+              -3389,
+              3734
             ],
             "size": [
               451,
@@ -4623,8 +4617,8 @@
             "id": 5610,
             "type": "ComfySwitchNode",
             "pos": [
-              -2886,
-              3790
+              -2878,
+              3734
             ],
             "size": [
               451,
@@ -4684,8 +4678,8 @@
             "id": 5612,
             "type": "ComfySwitchNode",
             "pos": [
-              -2878.8037919107023,
-              5284.737581697243
+              -1345,
+              5316.125
             ],
             "size": [
               451,
@@ -4744,8 +4738,8 @@
             "id": 5613,
             "type": "ComfySwitchNode",
             "pos": [
-              -2878.8037919107023,
-              5490.737581697243
+              -1345,
+              5482.125
             ],
             "size": [
               451,
@@ -4805,7 +4799,7 @@
             "type": "TextGenerateLTX2Prompt",
             "pos": [
               -3900,
-              3790
+              3734
             ],
             "size": [
               451,
@@ -4925,8 +4919,8 @@
             "id": 5611,
             "type": "StringContains",
             "pos": [
-              -3896.908488578484,
-              5456.2658743985685
+              -3900,
+              5446.125
             ],
             "size": [
               451,
@@ -4976,8 +4970,8 @@
             "id": 5400,
             "type": "PrimitiveInt",
             "pos": [
-              -3898.0735002320193,
-              6288.557380342078
+              -3900,
+              6314.125
             ],
             "size": [
               451,
@@ -5020,15 +5014,15 @@
             ],
             "widgets_values_named": {
               "value": 15,
-              "fixed": "fixed"
+              "control_after_generate": "fixed"
             }
           },
           {
             "id": 5372,
             "type": "ComfyMathExpression",
             "pos": [
-              -3391.0735002320193,
-              6288.557380342078
+              -3389,
+              6266.125
             ],
             "size": [
               451,
@@ -5088,6 +5082,54 @@
             "widgets_values_named": {
               "expression": "2*a"
             }
+          },
+          {
+            "id": 9033,
+            "type": "ImageColorSpace",
+            "pos": [
+              -3900,
+              3352
+            ],
+            "size": [
+              451,
+              106
+            ],
+            "flags": {},
+            "order": 28,
+            "mode": 0,
+            "inputs": [
+              {
+                "localized_name": "image",
+                "name": "image",
+                "type": "IMAGE",
+                "link": 13802
+              }
+            ],
+            "outputs": [
+              {
+                "localized_name": "IMAGE",
+                "name": "IMAGE",
+                "type": "IMAGE",
+                "links": [
+                  13981
+                ]
+              }
+            ],
+            "title": "Start image sRGB → ACEScct",
+            "properties": {
+              "Node name for S&R": "ImageColorSpace",
+              "cnr_id": "comfy-core"
+            },
+            "widgets_values": [
+              "sRGB",
+              "HDR ACEScct"
+            ],
+            "widgets_values_named": {
+              "source": "sRGB",
+              "destination": "HDR ACEScct"
+            },
+            "color": "#233",
+            "bgcolor": "#355"
           }
         ],
         "groups": [
@@ -5097,8 +5139,8 @@
             "bounding": [
               -3926,
               3278,
-              1010,
-              310
+              1014,
+              332
             ],
             "color": "#3f789e",
             "flags": {}
@@ -5108,9 +5150,9 @@
             "title": "Prompt enhancement - only runs when enhance_positive_prompt is on",
             "bounding": [
               -3926,
-              3716,
-              1517,
-              970
+              3660,
+              1525,
+              1096
             ],
             "color": "#3f789e",
             "flags": {}
@@ -5120,9 +5162,9 @@
             "title": "Text encoding",
             "bounding": [
               -3926,
-              4814,
-              1010,
-              354.1364139790021
+              4806,
+              2547,
+              386.125
             ],
             "color": "#3f789e",
             "flags": {}
@@ -5131,10 +5173,10 @@
             "id": 8,
             "title": "Prompt encode via the LTX API - used whenever an API key is present",
             "bounding": [
-              -3918.8037919107023,
-              5210.737581697243,
-              1526.7707585885873,
-              617.939935604848
+              -3926,
+              5242.125,
+              3058,
+              600
             ],
             "color": "#3f789e",
             "flags": {}
@@ -5144,9 +5186,9 @@
             "title": "Reference and mask videos",
             "bounding": [
               -3926,
-              5896.136413979002,
-              3029.9529459452356,
-              568.7554588884977
+              5892.125,
+              3058,
+              546
             ],
             "color": "#3f789e",
             "flags": {}
@@ -5247,8 +5289,7 @@
             "origin_slot": 1,
             "target_id": 5379,
             "target_slot": 2,
-            "type": "INT",
-            "parentId": 506
+            "type": "INT"
           },
           {
             "id": 16,
@@ -5264,8 +5305,7 @@
             "origin_slot": 0,
             "target_id": 5382,
             "target_slot": 2,
-            "type": "INT",
-            "parentId": 510
+            "type": "INT"
           },
           {
             "id": 13815,
@@ -5393,8 +5433,7 @@
             "origin_slot": 0,
             "target_id": 5609,
             "target_slot": 1,
-            "type": "STRING",
-            "parentId": 516
+            "type": "STRING"
           },
           {
             "id": 13834,
@@ -5418,8 +5457,7 @@
             "origin_slot": 0,
             "target_id": 5610,
             "target_slot": 0,
-            "type": "STRING",
-            "parentId": 518
+            "type": "STRING"
           },
           {
             "id": 13837,
@@ -5427,8 +5465,7 @@
             "origin_slot": 10,
             "target_id": 5610,
             "target_slot": 2,
-            "type": "BOOLEAN",
-            "parentId": 520
+            "type": "BOOLEAN"
           },
           {
             "id": 13838,
@@ -5492,8 +5529,7 @@
             "origin_slot": 0,
             "target_id": 5613,
             "target_slot": 2,
-            "type": "BOOLEAN",
-            "parentId": 526
+            "type": "BOOLEAN"
           },
           {
             "id": 13846,
@@ -5544,13 +5580,20 @@
             "type": "CONDITIONING"
           },
           {
+            "id": 13802,
+            "origin_id": -10,
+            "origin_slot": 3,
+            "target_id": 9033,
+            "target_slot": 0,
+            "type": "IMAGE"
+          },
+          {
             "id": 13759,
             "origin_id": -10,
             "origin_slot": 7,
             "target_id": 5020,
             "target_slot": 2,
-            "type": "COMBO",
-            "parentId": 514
+            "type": "COMBO"
           },
           {
             "id": 36,
@@ -5585,9 +5628,9 @@
             "type": "INT"
           },
           {
-            "id": 13802,
-            "origin_id": -10,
-            "origin_slot": 3,
+            "id": 13981,
+            "origin_id": 9033,
+            "origin_slot": 0,
             "target_id": 5188,
             "target_slot": 0,
             "type": "IMAGE"
@@ -5681,155 +5724,6 @@
             "type": "INT"
           }
         ],
-        "reroutes": [
-          {
-            "id": 505,
-            "pos": [
-              -2918,
-              6624
-            ],
-            "linkIds": [
-              13809
-            ]
-          },
-          {
-            "id": 506,
-            "parentId": 505,
-            "pos": [
-              -1968,
-              6624
-            ],
-            "linkIds": [
-              13809
-            ]
-          },
-          {
-            "id": 509,
-            "pos": [
-              -3425,
-              6636
-            ],
-            "linkIds": [
-              22
-            ]
-          },
-          {
-            "id": 510,
-            "parentId": 509,
-            "pos": [
-              -1389,
-              6636
-            ],
-            "linkIds": [
-              22
-            ]
-          },
-          {
-            "id": 513,
-            "pos": [
-              -3922.2215400653663,
-              5840.417840996398
-            ],
-            "linkIds": [
-              13759
-            ]
-          },
-          {
-            "id": 514,
-            "parentId": 513,
-            "pos": [
-              -3515.8006881270085,
-              5848.363500326532
-            ],
-            "linkIds": [
-              13759
-            ]
-          },
-          {
-            "id": 515,
-            "pos": [
-              -3425,
-              5172
-            ],
-            "linkIds": [
-              13833
-            ]
-          },
-          {
-            "id": 516,
-            "parentId": 515,
-            "pos": [
-              -3417,
-              5172
-            ],
-            "linkIds": [
-              13833
-            ]
-          },
-          {
-            "id": 517,
-            "pos": [
-              -4077.35546875,
-              6624
-            ],
-            "linkIds": [
-              13836
-            ]
-          },
-          {
-            "id": 518,
-            "parentId": 517,
-            "pos": [
-              -2926,
-              6624
-            ],
-            "linkIds": [
-              13836
-            ]
-          },
-          {
-            "id": 519,
-            "pos": [
-              -4077.35546875,
-              6648
-            ],
-            "linkIds": [
-              13837
-            ]
-          },
-          {
-            "id": 520,
-            "parentId": 519,
-            "pos": [
-              -2926,
-              6648
-            ],
-            "linkIds": [
-              13837
-            ]
-          },
-          {
-            "id": 525,
-            "pos": [
-              -3393.514980614082,
-              5861.736421636856
-            ],
-            "linkIds": [
-              13845
-            ]
-          },
-          {
-            "id": 526,
-            "parentId": 525,
-            "pos": [
-              -2914.1088687133088,
-              5855.632311179598
-            ],
-            "linkIds": [
-              13845
-            ]
-          }
-        ],
         "extra": {}
       },
       {
@@ -5837,8 +5731,8 @@
         "version": 1,
         "state": {
           "lastGroupId": 158,
-          "lastNodeId": 9030,
-          "lastLinkId": 13976,
+          "lastNodeId": 9033,
+          "lastLinkId": 13981,
           "lastRerouteId": 9105
         },
         "revision": 0,
@@ -5858,8 +5752,8 @@
           "bounding": [
             2517.1943200034757,
             119.00935650732981,
-            137.71875,
-            128
+            128,
+            108
           ]
         },
         "inputs": [
@@ -6003,19 +5897,6 @@
             ]
           },
           {
-            "id": "64347e9a-f71b-460e-94f3-a0f4cf3d9258",
-            "name": "image",
-            "type": "IMAGE",
-            "linkIds": [
-              13875
-            ],
-            "label": "blend reference",
-            "pos": [
-              2541.1943200034757,
-              183.0093565073298
-            ]
-          },
-          {
             "id": "521992e0-5e07-4221-aa3f-e492076be353",
             "name": "latent",
             "type": "LATENT",
@@ -6024,7 +5905,7 @@
             ],
             "pos": [
               2541.1943200034757,
-              203.0093565073298
+              183.0093565073298
             ]
           }
         ],
@@ -6190,8 +6071,7 @@
                 "type": "IMAGE",
                 "links": [
                   13863,
-                  13865,
-                  13875
+                  13865
                 ]
               }
             ],
@@ -6771,23 +6651,6 @@
             "parentId": 9081
           },
           {
-            "id": 13875,
-            "origin_id": 5378,
-            "origin_slot": 0,
-            "target_id": -20,
-            "target_slot": 2,
-            "type": "IMAGE",
-            "parentId": 9083
-          },
-          {
-            "id": 13876,
-            "origin_id": 5391,
-            "origin_slot": 0,
-            "target_id": -20,
-            "target_slot": 3,
-            "type": "LATENT"
-          },
-          {
             "id": 13861,
             "origin_id": -10,
             "origin_slot": 3,
@@ -6795,6 +6658,14 @@
             "target_slot": 3,
             "type": "BOOLEAN",
             "parentId": 9069
+          },
+          {
+            "id": 13876,
+            "origin_id": 5391,
+            "origin_slot": 0,
+            "target_id": -20,
+            "target_slot": 2,
+            "type": "LATENT"
           }
         ],
         "reroutes": [
@@ -7028,27 +6899,6 @@
             "linkIds": [
               25
             ]
-          },
-          {
-            "id": 9082,
-            "pos": [
-              514.0835715395484,
-              439
-            ],
-            "linkIds": [
-              13875
-            ]
-          },
-          {
-            "id": 9083,
-            "parentId": 9082,
-            "pos": [
-              2493.1943200034757,
-              439
-            ],
-            "linkIds": [
-              13875
-            ]
           }
         ],
         "extra": {}
@@ -7058,8 +6908,8 @@
         "version": 1,
         "state": {
           "lastGroupId": 158,
-          "lastNodeId": 9030,
-          "lastLinkId": 13976,
+          "lastNodeId": 9033,
+          "lastLinkId": 13981,
           "lastRerouteId": 9105
         },
         "revision": 0,
@@ -7766,8 +7616,8 @@
         "version": 1,
         "state": {
           "lastGroupId": 158,
-          "lastNodeId": 9030,
-          "lastLinkId": 13976,
+          "lastNodeId": 9033,
+          "lastLinkId": 13981,
           "lastRerouteId": 9105
         },
         "revision": 0,
@@ -8397,8 +8247,8 @@
         "version": 1,
         "state": {
           "lastGroupId": 158,
-          "lastNodeId": 9030,
-          "lastLinkId": 13976,
+          "lastNodeId": 9033,
+          "lastLinkId": 13981,
           "lastRerouteId": 9105
         },
         "revision": 0,
@@ -8908,8 +8758,8 @@
         "version": 1,
         "state": {
           "lastGroupId": 158,
-          "lastNodeId": 9030,
-          "lastLinkId": 13976,
+          "lastNodeId": 9033,
+          "lastLinkId": 13981,
           "lastRerouteId": 9105
         },
         "revision": 0,
@@ -9338,8 +9188,8 @@
         "version": 1,
         "state": {
           "lastGroupId": 158,
-          "lastNodeId": 9030,
-          "lastLinkId": 13976,
+          "lastNodeId": 9033,
+          "lastLinkId": 13981,
           "lastRerouteId": 9105
         },
         "revision": 0,
@@ -9357,10 +9207,10 @@
         "outputNode": {
           "id": -20,
           "bounding": [
-            1038.4606811179804,
-            380.41171124729806,
-            134.419921875,
-            68
+            1754.3815380717526,
+            327.05482838721036,
+            143.8828125,
+            88
           ]
         },
         "inputs": [
@@ -9394,7 +9244,6 @@
             "name": "mask",
             "type": "MASK",
             "linkIds": [
-              13931,
               13933
             ],
             "pos": [
@@ -9407,7 +9256,7 @@
             "name": "images",
             "type": "IMAGE",
             "linkIds": [
-              13934
+              13932
             ],
             "label": "reference frames",
             "pos": [
@@ -9474,13 +9323,13 @@
             "name": "IMAGE",
             "type": "IMAGE",
             "linkIds": [
-              13944
+              13979
             ],
             "localized_name": "IMAGE",
-            "label": "ACEScct_image",
+            "label": "ACEScg_image",
             "pos": [
-              1062.4606811179804,
-              404.41171124729806
+              1778.3815380717526,
+              351.05482838721036
             ]
           },
           {
@@ -9492,8 +9341,8 @@
             ],
             "label": "HDR_HLG_image",
             "pos": [
-              1062.4606811179804,
-              424.41171124729806
+              1778.3815380717526,
+              371.05482838721036
             ]
           }
         ],
@@ -9503,15 +9352,15 @@
             "id": 5387,
             "type": "VAEDecodeTiled",
             "pos": [
-              270,
-              230
+              265.090814691862,
+              138.64994380162528
             ],
             "size": [
               269.91611409288987,
               174
             ],
             "flags": {},
-            "order": 2,
+            "order": 1,
             "mode": 0,
             "inputs": [
               {
@@ -9593,8 +9442,8 @@
             "id": 5226,
             "type": "LTXVLaplacianPyramidBlend",
             "pos": [
-              629.9161140928899,
-              378.608401179627
+              630.9883729865988,
+              338.66675738896583
             ],
             "size": [
               330,
@@ -9629,8 +9478,7 @@
                 "name": "image",
                 "type": "IMAGE",
                 "links": [
-                  13944,
-                  13960
+                  13977
                 ]
               }
             ],
@@ -9647,53 +9495,59 @@
             }
           },
           {
-            "id": 5380,
-            "type": "LTXVInpaintPreprocess",
+            "id": 9027,
+            "type": "ImageColorSpace",
             "pos": [
-              269.1753885895672,
-              491.5486437394664
+              1382.3534591721382,
+              410.183663178669
             ],
             "size": [
-              269.91611409288987,
-              47.21680235925396
+              315,
+              106
             ],
             "flags": {},
-            "order": 1,
+            "order": 2,
             "mode": 0,
             "inputs": [
-              {
-                "localized_name": "images",
-                "name": "images",
-                "type": "IMAGE",
-                "link": 13934
-              },
-              {
-                "localized_name": "mask",
-                "name": "mask",
-                "type": "MASK",
-                "link": 13931
-              }
-            ],
-            "outputs": [
               {
                 "localized_name": "image",
                 "name": "image",
                 "type": "IMAGE",
+                "link": 13978
+              }
+            ],
+            "outputs": [
+              {
+                "localized_name": "IMAGE",
+                "name": "IMAGE",
+                "type": "IMAGE",
                 "links": [
-                  13932
+                  13961
                 ]
               }
             ],
+            "title": "ACEScg → HDR (HLG)",
             "properties": {
-              "Node name for S&R": "LTXVInpaintPreprocess"
-            }
+              "Node name for S&R": "ImageColorSpace",
+              "cnr_id": "comfy-core"
+            },
+            "widgets_values": [
+              "linear ACEScg",
+              "HDR"
+            ],
+            "widgets_values_named": {
+              "source": "linear ACEScg",
+              "destination": "HDR"
+            },
+            "color": "#233",
+            "bgcolor": "#355"
           },
           {
-            "id": 9027,
+            "id": 9031,
             "type": "ImageColorSpace",
             "pos": [
-              1029.91611409289,
-              498.608401179627
+              1004.5739953139611,
+              341.88656115919355
             ],
             "size": [
               315,
@@ -9707,7 +9561,7 @@
                 "localized_name": "image",
                 "name": "image",
                 "type": "IMAGE",
-                "link": 13960
+                "link": 13977
               }
             ],
             "outputs": [
@@ -9716,22 +9570,23 @@
                 "name": "IMAGE",
                 "type": "IMAGE",
                 "links": [
-                  13961
+                  13978,
+                  13979
                 ]
               }
             ],
-            "title": "ACEScct → HDR (HLG)",
+            "title": "ACEScct → ACEScg",
             "properties": {
               "Node name for S&R": "ImageColorSpace",
               "cnr_id": "comfy-core"
             },
             "widgets_values": [
               "HDR ACEScct",
-              "HDR"
+              "linear ACEScg"
             ],
             "widgets_values_named": {
               "source": "HDR ACEScct",
-              "destination": "HDR"
+              "destination": "linear ACEScg"
             },
             "color": "#233",
             "bgcolor": "#355"
@@ -9757,8 +9612,8 @@
           },
           {
             "id": 13932,
-            "origin_id": 5380,
-            "origin_slot": 0,
+            "origin_id": -10,
+            "origin_slot": 3,
             "target_id": 5226,
             "target_slot": 1,
             "type": "IMAGE"
@@ -9772,22 +9627,6 @@
             "type": "IMAGE"
           },
           {
-            "id": 13944,
-            "origin_id": 5226,
-            "origin_slot": 0,
-            "target_id": -20,
-            "target_slot": 0,
-            "type": "IMAGE"
-          },
-          {
-            "id": 13931,
-            "origin_id": -10,
-            "origin_slot": 2,
-            "target_id": 5380,
-            "target_slot": 1,
-            "type": "MASK"
-          },
-          {
             "id": 13933,
             "origin_id": -10,
             "origin_slot": 2,
@@ -9795,14 +9634,6 @@
             "target_slot": 2,
             "type": "MASK",
             "parentId": 750
-          },
-          {
-            "id": 13934,
-            "origin_id": -10,
-            "origin_slot": 3,
-            "target_id": 5380,
-            "target_slot": 0,
-            "type": "IMAGE"
           },
           {
             "id": 13940,
@@ -9837,19 +9668,35 @@
             "type": "INT"
           },
           {
-            "id": 13960,
+            "id": 13961,
+            "origin_id": 9027,
+            "origin_slot": 0,
+            "target_id": -20,
+            "target_slot": 1,
+            "type": "IMAGE"
+          },
+          {
+            "id": 13977,
             "origin_id": 5226,
+            "origin_slot": 0,
+            "target_id": 9031,
+            "target_slot": 0,
+            "type": "IMAGE"
+          },
+          {
+            "id": 13978,
+            "origin_id": 9031,
             "origin_slot": 0,
             "target_id": 9027,
             "target_slot": 0,
             "type": "IMAGE"
           },
           {
-            "id": 13961,
-            "origin_id": 9027,
+            "id": 13979,
+            "origin_id": 9031,
             "origin_slot": 0,
             "target_id": -20,
-            "target_slot": 1,
+            "target_slot": 0,
             "type": "IMAGE"
           }
         ],
@@ -9913,7 +9760,7 @@
   },
   "config": {},
   "extra": {
-    "frontendVersion": "1.55.14",
+    "frontendVersion": "1.57.1",
     "reroutes": [
       {
         "id": 9005,
@@ -10036,8 +9883,8 @@
       {
         "id": 9027,
         "pos": [
-          -2505.644987226221,
-          3739.0159045036203
+          -3134.1552196554285,
+          3717.606154671737
         ],
         "linkIds": [
           29
@@ -10047,8 +9894,8 @@
         "id": 9028,
         "parentId": 9027,
         "pos": [
-          -2129.2604435019653,
-          3738.2295450162997
+          -2128.1519505372967,
+          3721.0426255260095
         ],
         "linkIds": [
           29
@@ -10387,10 +10234,10 @@
       }
     ],
     "ds": {
-      "scale": 0.6425180481507757,
+      "scale": 0.34522712143931694,
       "offset": [
-        5297.747156023086,
-        -2758.9521299673247
+        5641.3813421913055,
+        -1854.9294126426041
       ]
     },
     "linkExtensions": [
@@ -10490,7 +10337,11 @@
         "id": 13975,
         "parentId": 9105
       }
-    ]
+    ],
+    "VHS_latentpreview": false,
+    "VHS_latentpreviewrate": 0,
+    "VHS_MetadataImage": true,
+    "VHS_KeepIntermediate": true
   },
   "version": 0.4
 }

@@ -7,7 +7,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {}
 
 NODES_DISPLAY_NAME_PREFIX = "🅛🅣🅧"
 EXPERIMENTAL_DISPLAY_NAME_PREFIX = "(Experimental 🧪)"
-DEPRECATED_DISPLAY_NAME_PREFIX = "(Deprecated 🚫)"
+DEPRECATED_DISPLAY_NAME_SUFFIX = "(DEPRECATED)"
 DEFAULT_CATEGORY_NAME = "Lightricks"
 
 
@@ -134,9 +134,9 @@ def _format_description(
     if description.startswith(NODES_DISPLAY_NAME_PREFIX):
         description = description[prefix_len:].lstrip()
 
-    # Add the deprecated / experimental prefixes
+    # Deprecated nodes get a suffix (same convention as ComfyUI core); experimental ones a prefix
     if deprecated:
-        description = f"{DEPRECATED_DISPLAY_NAME_PREFIX} {description}"
+        description = f"{description} {DEPRECATED_DISPLAY_NAME_SUFFIX}"
     elif experimental:
         description = f"{EXPERIMENTAL_DISPLAY_NAME_PREFIX} {description}"
 

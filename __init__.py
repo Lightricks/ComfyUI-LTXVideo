@@ -36,6 +36,7 @@ from .low_vram_loaders import (
     LowVRAMCheckpointLoader,
     LowVRAMLatentUpscaleModelLoader,
 )
+from .node_replacements import register_node_replacements
 from .nodes_registry import NODE_CLASS_MAPPINGS as RUNTIME_NODE_CLASS_MAPPINGS
 from .nodes_registry import (
     NODE_DISPLAY_NAME_MAPPINGS as RUNTIME_NODE_DISPLAY_NAME_MAPPINGS,
@@ -120,6 +121,8 @@ NODE_DISPLAY_NAME_MAPPINGS = {
 # Update with runtime mappings (these will override static mappings if there are any differences)
 NODE_CLASS_MAPPINGS.update(RUNTIME_NODE_CLASS_MAPPINGS)
 NODE_DISPLAY_NAME_MAPPINGS.update(RUNTIME_NODE_DISPLAY_NAME_MAPPINGS)
+
+register_node_replacements()
 
 WEB_DIRECTORY = "./web"
 
