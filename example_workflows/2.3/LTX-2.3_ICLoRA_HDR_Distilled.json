@@ -1,8 +1,8 @@
 {
   "id": "394ed254-7306-42a2-9ae6-aa880ce4456d",
   "revision": 0,
-  "last_node_id": 5125,
-  "last_link_id": 13676,
+  "last_node_id": 5127,
+  "last_link_id": 13677,
   "nodes": [
     {
       "id": 1241,
@@ -1119,7 +1119,7 @@
       "outputs": [],
       "properties": {},
       "widgets_values": [
-        "EXR export requires OpenImageIO (pip install openimageio). Same backend as ltx-pipelines."
+        "EXR is saved with core Save Image (Advanced): linear Rec.709, 16-bit float, under output/hdr/."
       ],
       "color": "#432",
       "bgcolor": "#653"
@@ -1387,127 +1387,6 @@
       ]
     },
     {
-      "id": 5114,
-      "type": "LTXVHDRDecodePostprocess",
-      "pos": [
-        -207.03749020730552,
-        3122.6640852823707
-      ],
-      "size": [
-        351.612890625,
-        174
-      ],
-      "flags": {},
-      "order": 30,
-      "mode": 0,
-      "inputs": [
-        {
-          "localized_name": "image",
-          "name": "image",
-          "type": "IMAGE",
-          "link": 13664
-        },
-        {
-          "localized_name": "transfer",
-          "name": "transfer",
-          "shape": 7,
-          "type": "COMBO",
-          "widget": {
-            "name": "transfer"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "exposure",
-          "name": "exposure",
-          "shape": 7,
-          "type": "FLOAT",
-          "widget": {
-            "name": "exposure"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "save_exr",
-          "name": "save_exr",
-          "shape": 7,
-          "type": "BOOLEAN",
-          "widget": {
-            "name": "save_exr"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "exr_color_space",
-          "name": "exr_color_space",
-          "shape": 7,
-          "type": "COMBO",
-          "widget": {
-            "name": "exr_color_space"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "output_dir",
-          "name": "output_dir",
-          "shape": 7,
-          "type": "STRING",
-          "widget": {
-            "name": "output_dir"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "filename_prefix",
-          "name": "filename_prefix",
-          "shape": 7,
-          "type": "STRING",
-          "widget": {
-            "name": "filename_prefix"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "half_precision",
-          "name": "half_precision",
-          "shape": 7,
-          "type": "BOOLEAN",
-          "widget": {
-            "name": "half_precision"
-          },
-          "link": null
-        }
-      ],
-      "outputs": [
-        {
-          "localized_name": "tonemapped",
-          "name": "tonemapped",
-          "type": "IMAGE",
-          "links": []
-        },
-        {
-          "localized_name": "hdr_linear",
-          "name": "hdr_linear",
-          "type": "IMAGE",
-          "links": [
-            13667
-          ]
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "LTXVHDRDecodePostprocess"
-      },
-      "widgets_values": [
-        "logc3",
-        7.1,
-        true,
-        "linear",
-        "output/hdr_exr3",
-        "frame",
-        true
-      ]
-    },
-    {
       "id": 5121,
       "type": "Note",
       "pos": [
@@ -1615,29 +1494,6 @@
         8,
         4
       ]
-    },
-    {
-      "id": 5120,
-      "type": "Note",
-      "pos": [
-        -115.76719331864305,
-        3351.7232425611232
-      ],
-      "size": [
-        210,
-        88
-      ],
-      "flags": {},
-      "order": 11,
-      "mode": 0,
-      "inputs": [],
-      "outputs": [],
-      "properties": {},
-      "widgets_values": [
-        "Exposure adjusts the SDR preview only (in stops, ±10 EV). Does not affect hdr_linear or the saved EXR."
-      ],
-      "color": "#432",
-      "bgcolor": "#653"
     },
     {
       "id": 5020,
@@ -1943,9 +1799,102 @@
         "Node name for S&R": "LoadVideo"
       },
       "widgets_values": [
-        "hdr_input_video (1).mp4",
+        "",
         "image"
       ]
+    },
+    {
+      "id": 5126,
+      "type": "ImageColorSpace",
+      "pos": [
+        -207.03749020730552,
+        3122.6640852823707
+      ],
+      "size": [
+        315,
+        106
+      ],
+      "flags": {},
+      "order": 30,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "image",
+          "name": "image",
+          "type": "IMAGE",
+          "link": 13664
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "IMAGE",
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            13667,
+            13677
+          ]
+        }
+      ],
+      "title": "LogC3 → linear",
+      "properties": {
+        "Node name for S&R": "ImageColorSpace",
+        "cnr_id": "comfy-core"
+      },
+      "widgets_values": [
+        "HDR LogC3",
+        "linear"
+      ],
+      "widgets_values_named": {
+        "source": "HDR LogC3",
+        "destination": "linear"
+      }
+    },
+    {
+      "id": 5127,
+      "type": "SaveImageAdvanced",
+      "pos": [
+        -115.76719331864305,
+        3351.7232425611232
+      ],
+      "size": [
+        320,
+        155
+      ],
+      "flags": {},
+      "order": 31,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 13677
+        }
+      ],
+      "outputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "links": []
+        }
+      ],
+      "title": "Save EXR (linear)",
+      "properties": {
+        "Node name for S&R": "SaveImageAdvanced",
+        "cnr_id": "comfy-core"
+      },
+      "widgets_values": [
+        "hdr/linear_exr",
+        "exr",
+        "16-bit float",
+        "linear"
+      ],
+      "widgets_values_named": {
+        "filename_prefix": "hdr/linear_exr",
+        "format": "exr",
+        "format.bit_depth": "16-bit float",
+        "format.input_color_space": "linear"
+      }
     }
   ],
   "links": [
@@ -2209,14 +2158,14 @@
       13664,
       4851,
       0,
-      5114,
+      5126,
       0,
       "IMAGE"
     ],
     [
       13667,
-      5114,
-      1,
+      5126,
+      0,
       5108,
       0,
       "IMAGE"
@@ -2260,6 +2209,14 @@
       1241,
       1,
       "CONDITIONING"
+    ],
+    [
+      13677,
+      5126,
+      0,
+      5127,
+      0,
+      "IMAGE"
     ]
   ],
   "floatingLinks": [
@@ -3034,7 +2991,7 @@
       },
       "5106": {
         "inputs": {
-          "file": "hdr_input_video (1).mp4",
+          "file": "",
           "video-preview": ""
         },
         "class_type": "LoadVideo",
@@ -3046,8 +3003,8 @@
         "inputs": {
           "fps": 30,
           "images": [
-            "5114",
-            1
+            "5126",
+            0
           ],
           "audio": [
             "5105",
@@ -3106,25 +3063,6 @@
           "title": "Resize Image/Mask"
         }
       },
-      "5114": {
-        "inputs": {
-          "transfer": "logc3",
-          "exposure": 7.1,
-          "save_exr": true,
-          "exr_color_space": "linear",
-          "output_dir": "output/hdr_exr3",
-          "filename_prefix": "frame",
-          "half_precision": true,
-          "image": [
-            "4851",
-            0
-          ]
-        },
-        "class_type": "LTXVHDRDecodePostprocess",
-        "_meta": {
-          "title": "🅛🅣🅧 LTXVHDR Decode Postprocess"
-        }
-      },
       "5125": {
         "inputs": {
           "lora_name": "ltxv/ltx2/ltx-2.3-22b-distilled-lora-384-1.1.safetensors",
@@ -3137,6 +3075,36 @@
         "class_type": "LTXICLoRALoaderModelOnly",
         "_meta": {
           "title": "🅛🅣🅧 IC-LoRA Loader Model Only"
+        }
+      },
+      "5126": {
+        "inputs": {
+          "source": "HDR LogC3",
+          "destination": "linear",
+          "image": [
+            "4851",
+            0
+          ]
+        },
+        "class_type": "ImageColorSpace",
+        "_meta": {
+          "title": "LogC3 → linear"
+        }
+      },
+      "5127": {
+        "inputs": {
+          "filename_prefix": "hdr/linear_exr",
+          "format": "exr",
+          "format.bit_depth": "16-bit float",
+          "format.input_color_space": "linear",
+          "images": [
+            "5126",
+            0
+          ]
+        },
+        "class_type": "SaveImageAdvanced",
+        "_meta": {
+          "title": "Save EXR (linear)"
         }
       }
     },

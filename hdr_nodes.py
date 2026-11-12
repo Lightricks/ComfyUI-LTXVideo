@@ -3,8 +3,9 @@
 Stage-oriented layout (shared ACEScct working space):
 
 - Ingest: ``LTXVLoadEXRSequence`` (SDR→ACEScct uses Comfy Convert Image Color Space)
-- Runtime: ``LTXVVAEForceFloat32``
-- Delivery: ``LTXVHDRDecodePostprocess`` (HLG video uses Comfy Create Video / Save Video)
+- Runtime: Comfy VAE Compute Dtype (``fp32``); ``LTXVVAEForceFloat32`` is deprecated
+- Delivery: Comfy Convert Image Color Space → Save Image (Advanced) EXR / Create Video + Save Video (HLG);
+  ``LTXVHDRDecodePostprocess`` is deprecated
 
 Color math: ``hdr_color``. File I/O helpers: ``hdr_io``.
 """
@@ -158,9 +159,12 @@ def _exr_payload_for_color_space(
     )
 
 
-@comfy_node(name="LTXVHDRDecodePostprocess")
+@comfy_node(name="LTXVHDRDecodePostprocess", deprecated=True)
 class LTXVHDRDecodePostprocess:
-    """Decompress HDR from VAE output, tonemap for preview, optionally save EXR.
+    """Deprecated: decompress HDR from VAE output, tonemap for preview, optionally save EXR.
+
+    Use core Convert Image Color Space (``HDR ACEScct`` → ``linear ACEScg``, or
+    ``HDR LogC3`` → ``linear``) → Save Image (Advanced) EXR instead.
 
     Place after VAE Decode. Recovers linear HDR from the VAE ``[0,1]`` image and
     tonemaps to SDR for display. When ``save_exr`` is enabled, writes an EXR
@@ -260,10 +264,14 @@ class LTXVHDRDecodePostprocess:
     OUTPUT_NODE = True
     FUNCTION = "postprocess"
     CATEGORY = "Lightricks/HDR"
+    # Superseded by core Convert Image Color Space → Save Image (Advanced) EXR.
+    DEPRECATED = True
     DESCRIPTION = (
-        "Decompresses VAE-decoded HDR (ACEScct or legacy LogC3), tonemaps for "
-        "preview, and optionally writes EXR (linear / ACEScct / sRGB linear / "
-        "ACEScg)."
+        "Deprecated, will be removed: use core Convert Image Color Space "
+        "(HDR ACEScct → linear ACEScg, or HDR LogC3 → linear) → Save Image "
+        "(Advanced) EXR. Decompresses VAE-decoded HDR (ACEScct or legacy LogC3), "
+        "tonemaps for preview, and optionally writes EXR (linear / ACEScct / "
+        "sRGB linear / ACEScg)."
     )
 
     def postprocess(
@@ -277,7 +285,10 @@ class LTXVHDRDecodePostprocess:
         filename_prefix: str = "frame",
         half_precision: bool = True,
     ) -> tuple:
-
+        logger.warning(
+            "LTXVHDRDecodePostprocess is deprecated and will be removed; use core "
+            "Convert Image Color Space → Save Image (Advanced) EXR instead."
+        )
         hdr = _hdr_decompress(image, transfer=transfer)
         hdr = torch.clamp(hdr, min=0.0, max=1e4)
 
@@ -458,9 +469,11 @@ class LTXVLoadEXRSequence:
         return (images, float(frame_rate), w, h, n, audio)
 
 
-@comfy_node(name="LTXVVAEForceFloat32")
+@comfy_node(name="LTXVVAEForceFloat32", deprecated=True)
 class LTXVVAEForceFloat32:
-    """Force the video VAE to encode/decode in float32 (native HDR requirement).
+    """Deprecated: force the video VAE to encode/decode in float32 (native HDR requirement).
+
+    Use core VAE Compute Dtype with ``dtype=fp32`` instead.
 
     This node does **not** clone the VAE into a separate float32 copy for the
     output. It mutates the same object that was passed in (``vae_dtype`` and
@@ -478,7 +491,10 @@ class LTXVVAEForceFloat32:
     RETURN_TYPES = ("VAE",)
     FUNCTION = "patch"
     CATEGORY = "Lightricks/HDR"
+    # Superseded by core VAE Compute Dtype (dtype=fp32), which also clones instead of mutating.
+    DEPRECATED = True
     DESCRIPTION = (
+        "Deprecated, will be removed: use core VAE Compute Dtype (fp32). "
         "Forces float32 on the video VAE (vae_dtype + first_stage_model) for "
         "native HDR. IMPORTANT: this does NOT clone a float32 VAE for the "
         "output — it mutates the input object in place and returns the same "
@@ -490,6 +506,10 @@ class LTXVVAEForceFloat32:
     )
 
     def patch(self, vae):
+        logger.warning(
+            "LTXVVAEForceFloat32 is deprecated and will be removed; use core "
+            "VAE Compute Dtype (fp32) instead."
+        )
         # In-place: Comfy Module.to(dtype) mutates weights; a wrapper copy would
         # still share first_stage_model and waste peak memory for no isolation.
         vae.vae_dtype = torch.float32

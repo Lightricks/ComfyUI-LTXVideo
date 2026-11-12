@@ -86,13 +86,12 @@ The union LoRA is trained to understand and respond to both control signals (dep
 
 ## HDR IC-LoRA
 
-We provide an **HDR IC-LoRA** that upgrades SDR video into ACEScct HDR (same working space as pipelines `hdr_ic_lora`), suitable for grading, EXR export, and HLG masters. Use the tiled 2.5 graph [`LTX-2.5_V2V_TiledFusion_SDR_to_HDR.json`](./example_workflows/2.5/LTX-2.5_V2V_TiledFusion_SDR_to_HDR.json), or the 2.3 single-stage [`LTX-2.3_ICLoRA_HDR_Distilled.json`](./example_workflows/2.3/LTX-2.3_ICLoRA_HDR_Distilled.json).
+We provide an **HDR IC-LoRA** that upgrades SDR video into ACEScct HDR (same working space as pipelines `hdr_ic_lora`), suitable for grading, EXR export, and HLG masters. Use the tiled 2.5 graph [`LTX-2.5_V2V_TiledFusion_SDR_to_HDR.json`](./example_workflows/2.5/HDR_workflows/LTX-2.5_V2V_TiledFusion_SDR_to_HDR.json), or the 2.3 single-stage [`LTX-2.3_ICLoRA_HDR_Distilled.json`](./example_workflows/2.3/LTX-2.3_ICLoRA_HDR_Distilled.json).
 
 ### Key Features
 
-- **Linear HDR output**: The LoRA produces frames in LogC3-compressed space; the `LTXVHDRDecodePostprocess` node decodes these back to linear HDR values.
-- **SDR preview + raw HDR**: The node outputs both a Reinhard-tonemapped SDR preview and the raw linear HDR tensor for downstream use.
-- **EXR export**: Optionally writes the linear HDR frames as a 16/32-bit EXR image sequence via **OpenImageIO** (`pip install openimageio`, also listed in `requirements.txt`). The exported EXR sequence is best viewed in [DJV](https://github.com/grizzlypeak3d/DJV) (or [DJV for macOS](https://djv.en.uptodown.com/mac/download)).
+- **Linear HDR output**: The 2.3 LoRA produces frames in LogC3-compressed space; core **Convert Image Color Space** (`HDR LogC3` → `linear`) decodes them back to linear Rec.709 HDR. The 2.5 graphs work in ACEScct and save ACEScg.
+- **EXR export**: Core **Save Image (Advanced)** writes the linear HDR frames as a 16-bit float EXR sequence. The exported EXR sequence is best viewed in [DJV](https://github.com/grizzlypeak3d/DJV) (or [DJV for macOS](https://djv.en.uptodown.com/mac/download)).
 
 ## Dub-It IC-LoRA
 
@@ -191,7 +190,7 @@ Example graphs (2.5 distilled):
 
 * [`V2V upscale`](./example_workflows/2.5/LTX-2.5_V2V_TiledFusion_Upscale.json) — detail-refine at FullHD / 4K / 8K
 * [`V2V native 4K/8K`](./example_workflows/2.5/LTX-2.5_V2V_TiledFusion_Native_4K_8K.json) — FullHD stage 1, then 4K or 8K
-* [`V2V SDR→HDR`](./example_workflows/2.5/LTX-2.5_V2V_TiledFusion_SDR_to_HDR.json) — same ladder with the HDR IC-LoRA
+* [`V2V SDR→HDR`](./example_workflows/2.5/HDR_workflows/LTX-2.5_V2V_TiledFusion_SDR_to_HDR.json) — same ladder with the HDR IC-LoRA
 
 Prompt those graphs for look and style only (lighting, palette, sharpness, grade). Do not name specific objects in the scene: after upscale, named details can appear in every spatial tile.
 
