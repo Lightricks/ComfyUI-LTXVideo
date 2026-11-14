@@ -29,6 +29,7 @@ import comfy.sampler_helpers
 import comfy.samplers
 import comfy.utils
 import torch
+from comfy.nested_tensor import NestedTensor
 
 from .nodes_registry import comfy_node
 from .tiled_fusion_plan import (
@@ -166,6 +167,29 @@ def _crop_spatial(t, y0, x0, th, tw):
     if t.shape[-2] > 1 or t.shape[-1] > 1:
         return t[..., y0 : y0 + th, x0 : x0 + tw]
     return t
+
+
+def _av_model_wrapper(audio):
+    """model_function_wrapper that runs the joint AV model on video-only tiles.
+
+    Tiles stay video-only for the cond and sampler machinery. Each model call
+    packs the full audio latent next to the tile, like the regular AV sampling
+    path, and returns only the video part of the output.
+
+    No audio_denoise_mask is passed, so the clean audio shares the video
+    timestep: audio at timestep 0 lost lip sync in low-sigma refine tests.
+    """
+
+    def wrapper(apply_model, args):
+        x = args["input"]
+        a = audio.expand(x.shape[0], *audio.shape[1:])
+        flat, shapes = comfy.utils.pack_latents([x, a])
+        c = dict(args["c"])
+        c["latent_shapes"] = shapes
+        out = apply_model(flat, args["timestep"], **c)
+        return out[:, :, : x[0].numel()].reshape(x.shape)
+
+    return wrapper
 
 
 class _TileGuider:
@@ -441,6 +465,13 @@ class LTXVTiledFusionSampler:
     ):
         samples = latents["samples"]
         noise_mask = latents.get("noise_mask")
+        # Joint AV latent: tile the video, keep the audio unchanged as context
+        # for every tile pass (see _av_model_wrapper).
+        audio_samples = audio_noise_mask = None
+        if isinstance(samples, NestedTensor):
+            samples, audio_samples = samples.tensors
+            if isinstance(noise_mask, NestedTensor):
+                noise_mask, audio_noise_mask = noise_mask.tensors
         if samples.ndim != 5:
             raise ValueError(f"{_NODE} needs a 5D video latent.")
         b, C, F_total, H, W = samples.shape
@@ -736,6 +767,13 @@ class LTXVTiledFusionSampler:
                 wsums.append(ws.clamp_min(1e-12))
 
             model_options = model.model_options
+            if audio_samples is not None:
+                model_options = {
+                    **model_options,
+                    "model_function_wrapper": _av_model_wrapper(
+                        audio_samples.to(device, torch.float32)
+                    ),
+                }
 
             pbar = comfy.utils.ProgressBar(len(sigmas) - 1)
             for step in range(len(sigmas) - 1):
@@ -829,4 +867,11 @@ class LTXVTiledFusionSampler:
             model.cleanup()
             comfy.sampler_helpers.cleanup_models(conds0, loaded)
 
-        return ({"samples": out},)
+        if audio_samples is None:
+            return ({"samples": out},)
+        result = {"samples": NestedTensor((out, audio_samples))}
+        if audio_noise_mask is not None:
+            result["noise_mask"] = NestedTensor(
+                (torch.ones_like(out), audio_noise_mask)
+            )
+        return (result,)
