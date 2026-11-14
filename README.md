@@ -7,6 +7,7 @@
 [![Demo](https://img.shields.io/badge/Demo-Try%20Now-brightgreen?logo=vercel)](https://app.ltx.studio/ltx-2-playground/i2v)
 [![Paper](https://img.shields.io/badge/Paper-arXiv-B31B1B?logo=arxiv)](https://videos.ltx.io/LTX-2/grants/LTX_2_Technical_Report_compressed.pdf)
 [![Discord](https://img.shields.io/badge/Join-Discord-5865F2?logo=discord)](https://discord.gg/ltxplatform)
+[![swm cloud](https://img.shields.io/badge/swm%20cloud-Try%20Now-0A66C2)](https://cloud.swmgpu.com/w/samofvaani/ltx-2-3-video-vfx-studio)
 
 
 A collection of powerful custom nodes that extend ComfyUI's capabilities for the LTX-2 video generation model.
@@ -27,6 +28,7 @@ Before you begin using an LTX-2 workflow in ComfyUI, make sure you have:
 ## Quick Start 🚀
 
 We recommend using the LTX-2 workflows available in Comfy Manager.
+> **swm cloud quick start (no local 32GB+ GPU required):** Launch pre-loaded workspaces on **swm cloud** for [LTX-2.3 22B Video & IC-LoRA Studio](https://cloud.swmgpu.com/w/samofvaani/ltx-2-3-video-vfx-studio) or [LTX-2.5 22B VFX IC-LoRA Suite](https://cloud.swmgpu.com/w/samofvaani/ltx-2-5-vfx-video-editor).
 
 1. Open ComfyUI
 2. Click the Manager button (or press Ctrl+M)
