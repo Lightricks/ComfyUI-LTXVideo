@@ -655,6 +655,13 @@ class LTXVInContextSampler:
                         "tooltip": "The image to use for conditioning the sampling, if not provided, the sampling will be unconditioned (t2v setup). The image will be resized to the size of the first frame."
                     },
                 ),
+                "optional_cond_indices": (
+                    "STRING",
+                    {
+                        "default": "",
+                        "tooltip": "Comma-separated frame indices for the conditioning images. A single image defaults to frame 0.",
+                    },
+                ),
                 "num_frames": (
                     "INT",
                     {
@@ -697,13 +704,15 @@ class LTXVInContextSampler:
         guider.original_conds = copy.deepcopy(guider.original_conds)
         if optional_cond_images is None:
             optional_cond_indices = None
-
-        if optional_cond_indices is not None and optional_cond_images is not None:
-            optional_cond_indices = optional_cond_indices.split(",")
-            optional_cond_indices = [int(i) for i in optional_cond_indices]
-            assert len(optional_cond_indices) == len(
-                optional_cond_images
-            ), "Number of optional cond images must match number of optional cond indices"
+        else:
+            if optional_cond_indices is None or not optional_cond_indices.strip():
+                if len(optional_cond_images) != 1:
+                    raise ValueError("Provide one conditioning frame index per image.")
+                optional_cond_indices = [0]
+            else:
+                optional_cond_indices = [int(i) for i in optional_cond_indices.split(",")]
+                if len(optional_cond_indices) != len(optional_cond_images):
+                    raise ValueError("Number of conditioning frame indices must match the number of images.")
 
         positive, negative = _get_raw_conds_from_guider(guider)
 
