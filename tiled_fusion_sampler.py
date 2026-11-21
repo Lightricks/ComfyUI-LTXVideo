@@ -1,3 +1,11 @@
+# MODIFIED BY SHIFTLOOM (2026-11-21): this file was modified from the upstream
+# Lightricks/ComfyUI-LTXVideo release (base 220e1d4) under the LTX-2 Community
+# License. Change: anchor-aware temporal streaming. _crop_guide_metadata gains
+# ordered entry selection with per-entry temporal shifts, and the sampler reads
+# the versioned anchor layout so still keyframes ahead of the streamed guide
+# blocks are gathered into each covering window and kept out of the output.
+# Behaviour without an anchor layout is unchanged.
+
 """Per-step tiled latent fusion for LTX video models.
 
 Keeps one latent canvas and one noise field, runs the model once per overlapping
@@ -32,11 +40,14 @@ import torch
 
 from .nodes_registry import comfy_node
 from .tiled_fusion_plan import (
+    ANCHOR_LAYOUT_KEY,
+    anchor_window_selection,
     plan_grid,
     read_temporal_plan,
     shifted,
     snap_frames,
     temporal_plan,
+    validate_anchor_layout,
 )
 
 logger = logging.getLogger(__name__)
@@ -95,7 +106,18 @@ def gaussian_weight(tile_w, tile_h, var, device):
 
 
 def _crop_guide_metadata(
-    conds, y0, x0, th, tw, canvas_h, canvas_w, sh, sw, entry_idx=None
+    conds,
+    y0,
+    x0,
+    th,
+    tw,
+    canvas_h,
+    canvas_w,
+    sh,
+    sw,
+    entry_idx=None,
+    entry_indices=None,
+    temporal_shifts=None,
 ):
     """Crop keyframe_idxs + guide_attention_entries to a spatial tile.
 
@@ -109,6 +131,12 @@ def _crop_guide_metadata(
     with guide block w, each encoded FRESH from that window's pixel span, so
     its coords already describe a clip starting at 0 and are never rewritten
     here. None keeps every entry (whole-clip guide).
+
+    entry_indices selects an ORDERED list of entries (anchored streaming: the
+    window's stills, then its own video block) and overrides entry_idx.
+    temporal_shifts pairs with it and is added to both temporal endpoints of
+    that entry's tokens on a clone, so a still shared by overlapping windows
+    is rebased independently in each and the input is never modified.
     Slicing a whole-clip guide's latents into windows does NOT work and no
     coordinate rewrite can save it: a mid-clip causal latent (each frame
     encodes 8 pixels given prior context) is not a fresh-clip latent (frame 0
@@ -123,14 +151,23 @@ def _crop_guide_metadata(
         if kf is not None and entries:
             pieces = []
             new_entries = []
+            offsets = []
             tok0 = 0
-            for j, e in enumerate(entries):
+            for e in entries:
                 f, gh, gw = (int(v) for v in e["latent_shape"])
-                n_tok = f * gh * gw
-                blk = kf[:, :, tok0 : tok0 + n_tok, :]
-                tok0 += n_tok
-                if entry_idx is not None and j != entry_idx:
-                    continue
+                offsets.append(tok0)
+                tok0 += f * gh * gw
+            if entry_indices is not None:
+                shifts = temporal_shifts or [0] * len(entry_indices)
+                selection = list(zip(entry_indices, shifts))
+            elif entry_idx is not None:
+                selection = [(entry_idx, 0)]
+            else:
+                selection = [(j, 0) for j in range(len(entries))]
+            for j, shift in selection:
+                e = entries[j]
+                f, gh, gw = (int(v) for v in e["latent_shape"])
+                blk = kf[:, :, offsets[j] : offsets[j] + f * gh * gw, :]
                 if (gh, gw) != (canvas_h, canvas_w):
                     raise ValueError(
                         f"{_NODE}: guide latent grid {gh}x{gw} does not match "
@@ -141,6 +178,8 @@ def _crop_guide_metadata(
                 b = blk.shape[0]
                 blk = blk.reshape(b, 3, f, gh, gw, 2)
                 blk = blk[:, :, :, y0 : y0 + th, x0 : x0 + tw, :].clone()
+                if shift:
+                    blk[:, 0, ...] += shift
                 blk[:, 1, ...] -= py0
                 blk[:, 2, ...] -= px0
                 pieces.append(blk.reshape(b, 3, f * th * tw, 2))
@@ -498,8 +537,16 @@ class LTXVTiledFusionSampler:
         if len(all_origins) == 1:
             logger.info("canvas fits one tile; falling back to plain sampling")
 
-        n_content = F_total
-        if noise_mask is not None:
+        plan = read_temporal_plan(positive)
+        anchored = plan is not None and ANCHOR_LAYOUT_KEY in plan
+        if anchored:
+            # The guide node recorded where content, stills and video blocks
+            # sit; do not infer the content length from mask strengths.
+            validate_anchor_layout(plan, positive, negative, samples.shape)
+            n_content = int(plan["n_content"])
+        else:
+            n_content = F_total
+        if noise_mask is not None and not anchored:
             fm = (
                 noise_mask.to(dtype=torch.float32)
                 .reshape(1, 1, F_total, -1)
@@ -511,8 +558,6 @@ class LTXVTiledFusionSampler:
                 else:
                     break
         n_guide = F_total - n_content
-
-        plan = read_temporal_plan(positive)
 
         tile_frames = int(tile_frames)
         if tile_frames > 0:
@@ -537,7 +582,9 @@ class LTXVTiledFusionSampler:
         if use_temporal:
             if plan is not None:
                 ts = [int(v) for v in plan["ts"]]
-                if int(plan["n_content"]) != n_content or n_guide != len(ts) * tf_lat:
+                if not anchored and (
+                    int(plan["n_content"]) != n_content or n_guide != len(ts) * tf_lat
+                ):
                     raise ValueError(
                         f"{_NODE}: temporal plan does not match the latent "
                         f"(plan: n_content={plan['n_content']}, "
@@ -567,7 +614,12 @@ class LTXVTiledFusionSampler:
                 ", per-window guides" if per_window_guides else "",
             )
             window_len = min(tf_lat, n_content)
-            if per_window_guides:
+            if anchored:
+                window_len = max(
+                    sum(b - a for a, b in anchor_window_selection(plan, w)[0])
+                    for w in range(len(ts))
+                )
+            elif per_window_guides:
                 window_len += tf_lat
         else:
             ts = [0]
@@ -627,6 +679,13 @@ class LTXVTiledFusionSampler:
                 """Take content[t0:t0+tf] plus window w's own guide block."""
                 if not use_temporal:
                     return tensor
+                if anchored:
+                    # Content window, selected stills, then this window's video.
+                    parts = [
+                        tensor[:, :, a:b]
+                        for a, b in anchor_window_selection(plan, w)[0]
+                    ]
+                    return torch.cat(parts, dim=2)
                 parts = [tensor[:, :, t0 : t0 + tf_lat]]
                 if per_window_guides:
                     g0 = n_content + w * tf_lat
@@ -636,6 +695,10 @@ class LTXVTiledFusionSampler:
             tile_data = {}
             for w, t0_ in enumerate(ts):
                 eidx = w if (use_temporal and per_window_guides) else None
+                if anchored:
+                    _, sel_entries, sel_shifts = anchor_window_selection(plan, w)
+                else:
+                    sel_entries = sel_shifts = None
                 for x0_, y0_ in all_origins:
                     pos_t = _crop_guide_metadata(
                         copy.deepcopy(positive),
@@ -648,6 +711,8 @@ class LTXVTiledFusionSampler:
                         sh,
                         sw,
                         entry_idx=eidx,
+                        entry_indices=sel_entries,
+                        temporal_shifts=sel_shifts,
                     )
                     neg_t = _crop_guide_metadata(
                         copy.deepcopy(negative),
@@ -660,6 +725,8 @@ class LTXVTiledFusionSampler:
                         sh,
                         sw,
                         entry_idx=eidx,
+                        entry_indices=sel_entries,
+                        temporal_shifts=sel_shifts,
                     )
                     lat_t = _window_slice(
                         w,
@@ -812,7 +879,10 @@ class LTXVTiledFusionSampler:
                 pbar.update(1)
 
             out = canvas
-            if mask_full is not None:
+            if anchored:
+                out = canvas[:, :, :n_content]
+                logger.info("dropped %d appended guide frame(s)", F_total - n_content)
+            elif mask_full is not None:
                 frame_mask = mask_full.reshape(1, 1, F_total, -1).amax(dim=-1)
                 keep = F_total
                 for f in range(F_total - 1, -1, -1):

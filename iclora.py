@@ -1,3 +1,10 @@
+# MODIFIED BY SHIFTLOOM (2026-11-21): this file was modified from the upstream
+# Lightricks/ComfyUI-LTXVideo release (base 220e1d4) under the LTX-2 Community
+# License. Change: encode_windowed_guides separates still anchors appended by
+# LTXVAddGuide from the real content length and records an anchor layout in the
+# temporal plan (anchor-aware temporal streaming). Behaviour without anchors,
+# and for clips that fit one window, is unchanged.
+
 import logging
 
 import comfy
@@ -234,12 +241,24 @@ class LTXAddVideoICLoRAGuide(io.ComfyNode):
         guide block w. Returns None when the clip fits one window.
         """
         from .iclora_attention import append_guide_attention_entry
-        from .tiled_fusion_plan import attach_temporal_plan, temporal_plan
+        from .tiled_fusion_plan import (
+            ANCHOR_LAYOUT_KEY,
+            ANCHOR_LAYOUT_VERSION,
+            attach_temporal_plan,
+            read_still_anchors,
+            select_anchor_ids,
+            temporal_plan,
+        )
 
         t_scale = scale_factors[0]
         tf_lat = max(1, (tile_frames - 1) // t_scale + 1)
+        # Stills already appended by LTXVAddGuide are references, not content.
+        # latent_length stays the raw incoming length for the caller.
+        _, n_ref = nodes_lt.get_keyframe_idxs(positive, latent_image.shape)
+        latent_length = latent_length - n_ref
         if not (0 < tf_lat < latent_length):
             return None
+        anchors, n_ref = read_still_anchors(positive, negative, latent_image.shape)
         if int(frame_idx) != 0:
             raise ValueError(
                 "use_streaming encodes each window as a fresh clip at frame 0; "
@@ -261,6 +280,7 @@ class LTXAddVideoICLoRAGuide(io.ComfyNode):
                 f"windowed guide needs {need} frames for {latent_length} "
                 f"content latents, found {image.shape[0]}"
             )
+        windows = []
         for w, t0 in enumerate(ts):
             span = image[t0 * t_scale : t0 * t_scale + span_px]
             _, guide_latent = cls.encode(
@@ -277,6 +297,16 @@ class LTXAddVideoICLoRAGuide(io.ComfyNode):
             )
             shape = list(guide_latent.shape[2:])
             toks = shape[0] * shape[1] * shape[2]
+            if anchors:
+                kf_before = nodes_lt.get_keyframe_idxs(positive)[0]
+                video_token_start = 0 if kf_before is None else int(kf_before.shape[2])
+                video_entry = len(
+                    nodes_lt.conditioning_get_any_value(
+                        positive, "guide_attention_entries", None
+                    )
+                    or []
+                )
+                video_start = int(latent_image.shape[2])
             positive, negative, latent_image, noise_mask = (
                 nodes_lt.LTXVAddGuide.append_keyframe(
                     positive,
@@ -312,6 +342,22 @@ class LTXAddVideoICLoRAGuide(io.ComfyNode):
                 attention_strength=attention_strength,
                 attention_mask=window_mask,
             )
+            if anchors:
+                windows.append(
+                    {
+                        "video_start": video_start,
+                        "video_count": int(shape[0]),
+                        "video_entry": video_entry,
+                        "video_token_start": video_token_start,
+                        "video_token_count": int(toks),
+                        "anchor_ids": select_anchor_ids(
+                            [a["frame_idx"] for a in anchors],
+                            t0,
+                            t_scale,
+                            span_px,
+                        ),
+                    }
+                )
             logging.info(
                 "window %d/%d: guide frames %d-%d -> %s",
                 w + 1,
@@ -326,6 +372,21 @@ class LTXAddVideoICLoRAGuide(io.ComfyNode):
             "n_content": int(latent_length),
             "ts": [int(v) for v in ts],
         }
+        if anchors:
+            plan[ANCHOR_LAYOUT_KEY] = ANCHOR_LAYOUT_VERSION
+            plan["time_scale"] = int(t_scale)
+            plan["anchors"] = [
+                {
+                    "latent_start": latent_length + i,
+                    "latent_count": 1,
+                    "frame_idx": a["frame_idx"],
+                    "entry_idx": a["entry_idx"],
+                    "token_start": a["token_start"],
+                    "token_count": a["token_count"],
+                }
+                for i, a in enumerate(anchors)
+            ]
+            plan["windows"] = windows
         positive = attach_temporal_plan(positive, plan)
         negative = attach_temporal_plan(negative, plan)
         logging.info("%d per-window guides (t0 = %s)", len(ts), plan["ts"])
